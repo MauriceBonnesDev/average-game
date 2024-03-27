@@ -2,8 +2,9 @@
 pragma solidity ^0.8.24;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract AverageGame {
+contract AverageGame is ReentrancyGuard {
     uint256 public id;
     uint256 public maxPlayers;
     uint256 public totalPlayers;
@@ -63,7 +64,7 @@ contract AverageGame {
     event GameEnded();
     event BettingRoundClosed();
     event CollateralDeposited(address indexed player, uint256 indexed amount);
-    event PrizeAwarded(address indexed player, uint256 indexed amount);
+    event PrizeAwarded(address indexed player, uint256 indexed amount, uint256 indexed guess);
     event FeeCollected(address indexed player, uint256 indexed amount);
 
     function initGame(uint256 _gameId, string memory _name, uint256 _maxPlayers, uint256 _betAmount, address _gameMaster, uint256 _gameFee) public {
@@ -176,12 +177,10 @@ contract AverageGame {
                         participants++;
                     }
                 } else {
-                    console.log("Player revealed different values, penalize them");
+                    console.log("Player revealed different values, keeping collateralization and bet amount");
                 }
             } else {
-                console.log("Player did not reveal their guess, refund collateralization and bet amount");
-                payoutBetAmount(currentPlayer);
-                payoutCollateral(currentPlayer);
+                console.log("Player did not reveal their guess, keeping collateralization and bet amount");
             }
         }
 
@@ -213,7 +212,7 @@ contract AverageGame {
         }
     }
 
-    function payoutWinner(address _player, uint256 _betAmount, uint256 _collateralAmount) private onlyFactory onlyGameMaster onlyValidPlayers(_player) {
+    function payoutWinner(address _player, uint256 _betAmount, uint256 _collateralAmount) private onlyFactory onlyGameMaster onlyValidPlayers(_player) nonReentrant {
         uint256 payout = _betAmount + _collateralAmount;
         require(getBalance() >= payout, "Not enough funds to payout the winner");
 
@@ -223,10 +222,11 @@ contract AverageGame {
         (bool sent, ) = _player.call{value: payout}("");
         require(sent, "Failed to send Ether");
         
-        emit PrizeAwarded(_player, payout);
+        uint256 guess = revealedGuesses[_player];
+        emit PrizeAwarded(_player, payout, guess);
     }
 
-    function payoutBetAmount(address _player) private onlyFactory onlyGameMaster onlyValidPlayers(_player) {
+    function payoutBetAmount(address _player) private onlyFactory onlyGameMaster onlyValidPlayers(_player) nonReentrant {
         require(totalBetAmount >= betAmount, "Not enough funds to payout the bet amount");
 
         totalBetAmount -= betAmount;
@@ -236,7 +236,7 @@ contract AverageGame {
         
     }
 
-    function payoutCollateral(address _player) private onlyFactory onlyGameMaster onlyValidPlayers(_player) {
+    function payoutCollateral(address _player) private onlyFactory onlyGameMaster onlyValidPlayers(_player) nonReentrant {
         require(totalCollateralAmount >= collateralAmount, "Not enough funds to payout the collateral amount");
         require(collateralOfPlayer[_player] >= collateralAmount, "Not enough funds to payout the collateral amount");
         
@@ -248,7 +248,7 @@ contract AverageGame {
 
     }
 
-    function withdrawGameFees() external onlyFactory onlyGameMaster {
+    function withdrawGameFees() external onlyFactory onlyGameMaster nonReentrant {
         require(getBalance() >= totalGameFees, "Not enough funds to withdraw the game fees");
 
         totalGameFees = 0;
