@@ -11,7 +11,7 @@ contract AverageGameFactory is Ownable {
     uint256 public totalGames;
 
     mapping(uint256 => address) private gameProxies;
-    mapping(uint256 => address) public gameMasters;
+    mapping(uint256 => address) private gameMasters;
 
     modifier onlyGameMaster(uint256 _gameId) {
         require(
@@ -25,26 +25,36 @@ contract AverageGameFactory is Ownable {
 
     function createAverageGame(
         address _address,
-        address _gameMaster
+        address _gameMaster,
+        string memory _name,
+        uint256 _maxPlayers,
+        uint256 _betAmount,
+        uint256 _gameFee
     ) public onlyOwner returns (address) {
         address proxy = Clones.clone(_address);
         totalGames++;
         gameProxies[totalGames] = proxy;
+        gameMasters[totalGames] = _gameMaster;
         AverageGame(proxy).initGame({
             _gameId: totalGames,
-            _name: "Average Game",
-            _maxPlayers: 5,
-            _betAmount: 1 ether,
+            _name: _name,
+            _maxPlayers: _maxPlayers,
+            _betAmount: _betAmount,
             _gameMaster: _gameMaster,
-            _gameFee: 10
+            _gameFee: _gameFee,
+            _factory: address(this)
         });
 
         return proxy;
     }
 
-    function getAverageGameProxyAt(
+    function getGameProxyAt(
         uint256 _index
-    ) public view returns (address) {
+    ) public view onlyGameMaster(_index) returns (address) {
         return gameProxies[_index];
+    }
+
+    function getGameMasterAt(uint256 _index) public view returns (address) {
+        return gameMasters[_index];
     }
 }

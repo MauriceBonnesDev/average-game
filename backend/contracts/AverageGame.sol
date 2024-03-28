@@ -27,7 +27,7 @@ contract AverageGame is ReentrancyGuard {
     string public name;
 
     address private gameMaster;
-    address private factory;
+    address public factory;
     address public winner;
     address[] public players;
     address[] public potentialWinners;
@@ -61,11 +61,6 @@ contract AverageGame is ReentrancyGuard {
             gameMaster == msg.sender,
             "Only game master can call this function"
         );
-        _;
-    }
-
-    modifier onlyFactory() {
-        require(factory == msg.sender, "Only factory can call this function");
         _;
     }
 
@@ -119,18 +114,21 @@ contract AverageGame is ReentrancyGuard {
         uint256 _maxPlayers,
         uint256 _betAmount,
         address _gameMaster,
-        uint256 _gameFee
+        uint256 _gameFee,
+        address _factory
     ) external {
         require(!isInitialized, "Game is already initialized");
         id = _gameId;
         name = _name;
         maxPlayers = _maxPlayers;
-        betAmount = _betAmount;
-        collateralAmount = _betAmount * 3;
+        betAmount = _betAmount * 1 ether;
+        collateralAmount = _betAmount * 3 * 1 ether;
+        players = new address[](maxPlayers);
         state = GameState.Initialized;
         gameFee = _gameFee;
         isInitialized = true;
         gameMaster = _gameMaster;
+        factory = _factory;
         console.log("Game initialized");
     }
 
@@ -138,7 +136,7 @@ contract AverageGame is ReentrancyGuard {
      * @notice Starts the betting round where players can join the game, first function to call by the game master
      * @dev This function can only be called by the game master and the factory contract
      */
-    function startBettingRound() external onlyGameMaster onlyFactory {
+    function startBettingRound() external onlyGameMaster {
         require(state == GameState.Initialized, "Game has already started");
         state = GameState.CommitPhase;
         console.log("Game started");
@@ -150,7 +148,7 @@ contract AverageGame is ReentrancyGuard {
      * @dev The guess is hashed on the client side with a salt and stored in the commitments mapping
      * @param _guess The guess of the player
      */
-    function joinGame(bytes32 _guess) external payable onlyFactory {
+    function joinGame(bytes32 _guess) external payable {
         uint256 fee = (betAmount * gameFee) / 100;
         require(state == GameState.CommitPhase, "Game has not started yet");
         require(
@@ -161,14 +159,15 @@ contract AverageGame is ReentrancyGuard {
             !playerAlreadyJoined[msg.sender],
             "Player has already joined the game"
         );
-
         totalBetAmount += betAmount;
         totalCollateralAmount += collateralAmount;
         collateralOfPlayer[msg.sender] = collateralAmount;
         totalGameFees += fee;
         commitments[msg.sender] = _guess;
 
+        console.log(totalPlayers);
         players[totalPlayers] = msg.sender;
+        console.log(totalPlayers);
         playerAlreadyJoined[msg.sender] = true;
         totalPlayers++;
 
@@ -180,7 +179,7 @@ contract AverageGame is ReentrancyGuard {
      * @notice Closes the betting round and starts the reveal phase. This is the second function a game master has to call
      * @dev Only allowed once 3 players have joined the game
      */
-    function closeBettingRound() external onlyFactory onlyGameMaster {
+    function closeBettingRound() external onlyGameMaster {
         require(state == GameState.CommitPhase, "Game has not started yet");
         require(
             totalPlayers >= 3,
@@ -200,7 +199,7 @@ contract AverageGame is ReentrancyGuard {
     function revealGuess(
         uint256 _guess,
         string memory _salt
-    ) external onlyFactory onlyValidPlayers(msg.sender) {
+    ) external onlyValidPlayers(msg.sender) {
         require(state == GameState.RevealPhase, "Game has not ended yet");
         RevealState revealState = playerRevealed[msg.sender];
         require(
@@ -227,7 +226,7 @@ contract AverageGame is ReentrancyGuard {
     /**
      * @notice Ends the game and determines the winner. This is the third function a game master has to call
      */
-    function endGame() external onlyFactory onlyGameMaster {
+    function endGame() external onlyGameMaster {
         require(state == GameState.RevealPhase, "Game has not ended yet");
 
         uint256 totalWinners = determinePotentialWinners();
@@ -246,7 +245,6 @@ contract AverageGame is ReentrancyGuard {
      */
     function determinePotentialWinners()
         private
-        onlyFactory
         onlyGameMaster
         returns (uint256)
     {
@@ -295,7 +293,6 @@ contract AverageGame is ReentrancyGuard {
     function calculateTwoThirdAverage()
         private
         view
-        onlyFactory
         onlyGameMaster
         returns (uint256 result)
     {
@@ -328,7 +325,6 @@ contract AverageGame is ReentrancyGuard {
     )
         private
         view
-        onlyFactory
         onlyGameMaster
         onlyValidPlayers(_participant)
         returns (RevealState)
@@ -353,7 +349,7 @@ contract AverageGame is ReentrancyGuard {
     function selectWinner(
         address[] memory _potentialWinners,
         uint256 _totalPotentialWinners
-    ) private onlyFactory onlyGameMaster {
+    ) private onlyGameMaster {
         require(state == GameState.Ended, "Game has not ended yet");
         uint256 pricePool = totalBetAmount + totalCollateralAmount;
         require(
@@ -379,7 +375,7 @@ contract AverageGame is ReentrancyGuard {
      */
     function withdrawPricepool(
         address _winner
-    ) external onlyFactory onlyWinner nonReentrant {
+    ) external onlyWinner nonReentrant {
         require(state == GameState.Ended, "Game has not ended yet");
         uint256 payout = totalBetAmount + totalCollateralAmount;
         require(
@@ -403,13 +399,7 @@ contract AverageGame is ReentrancyGuard {
      */
     function payoutCollateral(
         address _player
-    )
-        private
-        onlyFactory
-        onlyGameMaster
-        onlyValidPlayers(_player)
-        nonReentrant
-    {
+    ) private onlyGameMaster onlyValidPlayers(_player) nonReentrant {
         require(
             totalCollateralAmount >= collateralAmount,
             "Not enough funds to payout the collateral amount"
@@ -435,12 +425,7 @@ contract AverageGame is ReentrancyGuard {
     /**
      * @notice Withdraws the game fees to the game master
      */
-    function withdrawGameFees()
-        external
-        onlyFactory
-        onlyGameMaster
-        nonReentrant
-    {
+    function withdrawGameFees() external onlyGameMaster nonReentrant {
         require(
             getBalance() >= totalGameFees,
             "Not enough funds to withdraw the game fees"
