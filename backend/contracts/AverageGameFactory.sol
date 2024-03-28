@@ -8,28 +8,43 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AverageGameFactory is Ownable {
-  uint256 public totalGames;
+    uint256 public totalGames;
 
-  mapping(uint256 => address) private gameProxies;
-  mapping(uint256 => address) public gameMasters;
+    mapping(uint256 => address) private gameProxies;
+    mapping(uint256 => address) public gameMasters;
 
-  modifier onlyGameMaster(uint256 _gameId) {
-    require(gameMasters[_gameId] == msg.sender, "Only game master can call this function");
-    _;
-  }
+    modifier onlyGameMaster(uint256 _gameId) {
+        require(
+            gameMasters[_gameId] == msg.sender,
+            "Only game master can call this function"
+        );
+        _;
+    }
 
-  constructor(address _owner) Ownable(_owner) {}
+    constructor(address _owner) Ownable(_owner) {}
 
-  function createAverageGame(address _address, address _gameMaster) public onlyOwner returns (address) {
-    address proxy = Clones.clone(_address);
-    totalGames++;
-    gameProxies[totalGames] = proxy;
-    AverageGame(proxy).initGame(totalGames, "Average Game", 5, 1 ether, _gameMaster);
+    function createAverageGame(
+        address _address,
+        address _gameMaster
+    ) public onlyOwner returns (address) {
+        address proxy = Clones.clone(_address);
+        totalGames++;
+        gameProxies[totalGames] = proxy;
+        AverageGame(proxy).initGame({
+            _gameId: totalGames,
+            _name: "Average Game",
+            _maxPlayers: 5,
+            _betAmount: 1 ether,
+            _gameMaster: _gameMaster,
+            _gameFee: 10
+        });
 
-    return proxy;
-  }
+        return proxy;
+    }
 
-  function getAverageGameProxyAt(uint256 _index) public view returns(address) {
-    return gameProxies[_index];
-  }
+    function getAverageGameProxyAt(
+        uint256 _index
+    ) public view returns (address) {
+        return gameProxies[_index];
+    }
 }
