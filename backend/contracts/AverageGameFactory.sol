@@ -38,6 +38,8 @@ contract AverageGameFactory is Ownable {
         AverageGame(proxy).initGame({
             _gameId: totalGames,
             _name: _name,
+            _minGuess: 0,
+            _maxGuess: 1000,
             _maxPlayers: _maxPlayers,
             _betAmount: _betAmount,
             _gameMaster: _gameMaster,

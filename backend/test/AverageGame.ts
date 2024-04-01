@@ -9,7 +9,8 @@ describe("AverageGame & AverageGameFactory", function () {
     player1: Signer,
     player2: Signer,
     player3: Signer,
-    player4: Signer;
+    player4: Signer,
+    player5: Signer;
   let averageGame: AverageGame;
   let averageGameFactory: AverageGameFactory;
   let proxy: AverageGame;
@@ -36,7 +37,7 @@ describe("AverageGame & AverageGameFactory", function () {
 
   beforeEach(async () => {
     const dest = await ethers.getSigners();
-    [deployer, gameMaster, player1, player2, player3, player4] =
+    [deployer, gameMaster, player1, player2, player3, player4, player5] =
       await ethers.getSigners();
 
     averageGame = await ethers.deployContract(contractName);
@@ -104,10 +105,12 @@ describe("AverageGame & AverageGameFactory", function () {
     let gmProxy: AverageGame;
     const guess = 20;
     const salt = "abc";
-    const bet = parseEther(betAmount.toString());
-    const entryValue =
-      bet + bet * BigInt(3) + (bet * BigInt(gameFee)) / BigInt(100);
-    console.log(entryValue);
+    const betAmountEth = parseEther(betAmount.toString());
+    const collateralAmountEth = betAmountEth * BigInt(3);
+    const gameFeeAmountEth = (betAmountEth * BigInt(gameFee)) / BigInt(100);
+    const commit: BytesLike = getHash(guess, salt);
+    const entryValue = betAmountEth + collateralAmountEth + gameFeeAmountEth;
+
     function getHash(_guess: number, _salt: string) {
       return solidityPackedKeccak256(["uint256", "string"], [_guess, _salt]);
     }
@@ -125,6 +128,8 @@ describe("AverageGame & AverageGameFactory", function () {
         proxy.initGame(
           gameId,
           name,
+          0,
+          1000,
           maxPlayers,
           betAmount,
           gameMaster.getAddress(),
@@ -140,11 +145,8 @@ describe("AverageGame & AverageGameFactory", function () {
       );
     });
 
-    it("StartBettingRound should set the gameState to 1", async () => {
+    it("StartBettingRound should set the gameState to Commit Phase (1)", async () => {
       await gmProxy.startBettingRound();
-      // await expect(proxy.startBettingRound()).to.be.revertedWith(
-      //   onlyGameMasterError
-      // );
       expect(await proxy.state()).to.be.equal(1);
     });
 
@@ -162,19 +164,17 @@ describe("AverageGame & AverageGameFactory", function () {
     });
 
     it("joinGame should revert if the game has not started", async () => {
-      const commit: BytesLike = getHash(guess, salt);
-      proxy.connect(player1);
+      const proxyAsPlayer1 = proxy.connect(player1);
       await expect(
-        proxy.joinGame(commit, { value: entryValue })
+        proxyAsPlayer1.joinGame(commit, { value: entryValue })
       ).to.be.revertedWith("Game has not started yet");
     });
 
     it("joinGame should revert if value is insufficient", async () => {
       await gmProxy.startBettingRound();
-      const commit: BytesLike = getHash(guess, salt);
-      proxy.connect(player1);
+      const proxyAsPlayer1 = proxy.connect(player1);
       await expect(
-        proxy.joinGame(commit, { value: entryValue - BigInt(1) })
+        proxyAsPlayer1.joinGame(commit, { value: entryValue - BigInt(1) })
       ).to.be.revertedWith(
         "Insufficient amount, must be the bet amount + 3 times the bet amount as collateral including the game fee"
       );
@@ -182,12 +182,299 @@ describe("AverageGame & AverageGameFactory", function () {
 
     it("joinGame should revert if the player already joined", async () => {
       await gmProxy.startBettingRound();
-      const commit: BytesLike = getHash(guess, salt);
-      proxy.connect(player1);
-      await proxy.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
       await expect(
-        proxy.joinGame(commit, { value: entryValue })
+        proxyAsPlayer1.joinGame(commit, { value: entryValue })
       ).to.be.revertedWith("Player has already joined the game");
     });
+
+    it("joinGame should increase the totalBetAmount by betAmount", async () => {
+      await gmProxy.startBettingRound();
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(getHash(1, "test"), { value: entryValue });
+
+      expect(await proxy.totalBetAmount()).to.be.equal(
+        BigInt(2) * betAmountEth
+      );
+    });
+
+    it("joinGame should increase the totalCollateralAmount by collateralAmount", async () => {
+      await gmProxy.startBettingRound();
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(getHash(1, "test"), { value: entryValue });
+
+      expect(await proxy.totalCollateralAmount()).to.be.equal(
+        BigInt(2) * collateralAmountEth
+      );
+    });
+
+    it("joinGame should increase the totalGameFee by gameFeeAmount", async () => {
+      await gmProxy.startBettingRound();
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(getHash(1, "test"), { value: entryValue });
+
+      expect(await gmProxy.getTotalGameFees()).to.be.equal(
+        BigInt(2) * gameFeeAmountEth
+      );
+    });
+
+    it("joinGame should set commitment for player", async () => {
+      await gmProxy.startBettingRound();
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+
+      expect(await gmProxy.getCommitment(player1.getAddress())).to.be.equal(
+        commit
+      );
+    });
+
+    it("closeBettingRound should revert if not called by game master", async () => {
+      await expect(proxy.closeBettingRound()).to.be.revertedWith(
+        onlyGameMasterError
+      );
+    });
+
+    it("closeBettingRound should revert if not game is not in commit phase", async () => {
+      await expect(gmProxy.closeBettingRound()).to.be.revertedWith(
+        "Game has not started yet"
+      );
+    });
+
+    it("closeBettingRound should revert if less than 3 players joined", async () => {
+      await gmProxy.startBettingRound();
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+
+      await expect(gmProxy.closeBettingRound()).to.be.revertedWith(
+        "Atleast 3 players are required to start the game"
+      );
+    });
+
+    it("closeBettingRound should set state to Reveal Phase if successful", async () => {
+      await gmProxy.startBettingRound();
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+      await gmProxy.closeBettingRound();
+
+      expect(await gmProxy.state()).to.equal(2);
+    });
+
+    it("revealGuess should revert cause not a valid players calls it", async () => {
+      await gmProxy.startBettingRound();
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+
+      await expect(gmProxy.revealGuess(guess, salt)).to.be.revertedWith(
+        "Not a valid player address"
+      );
+    });
+
+    it("revealGuess should set reveal state to revealed (1) on verified reveal", async () => {
+      await gmProxy.startBettingRound();
+
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+
+      await gmProxy.closeBettingRound();
+      await proxyAsPlayer1.revealGuess(guess, salt);
+
+      expect(
+        await gmProxy.getPlayerRevealedState(await player1.getAddress())
+      ).to.equal(1);
+    });
+
+    it("revealGuess should set reveal state to invalid (2) on invalid guess reveal", async () => {
+      await gmProxy.startBettingRound();
+
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+
+      await gmProxy.closeBettingRound();
+      await proxyAsPlayer1.revealGuess(10, salt);
+
+      expect(
+        await gmProxy.getPlayerRevealedState(await player1.getAddress())
+      ).to.equal(2);
+    });
+
+    it("revealGuess should call payoutCollateral on successful reveal", async () => {
+      await gmProxy.startBettingRound();
+
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+
+      await gmProxy.closeBettingRound();
+
+      await expect(proxyAsPlayer1.revealGuess(guess, salt)).to.emit(
+        proxyAsPlayer1,
+        "CollateralDeposited"
+      );
+    });
+
+    it("endGame should only be callable by game master", async () => {
+      await gmProxy.startBettingRound();
+
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+
+      await expect(proxyAsPlayer1.endGame()).to.be.revertedWith(
+        onlyGameMasterError
+      );
+    });
+
+    it("endGame should only be callable if in Reveal Phase", async () => {
+      await gmProxy.startBettingRound();
+
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+
+      await expect(gmProxy.endGame()).to.be.revertedWith(
+        "Game has not ended yet"
+      );
+    });
+
+    it("endGame should set the game state to Ended (3)", async () => {
+      await gmProxy.startBettingRound();
+
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+
+      await gmProxy.closeBettingRound();
+      await gmProxy.endGame();
+
+      expect(await gmProxy.state()).to.equal(3);
+    });
+
+    it("endGame should call refundPlayers if totalWinners == -1", async () => {
+      await gmProxy.startBettingRound();
+
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+
+      await gmProxy.closeBettingRound();
+
+      await expect(gmProxy.endGame()).to.emit(gmProxy, "PlayerRefunded");
+    });
+
+    it("endGame should call selectWinner if totalWinners != -1", async () => {
+      await gmProxy.startBettingRound();
+
+      const proxyAsPlayer1 = proxy.connect(player1);
+      await proxyAsPlayer1.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer2 = proxy.connect(player2);
+      await proxyAsPlayer2.joinGame(commit, { value: entryValue });
+      const proxyAsPlayer3 = proxy.connect(player3);
+      await proxyAsPlayer3.joinGame(commit, { value: entryValue });
+
+      await gmProxy.closeBettingRound();
+      await proxyAsPlayer1.revealGuess(guess, salt);
+
+      await expect(gmProxy.endGame()).to.emit(gmProxy, "WinnerSelected");
+    });
+
+    [
+      {
+        guesses: [9, 18, 27, 0, 0],
+        average: 7.2,
+        salts: ["secret1", "secret2", "secret3", "secret4", "secret5"],
+        containsPotentialWinner: [true, false, false, false, false],
+        players: "player1",
+      },
+      {
+        guesses: [9, 18, 27, 36, 45],
+        average: 18,
+        salts: ["secret1", "secret2", "secret3", "secret4", "secret5"],
+        containsPotentialWinner: [false, true, false, false, false],
+        players: "player2",
+      },
+      {
+        guesses: [9, 18, 18, 27, 36],
+        average: 14.4,
+        salts: ["secret1", "secret2", "secret3", "secret4", "secret5"],
+        containsPotentialWinner: [false, true, true, false, false],
+        players: "player2, player3",
+      },
+    ].forEach(
+      ({ guesses, average, salts, containsPotentialWinner, players }) => {
+        it(`determinePotentialWinners with ${guesses[0]}, ${guesses[1]}, ${guesses[2]}, ${guesses[3]}, ${guesses[4]} and ${average} as average should contain ${players}`, async () => {
+          await gmProxy.startBettingRound();
+          const commits = guesses.map((guess, index) => {
+            return getHash(guess, salts[index]);
+          });
+          const proxys = [];
+          const signers = await ethers.getSigners();
+          for (let i = 0; i < 5; i++) {
+            proxys.push(proxy.connect(signers[i + 2]));
+            await proxys[i].joinGame(commits[i], { value: entryValue });
+          }
+
+          await gmProxy.closeBettingRound();
+
+          for (let i = 0; i < 5; i++) {
+            await proxys[i].revealGuess(guesses[i], salts[i]);
+          }
+
+          await gmProxy.endGame();
+          const potentialWinners = await gmProxy.getPotentialWinners();
+
+          expect(
+            potentialWinners.includes(await player1.getAddress())
+          ).to.equal(containsPotentialWinner[0]);
+          expect(
+            potentialWinners.includes(await player2.getAddress())
+          ).to.equal(containsPotentialWinner[1]);
+          expect(
+            potentialWinners.includes(await player3.getAddress())
+          ).to.equal(containsPotentialWinner[2]);
+          expect(
+            potentialWinners.includes(await player4.getAddress())
+          ).to.equal(containsPotentialWinner[3]);
+          expect(
+            potentialWinners.includes(await player5.getAddress())
+          ).to.equal(containsPotentialWinner[4]);
+        });
+      }
+    );
   });
 });
