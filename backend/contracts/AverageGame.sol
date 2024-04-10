@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "prb-math/contracts/PRBMathUD60x18.sol";
+import {UD60x18, mul, div, add, convert, isZero, ZERO} from "@prb/math/src/UD60x18.sol";
 
 /**
  * @title 2/3-Average Game
@@ -13,8 +13,6 @@ import "prb-math/contracts/PRBMathUD60x18.sol";
  * @dev Also the onlyFactory modifier is used to restrict access to the functions to the AverageGameFactory contract.
  */
 contract AverageGame is ReentrancyGuard {
-    using PRBMathUD60x18 for uint256;
-
     uint256 public id;
     uint256 public maxPlayers;
     uint256 public totalPlayers;
@@ -26,6 +24,7 @@ contract AverageGame is ReentrancyGuard {
     uint256 public maxGuess;
     uint256 public gameFee; // Integer representation of the percentage of the game fee
     uint256 private totalGameFees;
+    int256 private totalPotentialWinners;
 
     string public name;
 
@@ -74,6 +73,8 @@ contract AverageGame is ReentrancyGuard {
     }
 
     modifier onlyWinner() {
+        console.log("Winner:", winner);
+        console.log("Msg.sender", msg.sender);
         require(winner == msg.sender, "Only winner can call this function");
         _;
     }
@@ -90,6 +91,7 @@ contract AverageGame is ReentrancyGuard {
         RevealState revealState
     );
 
+    event GameCreated(uint256 indexed gameId);
     event GameStarted();
     event GameEnded();
     event BettingRoundClosed();
@@ -139,6 +141,7 @@ contract AverageGame is ReentrancyGuard {
         gameMaster = _gameMaster;
         factory = _factory;
         console.log("Game initialized");
+        emit GameCreated(_gameId);
     }
 
     /**
@@ -176,6 +179,7 @@ contract AverageGame is ReentrancyGuard {
         commitments[msg.sender] = _guess;
         players[totalPlayers] = msg.sender;
         playerAlreadyJoined[msg.sender] = true;
+        playerRevealed[msg.sender] = RevealState.NotRevealed;
         totalPlayers++;
 
         console.log("Player joined the game");
@@ -233,20 +237,21 @@ contract AverageGame is ReentrancyGuard {
 
     /**
      * @notice Ends the game and determines the winner. This is the third function a game master has to call
+     * @dev This function will be automatically called from within the factory, after the random number has been generated
      */
     function endGame() external onlyGameMaster {
         require(state == GameState.RevealPhase, "Game has not ended yet");
 
-        int256 totalWinners = determinePotentialWinners();
+        determinePotentialWinners();
 
         state = GameState.Ended;
-        if (totalWinners == -1) {
+        if (totalPotentialWinners == -1) {
             refundPlayers();
             console.log(
                 "No potential winners found, refunding everyone their money"
             );
         } else {
-            selectWinner(potentialWinners, uint256(totalWinners));
+            selectWinner();
             console.log("Winner selected, game ended");
         }
 
@@ -257,32 +262,26 @@ contract AverageGame is ReentrancyGuard {
      * @notice Determines the potential winners of the game by checking the distance of each players guess to the 2/3 average, while only considering the players that correctly revealed their guesses
      * @dev There are multiple potential winners, because multiple players can have the same distance to the result
      * @dev Stores the potential winners in state variable potentialWinners
-     * @return The amount of potential winners
      */
-    function determinePotentialWinners() private returns (int256) {
+    function determinePotentialWinners() private {
         require(state == GameState.RevealPhase, "Game has not ended yet");
 
         int256 twoThirdAverage = calculateTwoThirdAverage();
 
         if (twoThirdAverage == -1) {
-            return -1;
+            totalPotentialWinners = -1;
+            return;
         }
-        uint256 average = uint256(twoThirdAverage);
+        UD60x18 average = convert(uint256(twoThirdAverage));
 
         potentialWinners = new address[](totalPlayers);
-        uint256 minDistance = PRBMathUD60x18.div(maxGuess, 1);
+        UD60x18 minDistance = convert(maxGuess);
         uint256 winnerIndex = 0;
 
         for (uint i = 0; i < totalPlayers; i++) {
             address currentPlayer = players[i];
-            uint256 guess = PRBMathUD60x18.div(
-                revealedGuesses[currentPlayer],
-                1
-            );
-            uint256 distance = 0;
-            console.log("Calculating distance for guess: %s", guess);
-            console.log("Average: %s", average);
-            console.log("MinDistance: %s", minDistance);
+            UD60x18 guess = convert(revealedGuesses[currentPlayer]);
+            UD60x18 distance = ZERO;
             if (guess < average) {
                 distance = average - guess;
             } else {
@@ -298,22 +297,18 @@ contract AverageGame is ReentrancyGuard {
                 minDistance = distance;
                 winnerIndex = 0;
                 potentialWinners[winnerIndex] = currentPlayer;
-                console.log(
-                    "New potential winner found with distance %s",
-                    distance
-                );
+                console.log("New potential winner found with distance");
             } else if (distance == minDistance) {
                 // Multiple potential winners can be determined if they have the same distance to the result
+                winnerIndex++;
                 potentialWinners[winnerIndex] = currentPlayer;
                 console.log(
                     "Another potential winner found with same distance"
                 );
             }
-
-            winnerIndex++;
         }
 
-        return int256(winnerIndex);
+        totalPotentialWinners = int256(winnerIndex + 1);
     }
 
     /**
@@ -322,29 +317,28 @@ contract AverageGame is ReentrancyGuard {
      * @return result The 2/3 average of the correctly revealed guesses
      */
     function calculateTwoThirdAverage() private view returns (int256 result) {
-        uint256 sum = 0;
-        uint256 participants = 0;
-        uint256 average = 0;
+        UD60x18 sum = ZERO;
+        UD60x18 participants = ZERO;
+        UD60x18 average = ZERO;
 
         for (uint i = 0; i < totalPlayers; i++) {
             address currentPlayer = players[i];
 
             if (playerRevealed[currentPlayer] == RevealState.Revealed) {
                 console.log("Player revealed their correct values");
-                uint256 guess = revealedGuesses[currentPlayer];
-                sum += guess;
-                participants++;
+                UD60x18 guess = convert(revealedGuesses[currentPlayer]);
+                sum = add(sum, guess);
+                participants = add(participants, convert(1));
             }
         }
 
-        if (participants == 0) {
+        if (isZero(participants)) {
             return -1;
         }
 
-        average = PRBMathUD60x18.div(sum, participants);
-        // average = sum / participants;
-        console.log("Average is", average);
-        result = int256((average * 2) / 3);
+        average = div(sum, participants);
+
+        result = int256(convert(div(mul(average, convert(2)), convert(3))));
     }
 
     /**
@@ -368,14 +362,9 @@ contract AverageGame is ReentrancyGuard {
 
     /**
      * @notice Selects the winner of the game by using randomness if there are multiple potential winners
-     * @dev The winner is selected by using the chainlink VRF
-     * @param _potentialWinners The potential winners of the game
-     * @param _totalPotentialWinners The amount of potential winners
+     * @dev The winner is selected by using the chainlink VRF if multiple potential winners are found
      */
-    function selectWinner(
-        address[] memory _potentialWinners,
-        uint256 _totalPotentialWinners
-    ) private {
+    function selectWinner() private {
         require(state == GameState.Ended, "Game has not ended yet");
         uint256 pricePool = totalBetAmount + totalCollateralAmount;
         require(
@@ -383,17 +372,39 @@ contract AverageGame is ReentrancyGuard {
             "Not enough funds to payout the winners"
         );
 
-        // Adjust randomness by using chainlink VRF
-        if (_totalPotentialWinners > 1) {
-            uint256 randomIndex = uint256(
-                keccak256(abi.encodePacked(block.timestamp, block.prevrandao))
-            ) % _totalPotentialWinners;
-            winner = payable(_potentialWinners[randomIndex]);
+        if (totalPotentialWinners > 1) {
+            uint256 winnerIndex = calculateRandomNumber();
+            winner = payable(potentialWinners[winnerIndex]);
         } else {
-            winner = payable(_potentialWinners[0]);
+            winner = payable(potentialWinners[0]);
         }
 
         emit WinnerSelected(winner, pricePool);
+    }
+
+    /**
+     * @notice Calculates a random number by hashing block parameters, with the salts and guesses by the potential winners
+     * @dev the salts and guesses are only available, once the game can't be entered anymore, therefore it's save to say that these values can be used for randomness
+     * @return The random number to determine the winner, acts as an index for the potential winners array
+     */
+    function calculateRandomNumber() private view returns (uint256) {
+        bytes memory seed = abi.encodePacked(
+            block.timestamp,
+            block.prevrandao,
+            block.coinbase,
+            block.number,
+            block.gaslimit
+        );
+        for (uint256 i = 0; i < uint256(totalPotentialWinners); i++) {
+            address currentPlayer = potentialWinners[i];
+            uint256 guess = revealedGuesses[currentPlayer];
+            string memory salt = revealedSalts[currentPlayer];
+            seed = abi.encodePacked(seed, guess, salt);
+        }
+
+        bytes32 seedHash = keccak256(seed);
+
+        return uint256(seedHash) % uint256(totalPotentialWinners);
     }
 
     /**
@@ -406,6 +417,7 @@ contract AverageGame is ReentrancyGuard {
     ) external onlyWinner nonReentrant {
         require(state == GameState.Ended, "Game has not ended yet");
         uint256 payout = totalBetAmount + totalCollateralAmount;
+        require(payout > 0, "No price pool to payout");
         require(
             getBalance() >= payout,
             "Not enough funds to payout the winner"
@@ -448,8 +460,10 @@ contract AverageGame is ReentrancyGuard {
         emit CollateralDeposited(_player, collateralAmount);
     }
 
+    // ------------------------------ Add refund after a specified time ------------------------------
+
     /**
-     * @notice Refunds all players their money if no winner was found to prevent malicious behavior by the game master
+     * @notice Refunds their money if no winner was found to prevent malicious behavior by the game master
      * @notice otherwise he could just end the game without a winner and keep the gameFees
      */
     function refundPlayers() private nonReentrant {
@@ -470,21 +484,26 @@ contract AverageGame is ReentrancyGuard {
      * @notice Withdraws the game fees to the game master
      */
     function withdrawGameFees() external onlyGameMaster nonReentrant {
-        // Check if we found a winner, otherwise do not payout the game fees, prevents malicious behavior
         require(state == GameState.Ended, "Game has not ended yet");
         require(winner != address(0), "No winner found");
         require(
             getBalance() >= totalGameFees,
             "Not enough funds to withdraw the game fees"
         );
-
+        uint256 collectedFee = totalGameFees;
         totalGameFees = 0;
 
-        (bool sent, ) = msg.sender.call{value: totalGameFees}("");
+        (bool sent, ) = msg.sender.call{value: collectedFee}("");
         require(sent, "Failed to send Ether");
 
-        emit FeeCollected(msg.sender, totalGameFees);
+        emit FeeCollected(msg.sender, collectedFee);
     }
+
+    // ---------------------------------------------
+    // ---------------------------------------------
+    // ---------- Getter functions ----------
+    // ---------------------------------------------
+    // ---------------------------------------------
 
     /**
      * @notice Returns the balance of the contract
@@ -493,26 +512,10 @@ contract AverageGame is ReentrancyGuard {
         return address(this).balance;
     }
 
-    function getCommitment(
-        address _player
-    ) public view onlyGameMaster returns (bytes32) {
-        return commitments[_player];
-    }
-
-    function getTotalGameFees() public view onlyGameMaster returns (uint256) {
-        return totalGameFees;
-    }
-
     function getPlayerRevealedState(
         address _player
     ) public view onlyGameMaster returns (RevealState) {
         return playerRevealed[_player];
-    }
-
-    function getPotentialWinnerAt(
-        uint256 _index
-    ) public view onlyGameMaster returns (address) {
-        return potentialWinners[_index];
     }
 
     function getPotentialWinners()

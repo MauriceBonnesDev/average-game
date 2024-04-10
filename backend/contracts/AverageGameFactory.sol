@@ -8,10 +8,10 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AverageGameFactory is Ownable {
-    uint256 public totalGames;
+    uint256 public totalGames = 0;
 
-    mapping(uint256 => address) private gameProxies;
-    mapping(uint256 => address) private gameMasters;
+    address[] private gameProxies;
+    address[] private gameMasters;
 
     modifier onlyGameMaster(uint256 _gameId) {
         require(
@@ -20,6 +20,8 @@ contract AverageGameFactory is Ownable {
         );
         _;
     }
+
+    event GameCreated(uint256 indexed gameCount, address indexed gameAddress);
 
     constructor(address _owner) Ownable(_owner) {}
 
@@ -31,10 +33,12 @@ contract AverageGameFactory is Ownable {
         uint256 _betAmount,
         uint256 _gameFee
     ) public onlyOwner returns (address) {
+        console.log("Creating Game!!!!!");
         address proxy = Clones.clone(_address);
-        totalGames++;
-        gameProxies[totalGames] = proxy;
-        gameMasters[totalGames] = _gameMaster;
+        console.log("Cloned");
+        gameProxies.push(proxy);
+        console.log("Game Master", _gameMaster);
+        gameMasters.push(_gameMaster);
         AverageGame(proxy).initGame({
             _gameId: totalGames,
             _name: _name,
@@ -47,7 +51,19 @@ contract AverageGameFactory is Ownable {
             _factory: address(this)
         });
 
+        totalGames++;
+        emit GameCreated(totalGames, proxy);
+        console.log("Init game called", proxy);
+
         return proxy;
+    }
+
+    function getGameProxies() public view returns (address[] memory) {
+        return gameProxies;
+    }
+
+    function getGameMasters() public view returns (address[] memory) {
+        return gameMasters;
     }
 
     function getGameProxyAt(
