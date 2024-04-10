@@ -1,0 +1,30 @@
+.numberPicker {
+  display: flex;
+  flex-direction: column;
+  height: 25px;
+  align-items: center;
+  width: 30px;
+
+  img {
+    height: 24px;
+    width: 24px;
+  }
+
+  input {
+    border: none;
+    color: red;
+    background-color: transparent;
+    text-align: center;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+.inputContainer {
+  display: flex;
+  gap: 10px;
+}

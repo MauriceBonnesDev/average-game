@@ -11,6 +11,9 @@ import type { AverageGameModule_AverageGameFactory as TAverageGameFactory } from
 import type { AverageGameModule_AverageGame as TAverageGame } from "../../../types/ethers-contracts/AverageGameModule_AverageGame";
 import { formatEther } from "ethers";
 import Modal, { DialogRef } from "../../components/modal/Modal";
+import CreateGame, {
+  CreateGameRef,
+} from "../../components/createGame/CreateGame";
 
 export type AverageGameInstance = {
   id: number;
@@ -23,6 +26,7 @@ export type AverageGameInstance = {
 const GamesPage = () => {
   const { wallet } = useWeb3Context();
   const dialog = useRef<DialogRef>(null);
+  const createGameRef = useRef<CreateGameRef>(null);
   const [factoryContract, setFactoryContract] =
     useState<TAverageGameFactory | null>(null);
   const [averageGameContracts, setAverageGameContracts] = useState<
@@ -100,40 +104,40 @@ const GamesPage = () => {
       };
     }
   }, [factoryContract, wallet]);
-  const owner = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-
-  const createGame = async () => {
-    if (factoryContract) {
-      try {
-        const transactionResponse = await factoryContract.createAverageGame(
-          addresses["AverageGameModule#AverageGame"],
-          owner,
-          "Average Game",
-          5,
-          1,
-          10
-        );
-        await transactionResponse.wait();
-        console.log("Spiel erfolgreich erstellt");
-      } catch (error) {
-        console.error("Fehler beim Erstellen des Spiels:", error);
-      }
-    }
-  };
 
   const openModal = () => {
     dialog.current?.open();
   };
 
+  const createGame = () => {
+    if (createGameRef.current) {
+      createGameRef.current.createGame();
+    }
+  };
+
+  const handleCreateGameClose = () => {
+    if (createGameRef.current) {
+      createGameRef.current.close();
+    }
+  };
+
   return (
     <>
-      {
-        <Modal
+      <Modal
+        title="Spiel erstellen"
+        submitText="Erstellen"
+        disclaimer="Hier kommt nochmal ein kurzer Disclaimer hin, was zu beachten ist
+          beim Erstellen eines Spiels"
+        onClick={createGame}
+        onClose={handleCreateGameClose}
+        ref={dialog}
+      >
+        <CreateGame
+          ref={createGameRef}
+          factoryContract={factoryContract}
           contractAddress={addresses["AverageGameModule#AverageGame"]}
-          onClick={createGame}
-          ref={dialog}
         />
-      }
+      </Modal>
       <div className={classes.container}>
         <img src={chevronLeft} />
         <button onClick={openModal}>Create Game</button>
