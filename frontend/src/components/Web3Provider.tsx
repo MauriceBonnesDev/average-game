@@ -62,4 +62,11 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
   );
 }
 
-export const useWeb3 = () => useContext(Web3Context);
+export const useWeb3Context = () => {
+  const context = useContext(Web3Context);
+
+  if (!context) {
+    throw new Error("useWeb3Context must be used within a Web3Provider");
+  }
+  return context;
+};

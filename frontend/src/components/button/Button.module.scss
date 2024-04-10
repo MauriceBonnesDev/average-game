@@ -1,0 +1,42 @@
+@use "../../colors";
+
+.btn {
+  background-color: rgba($color: colors.$purple-300, $alpha: 0.25);
+  border-radius: 100px;
+  border: none;
+  color: colors.$white;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: rgba($color: colors.$purple-400, $alpha: 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba($color: colors.$purple-800, $alpha: 0.25);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba($color: colors.$purple-950, $alpha: 0.25);
+  }
+
+  &Small {
+    width: 77px;
+    height: 38px;
+    font-weight: 800;
+    font-size: 20px;
+  }
+
+  &Medium {
+    width: 100px;
+    height: 38px;
+    font-weight: 400;
+    font-size: 22px;
+  }
+
+  &Large {
+    width: 177px;
+    height: 55px;
+    font-weight: 400;
+    font-size: 24px;
+  }
+}

@@ -1,0 +1,33 @@
+@use "../../colors";
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: colors.$purple-700;
+
+  .nav {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+
+    li {
+      width: 70px;
+    }
+
+    & a {
+      font-size: 24px;
+      text-decoration: none;
+      color: colors.$white;
+      translate: all 1.3 ease;
+
+      &:hover,
+      &.active {
+        display: inline-block;
+        transform: scale(1.05);
+        font-weight: 600;
+      }
+    }
+  }
+}
