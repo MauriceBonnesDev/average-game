@@ -1,4 +1,10 @@
-import React, { FormEvent, useImperativeHandle, useRef } from "react";
+import React, {
+  FormEvent,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import classes from "./Modal.module.scss";
 import { createPortal } from "react-dom";
 import Button from "../button/Button";

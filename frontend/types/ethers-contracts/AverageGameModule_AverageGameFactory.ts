@@ -32,26 +32,14 @@ export interface AverageGameModule_AverageGameFactoryInterface
       | "getGameMasters"
       | "getGameProxies"
       | "getGameProxyAt"
-      | "owner"
-      | "renounceOwnership"
       | "totalGames"
-      | "transferOwnership"
   ): FunctionFragment;
 
-  getEvent(
-    nameOrSignatureOrTopic: "GameCreated" | "OwnershipTransferred"
-  ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "GameCreated"): EventFragment;
 
   encodeFunctionData(
     functionFragment: "createAverageGame",
-    values: [
-      AddressLike,
-      AddressLike,
-      string,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish
-    ]
+    values: [AddressLike, string, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getGameMasterAt",
@@ -68,20 +56,11 @@ export interface AverageGameModule_AverageGameFactoryInterface
   encodeFunctionData(
     functionFragment: "getGameProxyAt",
     values: [BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "totalGames",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [AddressLike]
-  ): string;
 
   decodeFunctionResult(
     functionFragment: "createAverageGame",
@@ -103,16 +82,7 @@ export interface AverageGameModule_AverageGameFactoryInterface
     functionFragment: "getGameProxyAt",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "totalGames", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
 }
 
 export namespace GameCreatedEvent {
@@ -121,19 +91,6 @@ export namespace GameCreatedEvent {
   export interface OutputObject {
     gameCount: bigint;
     gameAddress: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace OwnershipTransferredEvent {
-  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
-  export type OutputTuple = [previousOwner: string, newOwner: string];
-  export interface OutputObject {
-    previousOwner: string;
-    newOwner: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -187,7 +144,6 @@ export interface AverageGameModule_AverageGameFactory extends BaseContract {
   createAverageGame: TypedContractMethod<
     [
       _address: AddressLike,
-      _gameMaster: AddressLike,
       _name: string,
       _maxPlayers: BigNumberish,
       _betAmount: BigNumberish,
@@ -209,17 +165,7 @@ export interface AverageGameModule_AverageGameFactory extends BaseContract {
 
   getGameProxyAt: TypedContractMethod<[_index: BigNumberish], [string], "view">;
 
-  owner: TypedContractMethod<[], [string], "view">;
-
-  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
-
   totalGames: TypedContractMethod<[], [bigint], "view">;
-
-  transferOwnership: TypedContractMethod<
-    [newOwner: AddressLike],
-    [void],
-    "nonpayable"
-  >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -230,7 +176,6 @@ export interface AverageGameModule_AverageGameFactory extends BaseContract {
   ): TypedContractMethod<
     [
       _address: AddressLike,
-      _gameMaster: AddressLike,
       _name: string,
       _maxPlayers: BigNumberish,
       _betAmount: BigNumberish,
@@ -252,17 +197,8 @@ export interface AverageGameModule_AverageGameFactory extends BaseContract {
     nameOrSignature: "getGameProxyAt"
   ): TypedContractMethod<[_index: BigNumberish], [string], "view">;
   getFunction(
-    nameOrSignature: "owner"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "renounceOwnership"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
     nameOrSignature: "totalGames"
   ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "transferOwnership"
-  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
 
   getEvent(
     key: "GameCreated"
@@ -270,13 +206,6 @@ export interface AverageGameModule_AverageGameFactory extends BaseContract {
     GameCreatedEvent.InputTuple,
     GameCreatedEvent.OutputTuple,
     GameCreatedEvent.OutputObject
-  >;
-  getEvent(
-    key: "OwnershipTransferred"
-  ): TypedContractEvent<
-    OwnershipTransferredEvent.InputTuple,
-    OwnershipTransferredEvent.OutputTuple,
-    OwnershipTransferredEvent.OutputObject
   >;
 
   filters: {
@@ -289,17 +218,6 @@ export interface AverageGameModule_AverageGameFactory extends BaseContract {
       GameCreatedEvent.InputTuple,
       GameCreatedEvent.OutputTuple,
       GameCreatedEvent.OutputObject
-    >;
-
-    "OwnershipTransferred(address,address)": TypedContractEvent<
-      OwnershipTransferredEvent.InputTuple,
-      OwnershipTransferredEvent.OutputTuple,
-      OwnershipTransferredEvent.OutputObject
-    >;
-    OwnershipTransferred: TypedContractEvent<
-      OwnershipTransferredEvent.InputTuple,
-      OwnershipTransferredEvent.OutputTuple,
-      OwnershipTransferredEvent.OutputObject
     >;
   };
 }

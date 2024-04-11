@@ -4,20 +4,22 @@ import classes from "./NumberPicker.module.scss";
 import { ChangeEvent } from "react";
 
 type NumberPickerProps = {
-  min: number;
-  max: number;
   label: string;
   name: string;
   value: number;
+  min?: number;
+  max?: number;
+  step?: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 const NumberPicker = ({
-  min,
-  max,
   label,
   name,
   value,
+  min,
+  max,
+  step = "0.1",
   onChange,
 }: NumberPickerProps) => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,6 +37,7 @@ const NumberPicker = ({
           id={name}
           type="number"
           value={value}
+          step={step}
           min={min}
           max={max}
           onChange={onInputChange}

@@ -43,19 +43,17 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
       };
     });
 
-    // TODO: Kann durch die aktuell connectete Wallet ersetzt werden, sobald die Average Game Factory überarbeitet wurde
-    const owner = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-
     const createGame = async () => {
       if (factoryContract) {
         try {
           const transactionResponse = await factoryContract.createAverageGame(
             contractAddress,
-            owner,
             gameSettings.name,
             gameSettings.maxPlayers,
-            gameSettings.betAmount,
-            gameSettings.gameFee.toString()
+            parseEther(gameSettings.betAmount.toString()),
+            parseEther(
+              ((gameSettings.gameFee / 100) * gameSettings.betAmount).toString()
+            )
           );
           await transactionResponse.wait();
           console.log("Spiel erfolgreich erstellt");
@@ -98,10 +96,10 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
           value={gameSettings.betAmount}
           onChange={handleInputChange}
         />
-        <label htmlFor="gameFee">Gebühren:</label>
-        <input
-          type="number"
-          id="gameFee"
+        <NumberPicker
+          min={0}
+          max={100}
+          label="Gebühren"
           name="gameFee"
           value={gameSettings.gameFee}
           onChange={handleInputChange}
