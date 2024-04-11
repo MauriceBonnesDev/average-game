@@ -14,6 +14,14 @@ import Modal, { DialogRef } from "../../components/modal/Modal";
 import CreateGame, {
   CreateGameRef,
 } from "../../components/createGame/CreateGame";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Grid, Navigation, Pagination } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/grid";
+import "../../index.scss";
 
 export type AverageGameInstance = {
   id: number;
@@ -121,6 +129,21 @@ const GamesPage = () => {
     }
   };
 
+  console.log(
+    averageGameInstances.sort((a, b) => {
+      // Prüfe die Bedingung für die Hälfte des Arrays
+      const halfA = a.id % 6 < 3 ? 0 : 1; // 0 für erste Hälfte, 1 für zweite Hälfte
+      const halfB = b.id % 6 < 3 ? 0 : 1;
+
+      if (halfA !== halfB) {
+        // Wenn sie nicht in der gleichen Hälfte sind, dann sortiere nach der Hälfte
+        return halfA - halfB;
+      } else {
+        // Wenn sie in der gleichen Hälfte sind, dann sortiere nach der ID
+        return a.id - b.id;
+      }
+    })
+  );
   return (
     <>
       <Modal
@@ -138,24 +161,52 @@ const GamesPage = () => {
           contractAddress={addresses["AverageGameModule#AverageGame"]}
         />
       </Modal>
+      <button onClick={openModal}>Create Game</button>
       <div className={classes.container}>
-        <img src={chevronLeft} />
-        <button onClick={openModal}>Create Game</button>
-        <div className={classes.cardContainer}>
+        <div className="swiper-button-prev"></div>
+        <Swiper
+          modules={[Grid, Pagination, Navigation]}
+          slidesPerView={3}
+          navigation={{
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+          }}
+          spaceBetween={100}
+          grid={{ rows: 2, fill: "row" }}
+        >
           {averageGameInstances.map((game) => {
             return (
-              <Card
-                entryPrice={game.entryPrice}
-                id={game.id}
-                maxPlayers={game.maxPlayers}
-                name={game.name}
-                totalPlayers={game.totalPlayers}
-                key={game.id}
-              />
+              <SwiperSlide key={game.id}>
+                <Card
+                  entryPrice={game.entryPrice}
+                  id={game.id}
+                  maxPlayers={game.maxPlayers}
+                  name={game.name}
+                  totalPlayers={game.totalPlayers}
+                />
+              </SwiperSlide>
             );
           })}
-        </div>
-        <img src={chevronRight} />
+          {/* {averageGameInstances
+            .filter(
+              (_, index) =>
+                index % 6 === 3 || index % 6 === 4 || index % 6 === 5
+            )
+            .map((game) => {
+              return (
+                <SwiperSlide key={game.id}>
+                  <Card
+                    entryPrice={game.entryPrice}
+                    id={game.id}
+                    maxPlayers={game.maxPlayers}
+                    name={game.name}
+                    totalPlayers={game.totalPlayers}
+                  />
+                </SwiperSlide>
+              );
+            })} */}
+        </Swiper>
+        <div className="swiper-button-next"></div>
       </div>
     </>
   );

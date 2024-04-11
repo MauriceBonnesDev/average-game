@@ -1,3 +1,4 @@
+@use "./colors";
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -14,4 +15,32 @@
 * {
   margin: 0;
   padding: 0;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  top: unset !important;
+  bottom: unset !important;
+  color: colors.$light-grey !important;
+  position: unset !important;
+  width: min-content !important;
+
+  &::after {
+    font-size: 100px;
+  }
+
+  &:hover::after {
+    transform: translateY(-2px);
+    color: darken($color: colors.$light-grey, $amount: 2);
+  }
+}
+
+.swiper-button-next {
+  right: unset !important;
+  margin-left: 5rem;
+}
+
+.swiper-button-prev {
+  left: unset !important;
+  margin-right: calc(5rem + 69px);
 }

@@ -1,17 +1,12 @@
 @use "../../colors";
 
-.cardContainer {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, auto);
-  gap: 8rem;
-  margin: 0 auto;
-}
-
 .container {
-  width: 65vw;
+  width: 75vw;
+  height: 800px;
   display: flex;
   margin: 0 auto;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .arrowBtn {
