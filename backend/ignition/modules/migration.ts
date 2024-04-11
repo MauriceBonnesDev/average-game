@@ -2,9 +2,7 @@ import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 const AverageGameModule = buildModule("AverageGameModule", (m) => {
   const averageGame = m.contract("AverageGame", []);
-  const averageGameFactory = m.contract("AverageGameFactory", [
-    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-  ]);
+  const averageGameFactory = m.contract("AverageGameFactory", []);
   // const gameMaster = "0x331e0f477be71d74228469a3fef83c50b2fd9f36";
   // const name = "Average Game";
   // const maxPlayers = 5;

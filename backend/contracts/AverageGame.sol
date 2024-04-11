@@ -22,7 +22,7 @@ contract AverageGame is ReentrancyGuard {
     uint256 public totalCollateralAmount;
     uint256 public minGuess;
     uint256 public maxGuess;
-    uint256 public gameFee; // Integer representation of the percentage of the game fee
+    uint256 public gameFee;
     uint256 private totalGameFees;
     int256 private totalPotentialWinners;
 
@@ -113,7 +113,7 @@ contract AverageGame is ReentrancyGuard {
      * @param _maxPlayers Amount of players that can join the game
      * @param _betAmount Bet amount for each player
      * @param _gameMaster Address of the game master
-     * @param _gameFee Game fee as an integer, that represents the percentage
+     * @param _gameFee Game fee
      */
     function initGame(
         uint256 _gameId,
@@ -132,15 +132,17 @@ contract AverageGame is ReentrancyGuard {
         minGuess = _minGuess;
         maxGuess = _maxGuess;
         maxPlayers = _maxPlayers;
-        betAmount = _betAmount * 1 ether;
-        collateralAmount = _betAmount * 3 * 1 ether;
+        betAmount = _betAmount;
+        collateralAmount = _betAmount * 3;
         players = new address[](maxPlayers);
         state = GameState.Initialized;
         gameFee = _gameFee;
         isInitialized = true;
         gameMaster = _gameMaster;
         factory = _factory;
-        console.log("Game initialized");
+        console.log("Game initialized", _betAmount);
+        console.log("Fee", _gameFee);
+        console.log("Collateral", collateralAmount);
         emit GameCreated(_gameId);
     }
 
@@ -161,10 +163,9 @@ contract AverageGame is ReentrancyGuard {
      * @param _guess The guess of the player
      */
     function joinGame(bytes32 _guess) external payable {
-        uint256 fee = (betAmount * gameFee) / 100;
         require(state == GameState.CommitPhase, "Game has not started yet");
         require(
-            msg.value == collateralAmount + betAmount + fee,
+            msg.value == collateralAmount + betAmount + gameFee,
             "Insufficient amount, must be the bet amount + 3 times the bet amount as collateral including the game fee"
         );
         require(
@@ -175,7 +176,7 @@ contract AverageGame is ReentrancyGuard {
         totalBetAmount += betAmount;
         totalCollateralAmount += collateralAmount;
         collateralOfPlayer[msg.sender] = collateralAmount;
-        totalGameFees += fee;
+        totalGameFees += gameFee;
         commitments[msg.sender] = _guess;
         players[totalPlayers] = msg.sender;
         playerAlreadyJoined[msg.sender] = true;

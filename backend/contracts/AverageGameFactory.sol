@@ -5,9 +5,8 @@ import "./AverageGame.sol";
 import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AverageGameFactory is Ownable {
+contract AverageGameFactory {
     uint256 public totalGames = 0;
 
     address[] private gameProxies;
@@ -23,22 +22,19 @@ contract AverageGameFactory is Ownable {
 
     event GameCreated(uint256 indexed gameCount, address indexed gameAddress);
 
-    constructor(address _owner) Ownable(_owner) {}
-
     function createAverageGame(
         address _address,
-        address _gameMaster,
         string memory _name,
         uint256 _maxPlayers,
         uint256 _betAmount,
         uint256 _gameFee
-    ) public onlyOwner returns (address) {
+    ) public returns (address) {
         console.log("Creating Game!!!!!");
         address proxy = Clones.clone(_address);
         console.log("Cloned");
         gameProxies.push(proxy);
-        console.log("Game Master", _gameMaster);
-        gameMasters.push(_gameMaster);
+        console.log("Game Master", msg.sender);
+        gameMasters.push(msg.sender);
         AverageGame(proxy).initGame({
             _gameId: totalGames,
             _name: _name,
@@ -46,7 +42,7 @@ contract AverageGameFactory is Ownable {
             _maxGuess: 1000,
             _maxPlayers: _maxPlayers,
             _betAmount: _betAmount,
-            _gameMaster: _gameMaster,
+            _gameMaster: msg.sender,
             _gameFee: _gameFee,
             _factory: address(this)
         });

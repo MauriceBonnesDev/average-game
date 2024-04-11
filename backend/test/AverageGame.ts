@@ -20,18 +20,21 @@ describe("AverageGame & AverageGameFactory", function () {
   const name = "Average Game";
   const maxPlayers = 5;
   const betAmount = 1;
-  const gameFee = 10;
-  const gameId = 1;
+  const gameFee = 10.5; // percent
+  const gameId = 0;
   const onlyGameMasterError = "Only game master can call this function";
+  const betAmountEth = parseEther(betAmount.toString());
+  const collateralAmountEth = betAmountEth * BigInt(3);
+  const gameFeeAmountEth = BigInt((gameFee / 100) * 1e18 * betAmount);
+  const entryValue = betAmountEth + collateralAmountEth + gameFeeAmountEth;
 
   async function createAverageGame() {
-    await averageGameFactory.createAverageGame(
+    await averageGameConnectedAsGameMaster.createAverageGame(
       averageGameAddress,
-      gameMaster.getAddress(),
       name,
       maxPlayers,
-      betAmount,
-      gameFee
+      betAmountEth,
+      gameFeeAmountEth
     );
   }
 
@@ -42,14 +45,12 @@ describe("AverageGame & AverageGameFactory", function () {
 
     averageGame = await ethers.deployContract(contractName);
 
-    averageGameFactory = await ethers.deployContract("AverageGameFactory", [
-      deployer.getAddress(),
-    ]);
+    averageGameFactory = await ethers.deployContract("AverageGameFactory");
 
     averageGameAddress = await averageGame.getAddress();
-    await createAverageGame();
 
     averageGameConnectedAsGameMaster = averageGameFactory.connect(gameMaster);
+    await createAverageGame();
 
     const proxyAddress = await averageGameConnectedAsGameMaster.getGameProxyAt(
       gameId
@@ -70,9 +71,9 @@ describe("AverageGame & AverageGameFactory", function () {
     });
 
     it("Calling getGameProxyAt not being the gameMaster should revert with error", async () => {
-      await expect(averageGameFactory.getGameProxyAt(1)).to.be.revertedWith(
-        "Only game master can call this function"
-      );
+      await expect(
+        averageGameFactory.getGameProxyAt(gameId)
+      ).to.be.revertedWith("Only game master can call this function");
     });
 
     it("GameMaster should be set", async () => {
@@ -80,19 +81,6 @@ describe("AverageGame & AverageGameFactory", function () {
         gameId
       );
       expect(gameMasterAddress).to.be.equal(await gameMaster.getAddress());
-    });
-
-    it("Should revert if caller of CreateAverageGame is not the owner", async () => {
-      await expect(
-        averageGameConnectedAsGameMaster.createAverageGame(
-          averageGameAddress,
-          gameMaster.getAddress(),
-          name,
-          maxPlayers,
-          betAmount,
-          gameFee
-        )
-      ).to.be.reverted;
     });
 
     it("Should increase totalGames by 1 on each call to createAverageGame", async () => {
@@ -105,11 +93,9 @@ describe("AverageGame & AverageGameFactory", function () {
     let gmProxy: AverageGame;
     const guess = 20;
     const salt = "abc";
-    const betAmountEth = parseEther(betAmount.toString());
-    const collateralAmountEth = betAmountEth * BigInt(3);
-    const gameFeeAmountEth = (betAmountEth * BigInt(gameFee)) / BigInt(100);
     const commit: BytesLike = getHash(guess, salt);
-    const entryValue = betAmountEth + collateralAmountEth + gameFeeAmountEth;
+
+    console.log("EntryValue:", entryValue);
 
     function getHash(_guess: number, _salt: string) {
       return solidityPackedKeccak256(["uint256", "string"], [_guess, _salt]);
@@ -146,9 +132,9 @@ describe("AverageGame & AverageGameFactory", function () {
           0,
           1000,
           maxPlayers,
-          betAmount,
+          betAmountEth,
           gameMaster.getAddress(),
-          gameFee,
+          gameFeeAmountEth,
           await averageGameFactory.getAddress()
         )
       ).to.be.revertedWith("Game is already initialized");
