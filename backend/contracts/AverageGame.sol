@@ -163,7 +163,8 @@ contract AverageGame is ReentrancyGuard {
      * @param _guess The guess of the player
      */
     function joinGame(bytes32 _guess) external payable {
-        require(state == GameState.CommitPhase, "Game has not started yet");
+        //TODO: Wieder einkommentieren
+        // require(state == GameState.CommitPhase, "Game has not started yet");
         require(
             msg.value == collateralAmount + betAmount + gameFee,
             "Insufficient amount, must be the bet amount + 3 times the bet amount as collateral including the game fee"

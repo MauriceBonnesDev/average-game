@@ -12,14 +12,6 @@ contract AverageGameFactory {
     address[] private gameProxies;
     address[] private gameMasters;
 
-    modifier onlyGameMaster(uint256 _gameId) {
-        require(
-            gameMasters[_gameId] == msg.sender,
-            "Only game master can call this function"
-        );
-        _;
-    }
-
     event GameCreated(uint256 indexed gameCount, address indexed gameAddress);
 
     function createAverageGame(
@@ -62,9 +54,7 @@ contract AverageGameFactory {
         return gameMasters;
     }
 
-    function getGameProxyAt(
-        uint256 _index
-    ) public view onlyGameMaster(_index) returns (address) {
+    function getGameProxyAt(uint256 _index) public view returns (address) {
         return gameProxies[_index];
     }
 
