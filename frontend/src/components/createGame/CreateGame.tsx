@@ -1,8 +1,17 @@
 import { ChangeEvent, forwardRef, useImperativeHandle, useState } from "react";
-import { GameSettings } from "../modal/Modal";
 import NumberPicker from "../numberPicker/NumberPicker";
 import type { AverageGameModule_AverageGameFactory as TAverageGameFactory } from "../../../types/ethers-contracts/AverageGameModule_AverageGameFactory";
 import { parseEther } from "ethers";
+import { EventLog } from "ethers";
+
+export type GameSettings = {
+  contractAddress: string;
+  gameMaster: string;
+  name: string;
+  maxPlayers: number;
+  betAmount: number;
+  gameFee: number;
+};
 
 type CreateGameProps = {
   contractAddress: string;
@@ -55,8 +64,10 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
               ((gameSettings.gameFee / 100) * gameSettings.betAmount).toString()
             )
           );
-          await transactionResponse.wait();
-          console.log("Spiel erfolgreich erstellt");
+          const test = await transactionResponse.wait();
+          const eventLog = test?.logs[1] as EventLog;
+          const address = eventLog.args[1];
+          console.log("Spiel erfolgreich erstellt", address);
         } catch (error) {
           console.error("Fehler beim Erstellen des Spiels:", error);
         }

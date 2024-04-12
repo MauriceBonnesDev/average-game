@@ -1,10 +1,4 @@
-import React, {
-  FormEvent,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import React, { FormEvent, useImperativeHandle, useRef } from "react";
 import classes from "./Modal.module.scss";
 import { createPortal } from "react-dom";
 import Button from "../button/Button";
@@ -20,15 +14,6 @@ type ModalProps = {
 
 export type DialogRef = {
   open: () => void;
-};
-
-export type GameSettings = {
-  contractAddress: string;
-  gameMaster: string;
-  name: string;
-  maxPlayers: number;
-  betAmount: number;
-  gameFee: number;
 };
 
 const Modal = React.forwardRef<DialogRef, ModalProps>(

@@ -1,20 +1,50 @@
+import { useRef } from "react";
 import ethLogo from "../../assets/eth.svg";
 import { AverageGameInstance } from "../../pages/games/GamesPage";
 import Button from "../button/Button";
+import JoinGame, { JoinGameRef } from "../joinGame/JoinGame";
+import Modal, { DialogRef } from "../modal/Modal";
 import classes from "./Card.module.scss";
 
-const Card = ({
-  name,
-  id,
-  entryPrice,
-  totalPlayers,
-  maxPlayers,
-}: AverageGameInstance) => {
+type CardProps = {
+  gameInstance: AverageGameInstance;
+};
+
+const Card = ({ gameInstance }: CardProps) => {
+  const { id, name, entryPrice, totalPlayers, maxPlayers } = gameInstance;
   const betAmount = parseFloat(entryPrice);
   const pricePool = totalPlayers * betAmount;
+  const dialog = useRef<DialogRef>(null);
+  const joinGameRef = useRef<JoinGameRef>(null);
+
+  const joinGame = () => {
+    if (joinGameRef.current) {
+      joinGameRef.current.joinGame();
+    }
+  };
+
+  const handleJoinGameClose = () => {
+    if (joinGameRef.current) {
+      joinGameRef.current.close();
+    }
+  };
+
+  const openModal = () => {
+    dialog.current?.open();
+  };
 
   return (
     <>
+      <Modal
+        title="Join Game"
+        disclaimer="Wähle eine Zahl zwischen 0 und 1000"
+        submitText="Join"
+        onClick={joinGame}
+        onClose={handleJoinGameClose}
+        ref={dialog}
+      >
+        <JoinGame ref={joinGameRef} gameInstance={gameInstance} />
+      </Modal>
       <div className={classes.card}>
         <div className={classes.cardBody}>
           <h5>Get Started</h5>
@@ -38,7 +68,9 @@ const Card = ({
             </div>
           </div>
           <div className={classes.cardJoinSection}>
-            <Button size="small">Join</Button>
+            <Button onClick={openModal} size="small">
+              Join
+            </Button>
             <p className={classes.playerCount}>
               {totalPlayers}/{maxPlayers}
             </p>

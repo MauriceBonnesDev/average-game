@@ -1,5 +1,3 @@
-import chevronLeft from "../../assets/chevron-left.svg";
-import chevronRight from "../../assets/chevron-right.svg";
 import classes from "./GamesPage.module.scss";
 import Card from "../../components/card/Card";
 import addresses from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json"; // Change to 11155111 for the Sepolia Testnet, now running on localhost
@@ -29,6 +27,10 @@ export type AverageGameInstance = {
   entryPrice: string;
   totalPlayers: number;
   maxPlayers: number;
+  contract: TAverageGame;
+  address: string;
+  collateral: string;
+  gameFee: string;
 };
 
 const GamesPage = () => {
@@ -60,20 +62,25 @@ const GamesPage = () => {
         games: TAverageGame[]
       ): Promise<AverageGameInstance[]> => {
         return await Promise.all(
-          games.map(async (game) => ({
-            id: Number(await game.id()),
-            name: await game.name(),
-            entryPrice: formatEther(await game.betAmount()),
-            totalPlayers: Number(await game.totalPlayers()),
-            maxPlayers: Number(await game.maxPlayers()),
-          }))
+          games.map(async (game) => {
+            const id = Number(await game.id());
+            return {
+              id,
+              name: await game.name(),
+              entryPrice: formatEther(await game.betAmount()),
+              totalPlayers: Number(await game.totalPlayers()),
+              maxPlayers: Number(await game.maxPlayers()),
+              contract: game,
+              address: await factoryContract.getGameProxyAt(id),
+              collateral: formatEther(await game.collateralAmount()),
+              gameFee: formatEther(await game.gameFee()),
+            };
+          })
         );
       };
 
-      const getTotalGames = async () => {
+      const fetchGames = async () => {
         try {
-          const game = await factoryContract.getGameProxyAt(0);
-          console.log(game);
           const gameProxies = await factoryContract.getGameProxies();
           const games = gameProxies.map((proxy) =>
             AverageGame.connect(proxy, wallet)
@@ -89,29 +96,41 @@ const GamesPage = () => {
         }
       };
 
-      getTotalGames();
+      fetchGames();
 
-      const onTotalGamesUpdated = (
-        newTotalGames: number,
-        proxyAddress: string
-      ) => {
-        console.log("Game #", newTotalGames, "created at", proxyAddress);
-        getTotalGames();
+      const onGamesChanged = (gameId: number, proxyAddress: string) => {
+        console.log("Game #", gameId, "created at", proxyAddress);
+        fetchGames();
       };
 
       factoryContract.on(
         factoryContract.filters["GameCreated(uint256,address)"],
-        (newTotalGames, proxyAddress) =>
-          onTotalGamesUpdated(Number(newTotalGames), proxyAddress)
+        (gameId, proxyAddress) => onGamesChanged(Number(gameId), proxyAddress)
       );
+
+      for (let i = 0; i < averageGameContracts.length; i++) {
+        averageGameContracts[i].on(
+          averageGameContracts[i].filters["PlayerJoined(address,uint256)"],
+          (player, gameId) => {
+            console.log("Player", player, "joined game", gameId);
+            fetchGames();
+          }
+        );
+      }
 
       return () => {
         factoryContract.off(
           factoryContract.filters["GameCreated(uint256,address)"]
         );
+
+        for (let i = 0; i < averageGameContracts.length; i++) {
+          averageGameContracts[i].off(
+            averageGameContracts[i].filters["PlayerJoined(address,uint256)"]
+          );
+        }
       };
     }
-  }, [factoryContract, wallet]);
+  }, [averageGameContracts, factoryContract, wallet]);
 
   const openModal = () => {
     dialog.current?.open();
@@ -129,21 +148,21 @@ const GamesPage = () => {
     }
   };
 
-  console.log(
-    averageGameInstances.sort((a, b) => {
-      // Prüfe die Bedingung für die Hälfte des Arrays
-      const halfA = a.id % 6 < 3 ? 0 : 1; // 0 für erste Hälfte, 1 für zweite Hälfte
-      const halfB = b.id % 6 < 3 ? 0 : 1;
+  // console.log(
+  //   averageGameInstances.sort((a, b) => {
+  //     // Prüfe die Bedingung für die Hälfte des Arrays
+  //     const halfA = a.id % 6 < 3 ? 0 : 1; // 0 für erste Hälfte, 1 für zweite Hälfte
+  //     const halfB = b.id % 6 < 3 ? 0 : 1;
 
-      if (halfA !== halfB) {
-        // Wenn sie nicht in der gleichen Hälfte sind, dann sortiere nach der Hälfte
-        return halfA - halfB;
-      } else {
-        // Wenn sie in der gleichen Hälfte sind, dann sortiere nach der ID
-        return a.id - b.id;
-      }
-    })
-  );
+  //     if (halfA !== halfB) {
+  //       // Wenn sie nicht in der gleichen Hälfte sind, dann sortiere nach der Hälfte
+  //       return halfA - halfB;
+  //     } else {
+  //       // Wenn sie in der gleichen Hälfte sind, dann sortiere nach der ID
+  //       return a.id - b.id;
+  //     }
+  //   })
+  // );
   return (
     <>
       <Modal
@@ -177,13 +196,7 @@ const GamesPage = () => {
           {averageGameInstances.map((game) => {
             return (
               <SwiperSlide key={game.id}>
-                <Card
-                  entryPrice={game.entryPrice}
-                  id={game.id}
-                  maxPlayers={game.maxPlayers}
-                  name={game.name}
-                  totalPlayers={game.totalPlayers}
-                />
+                <Card gameInstance={game} />
               </SwiperSlide>
             );
           })}
