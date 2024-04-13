@@ -3,6 +3,8 @@ import NumberPicker from "../numberPicker/NumberPicker";
 import type { AverageGameModule_AverageGameFactory as TAverageGameFactory } from "../../../types/ethers-contracts/AverageGameModule_AverageGameFactory";
 import { parseEther } from "ethers";
 import { EventLog } from "ethers";
+import TextInput from "../textInput/TextInput";
+import classes from "./CreateGame.module.scss";
 
 export type GameSettings = {
   contractAddress: string;
@@ -81,41 +83,54 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
         [name]: value,
       }));
     };
+
+    const handleStepChange = (name: string, newValue: number) => {
+      setGameSettings((prevState) => ({
+        ...prevState,
+        [name]: newValue,
+      }));
+    };
+
     return (
-      <>
-        <label htmlFor="name">Spielname</label>
-        <input
-          type="text"
-          id="name"
+      <div className={classes.content}>
+        <TextInput
           name="name"
+          label="Spielname"
+          onChange={handleInputChange}
           value={gameSettings.name}
-          onChange={handleInputChange}
         />
-        <label htmlFor="maxPlayers">Max Players:</label>
-        <input
-          type="number"
-          id="maxPlayers"
-          name="maxPlayers"
-          value={gameSettings.maxPlayers}
-          onChange={handleInputChange}
-        />
-        <NumberPicker
-          min={0}
-          max={1000}
-          label="Einsatz"
-          name="betAmount"
-          value={gameSettings.betAmount}
-          onChange={handleInputChange}
-        />
-        <NumberPicker
-          min={0}
-          max={100}
-          label="Gebühren"
-          name="gameFee"
-          value={gameSettings.gameFee}
-          onChange={handleInputChange}
-        />
-      </>
+        <div className={classes.numberInputs}>
+          <NumberPicker
+            label="Max Players"
+            name="maxPlayers"
+            value={gameSettings.maxPlayers}
+            onChange={handleInputChange}
+            onIncrement={handleStepChange}
+            onDecrement={handleStepChange}
+          />
+          <NumberPicker
+            min={0}
+            max={1000}
+            label="Einsatz"
+            name="betAmount"
+            step={0.01}
+            value={gameSettings.betAmount}
+            onChange={handleInputChange}
+            onIncrement={handleStepChange}
+            onDecrement={handleStepChange}
+          />
+          <NumberPicker
+            min={0}
+            max={100}
+            label="Gebühren"
+            name="gameFee"
+            value={gameSettings.gameFee}
+            onChange={handleInputChange}
+            onIncrement={handleStepChange}
+            onDecrement={handleStepChange}
+          />
+        </div>
+      </div>
     );
   }
 );

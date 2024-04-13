@@ -1,5 +1,3 @@
-import chevronUp from "../../assets/chevron-up.svg";
-import chevronDown from "../../assets/chevron-down.svg";
 import classes from "./NumberPicker.module.scss";
 import { ChangeEvent } from "react";
 
@@ -9,8 +7,10 @@ type NumberPickerProps = {
   value: number;
   min?: number;
   max?: number;
-  step?: string;
+  step?: number;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onIncrement: (name: string, step: number) => void;
+  onDecrement: (name: string, step: number) => void;
 };
 
 const NumberPicker = ({
@@ -19,19 +19,23 @@ const NumberPicker = ({
   value,
   min,
   max,
-  step = "0.1",
+  step = 1,
   onChange,
+  onDecrement,
+  onIncrement,
 }: NumberPickerProps) => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value);
-    console.log(value);
+    console.log("On input change", event.target.value);
     onChange(event);
   };
+
   return (
     <div className={classes.numberPicker}>
-      <img src={chevronUp} />
+      <label htmlFor={label}>{label}</label>
       <div className={classes.inputContainer}>
-        <label htmlFor={label}>{label}</label>
+        <span onClick={() => onDecrement(name, value - step)}>
+          <i className="fas fa-minus"></i>
+        </span>
         <input
           name={name}
           id={name}
@@ -42,8 +46,10 @@ const NumberPicker = ({
           max={max}
           onChange={onInputChange}
         />
+        <span onClick={() => onIncrement(name, value + step)}>
+          <i className="fas fa-plus"></i>
+        </span>
       </div>
-      <img src={chevronDown} />
     </div>
   );
 };

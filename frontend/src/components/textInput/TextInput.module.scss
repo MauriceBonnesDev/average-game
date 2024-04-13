@@ -1,0 +1,20 @@
+@use "../../colors";
+
+.textInput {
+  display: flex;
+  flex-direction: column;
+
+  & > input {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 100px;
+    background-color: colors.$dark-grey;
+    font-size: 20px;
+
+    &:focus-visible,
+    &:focus,
+    &:focus-within {
+      outline: colors.$purple-200 1px solid;
+    }
+  }
+}

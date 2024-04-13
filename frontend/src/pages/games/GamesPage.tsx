@@ -20,6 +20,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/grid";
 import "../../index.scss";
+import Button from "../../components/button/Button";
 
 export type AverageGameInstance = {
   id: number;
@@ -31,6 +32,7 @@ export type AverageGameInstance = {
   address: string;
   collateral: string;
   gameFee: string;
+  players: string[];
 };
 
 const GamesPage = () => {
@@ -74,6 +76,7 @@ const GamesPage = () => {
               address: await factoryContract.getGameProxyAt(id),
               collateral: formatEther(await game.collateralAmount()),
               gameFee: formatEther(await game.gameFee()),
+              players: await game.getPlayers(),
             };
           })
         );
@@ -148,21 +151,19 @@ const GamesPage = () => {
     }
   };
 
-  // console.log(
-  //   averageGameInstances.sort((a, b) => {
-  //     // Prüfe die Bedingung für die Hälfte des Arrays
-  //     const halfA = a.id % 6 < 3 ? 0 : 1; // 0 für erste Hälfte, 1 für zweite Hälfte
-  //     const halfB = b.id % 6 < 3 ? 0 : 1;
+  const sortGameInstances = (
+    a: AverageGameInstance,
+    b: AverageGameInstance
+  ) => {
+    if (a.id % 2 === 0 && b.id % 2 !== 0) {
+      return -1;
+    } else if (a.id % 2 !== 0 && b.id % 2 === 0) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
 
-  //     if (halfA !== halfB) {
-  //       // Wenn sie nicht in der gleichen Hälfte sind, dann sortiere nach der Hälfte
-  //       return halfA - halfB;
-  //     } else {
-  //       // Wenn sie in der gleichen Hälfte sind, dann sortiere nach der ID
-  //       return a.id - b.id;
-  //     }
-  //   })
-  // );
   return (
     <>
       <Modal
@@ -180,47 +181,35 @@ const GamesPage = () => {
           contractAddress={addresses["AverageGameModule#AverageGame"]}
         />
       </Modal>
-      <button onClick={openModal}>Create Game</button>
-      <div className={classes.container}>
-        <div className="swiper-button-prev"></div>
-        <Swiper
-          modules={[Grid, Pagination, Navigation]}
-          slidesPerView={3}
-          navigation={{
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-          }}
-          spaceBetween={100}
-          grid={{ rows: 2, fill: "row" }}
-        >
-          {averageGameInstances.map((game) => {
-            return (
-              <SwiperSlide key={game.id}>
-                <Card gameInstance={game} />
-              </SwiperSlide>
-            );
-          })}
-          {/* {averageGameInstances
-            .filter(
-              (_, index) =>
-                index % 6 === 3 || index % 6 === 4 || index % 6 === 5
-            )
-            .map((game) => {
+      <span className={classes.createGame}>
+        <Button style="grey" onClick={openModal}>
+          <i className={`fas fa-plus ${classes.icon}`}></i>
+        </Button>
+      </span>
+      {averageGameInstances.length > 0 && (
+        <div className={classes.container}>
+          <div className="swiper-button-prev"></div>
+          <Swiper
+            modules={[Grid, Pagination, Navigation]}
+            slidesPerView={3}
+            navigation={{
+              nextEl: ".swiper-button-next",
+              prevEl: ".swiper-button-prev",
+            }}
+            spaceBetween={100}
+            grid={{ rows: 2, fill: "row" }}
+          >
+            {averageGameInstances.sort(sortGameInstances).map((game) => {
               return (
                 <SwiperSlide key={game.id}>
-                  <Card
-                    entryPrice={game.entryPrice}
-                    id={game.id}
-                    maxPlayers={game.maxPlayers}
-                    name={game.name}
-                    totalPlayers={game.totalPlayers}
-                  />
+                  <Card gameInstance={game} />
                 </SwiperSlide>
               );
-            })} */}
-        </Swiper>
-        <div className="swiper-button-next"></div>
-      </div>
+            })}
+          </Swiper>
+          <div className="swiper-button-next"></div>
+        </div>
+      )}
     </>
   );
 };

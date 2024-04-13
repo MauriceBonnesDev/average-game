@@ -57,10 +57,12 @@ const Modal = React.forwardRef<DialogRef, ModalProps>(
           </button>
           <h2>{title}</h2>
           <p>{disclaimer}</p>
-          <form onSubmit={onSubmit}>
+          <form className={classes.modalForm} onSubmit={onSubmit}>
             {children}
 
-            <Button style="dark">{submitText}</Button>
+            <Button size="large" style="dark">
+              {submitText}
+            </Button>
           </form>
         </div>
       </dialog>,

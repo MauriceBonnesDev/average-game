@@ -2,6 +2,7 @@ import { ChangeEvent, forwardRef, useImperativeHandle, useState } from "react";
 import { AverageGameInstance } from "../../pages/games/GamesPage";
 import { parseEther, solidityPackedKeccak256 } from "ethers";
 import NumberPicker from "../numberPicker/NumberPicker";
+import TextInput from "../textInput/TextInput";
 
 type JoinGameProps = {
   gameInstance: AverageGameInstance;
@@ -65,10 +66,21 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
       }));
     };
 
+    const handleStepChange = (name: string, newValue: number) => {
+      setUserInput((prevState) => ({
+        ...prevState,
+        [name]: newValue,
+      }));
+    };
+
     return (
       <>
-        <p>Mein Guess: {userInput.guess}</p>
-        <p>Mein Salt: {userInput.salt}</p>
+        <TextInput
+          label="Geheimnis"
+          name="salt"
+          onChange={handleInputChange}
+          value={userInput.salt}
+        />
         <NumberPicker
           min={0}
           max={1000}
@@ -76,14 +88,8 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
           name="guess"
           value={userInput.guess}
           onChange={handleInputChange}
-        />
-        <label htmlFor="salt">Salt</label>
-        <input
-          type="text"
-          id="salt"
-          name="salt"
-          value={userInput.salt}
-          onChange={handleInputChange}
+          onIncrement={handleStepChange}
+          onDecrement={handleStepChange}
         />
       </>
     );

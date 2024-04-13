@@ -1,6 +1,6 @@
 import classes from "./Button.module.scss";
-type Size = "small" | "medium" | "large";
-type Style = "light" | "dark";
+type Size = "small" | "medium" | "large" | "round";
+type Style = "light" | "dark" | "grey";
 type ButtonProps = {
   children: React.ReactNode;
   size?: Size;
@@ -14,9 +14,16 @@ const Button = ({ children, size, style, onClick }: ButtonProps) => {
       ? classes.btnSmall
       : size === "medium"
       ? classes.btnMedium
-      : classes.btnLarge;
+      : size === "large"
+      ? classes.btnLarge
+      : classes.btnRound;
 
-  const btnStyle = style === "dark" ? classes.btnDark : classes.btnLight;
+  const btnStyle =
+    style === "dark"
+      ? classes.btnDark
+      : style === "grey"
+      ? classes.btnGrey
+      : classes.btnLight;
 
   return (
     <button

@@ -2,8 +2,8 @@
 
 .modal {
   border: none;
-  border-radius: 8px;
-  background-color: colors.$purple-100;
+  border-radius: 15px;
+  background-color: #ffffff;
   margin: 15rem auto;
 
   &[open] {
@@ -11,7 +11,7 @@
   }
 
   &::backdrop {
-    background: rgba(colors.$purple-950, 0.7);
+    background: rgba(0, 0, 0, 0.7);
   }
   h2 {
     font-family: "Handjet", monospace;
@@ -19,11 +19,21 @@
     font-size: 3rem;
     text-transform: uppercase;
   }
+
+  &Form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    & > button {
+      margin-top: auto;
+      align-self: center;
+    }
+  }
 }
 
 #modalBody {
   padding: 2rem;
-  height: 500px;
   position: relative;
 }
 

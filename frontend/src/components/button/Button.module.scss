@@ -25,24 +25,32 @@
   }
 
   &Small {
-    width: 77px;
     height: 38px;
     font-weight: 800;
     font-size: 20px;
+    padding: 0 15px;
   }
 
   &Medium {
-    width: 100px;
     height: 38px;
     font-weight: 400;
     font-size: 22px;
+    padding: 0 20px;
   }
 
   &Large {
-    width: 177px;
     height: 55px;
     font-weight: 400;
     font-size: 24px;
+    padding: 0 40px;
+  }
+
+  &Round {
+    width: 60px;
+    height: 60px;
+    font-weight: 600;
+    font-size: 26px;
+    padding: 0 20px;
   }
 
   &Light {
@@ -53,5 +61,10 @@
   &Dark {
     background-color: rgba($color: colors.$purple-800, $alpha: 0.25);
     color: colors.$white;
+  }
+
+  &Grey {
+    background-color: colors.$dark-grey;
+    color: colors.$purple-500;
   }
 }
