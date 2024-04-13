@@ -34,6 +34,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "gameFee"
       | "getBalance"
       | "getPlayerRevealedState"
+      | "getPlayers"
       | "getPotentialWinners"
       | "id"
       | "initGame"
@@ -42,7 +43,6 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "maxPlayers"
       | "minGuess"
       | "name"
-      | "players"
       | "potentialWinners"
       | "revealGuess"
       | "startBettingRound"
@@ -91,6 +91,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "getPlayers",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getPotentialWinners",
     values?: undefined
   ): string;
@@ -117,10 +121,6 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "minGuess", values?: undefined): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "players",
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(
     functionFragment: "potentialWinners",
     values: [BigNumberish]
@@ -173,6 +173,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     functionFragment: "getPlayerRevealedState",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getPlayers", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getPotentialWinners",
     data: BytesLike
@@ -184,7 +185,6 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   decodeFunctionResult(functionFragment: "maxPlayers", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "minGuess", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "players", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "potentialWinners",
     data: BytesLike
@@ -437,6 +437,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     "view"
   >;
 
+  getPlayers: TypedContractMethod<[], [string[]], "view">;
+
   getPotentialWinners: TypedContractMethod<[], [string[]], "view">;
 
   id: TypedContractMethod<[], [bigint], "view">;
@@ -466,8 +468,6 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   minGuess: TypedContractMethod<[], [bigint], "view">;
 
   name: TypedContractMethod<[], [string], "view">;
-
-  players: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
 
   potentialWinners: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
 
@@ -526,6 +526,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     nameOrSignature: "getPlayerRevealedState"
   ): TypedContractMethod<[_player: AddressLike], [bigint], "view">;
   getFunction(
+    nameOrSignature: "getPlayers"
+  ): TypedContractMethod<[], [string[]], "view">;
+  getFunction(
     nameOrSignature: "getPotentialWinners"
   ): TypedContractMethod<[], [string[]], "view">;
   getFunction(nameOrSignature: "id"): TypedContractMethod<[], [bigint], "view">;
@@ -561,9 +564,6 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   getFunction(
     nameOrSignature: "name"
   ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "players"
-  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
   getFunction(
     nameOrSignature: "potentialWinners"
   ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;

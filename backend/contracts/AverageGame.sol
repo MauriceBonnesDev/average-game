@@ -31,7 +31,7 @@ contract AverageGame is ReentrancyGuard {
     address private gameMaster;
     address public factory;
     address public winner;
-    address[] public players;
+    address[] private players;
     address[] public potentialWinners;
 
     bool private isInitialized;
@@ -527,5 +527,9 @@ contract AverageGame is ReentrancyGuard {
         returns (address[] memory)
     {
         return potentialWinners;
+    }
+
+    function getPlayers() public view returns (address[] memory) {
+        return players;
     }
 }
