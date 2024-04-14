@@ -3,14 +3,18 @@ import { AverageGameInstance } from "../../pages/games/GamesPage";
 import { parseEther, solidityPackedKeccak256 } from "ethers";
 import NumberPicker from "../numberPicker/NumberPicker";
 import TextInput from "../textInput/TextInput";
+import toast from "react-hot-toast";
+import { transformError } from "../card/Card";
 
 type JoinGameProps = {
   gameInstance: AverageGameInstance;
+  setIsLoading: (isLoading: boolean) => void;
 };
 
 export type JoinGameRef = {
   close: () => void;
   joinGame: () => void;
+  revealGuess: () => void;
 };
 
 type UserGuessSubmission = {
@@ -19,7 +23,7 @@ type UserGuessSubmission = {
 };
 
 const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
-  ({ gameInstance }, ref) => {
+  ({ gameInstance, setIsLoading }, ref) => {
     const [userInput, setUserInput] = useState<UserGuessSubmission>({
       guess: 0,
       salt: "",
@@ -29,6 +33,7 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
     const joinGame = async () => {
       if (contract) {
         try {
+          setIsLoading(true);
           const hash = solidityPackedKeccak256(
             ["uint256", "string"],
             [userInput.guess, userInput.salt]
@@ -43,6 +48,24 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
           console.log("Spiel erfolgreich beigetreten");
         } catch (error) {
           console.error("Fehler beim Beitreten des Spiels", error);
+          toast.error(transformError(error), { id: "error" });
+          setIsLoading(false);
+        }
+      }
+    };
+
+    const revealGuess = async () => {
+      if (contract) {
+        try {
+          const transactionResponse = await contract.revealGuess(
+            userInput.guess,
+            userInput.salt
+          );
+          await transactionResponse.wait();
+          console.log("Erfolgreich veröffentlicht");
+        } catch (error) {
+          console.error("Fehler beim Veröffentlichen deines Tipps", error);
+          toast.error(transformError(error), { id: "error" });
         }
       }
     };
@@ -54,6 +77,9 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
         },
         joinGame() {
           joinGame();
+        },
+        revealGuess() {
+          revealGuess();
         },
       };
     });

@@ -2,6 +2,7 @@
 
 .container {
   width: 75vw;
+  min-width: 2000px;
   height: 800px;
   display: flex;
   margin: 0 auto;
@@ -21,8 +22,9 @@
 
 .createGame {
   position: absolute;
-  top: 195px;
-  left: 560px;
+  top: 0px;
+  left: 0px;
+  padding: 10px;
 }
 
 .buttonContent {
@@ -33,4 +35,9 @@
   & > p {
     margin-left: 0.5rem;
   }
+}
+
+.swiper {
+  padding-top: 95px !important;
+  padding-left: 10px !important;
 }

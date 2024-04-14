@@ -36,7 +36,7 @@ const Navbar = () => {
           </li>
         </ul>
       </nav>
-      <Button onClick={init} size="large">
+      <Button onClick={init} size="large" style="light" color="purple">
         {wallet && address ? formatAddress(address) : "Connect"}
       </Button>
     </div>

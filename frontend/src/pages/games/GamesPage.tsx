@@ -2,7 +2,7 @@ import classes from "./GamesPage.module.scss";
 import Card from "../../components/card/Card";
 import addresses from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json"; // Change to 11155111 for the Sepolia Testnet, now running on localhost
 import { useWeb3Context } from "../../components/Web3Provider";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AverageGameModule_AverageGameFactory__factory as AverageGameFactory } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGameFactory__factory";
 import { AverageGameModule_AverageGame__factory as AverageGame } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGame__factory";
 import type { AverageGameModule_AverageGameFactory as TAverageGameFactory } from "../../../types/ethers-contracts/AverageGameModule_AverageGameFactory";
@@ -22,6 +22,18 @@ import "swiper/css/grid";
 import "../../index.scss";
 import Button from "../../components/button/Button";
 
+export enum GameState {
+  "CommitPhase",
+  "RevealPhase",
+  "Ended",
+}
+
+export enum RevealState {
+  "NotRevealed",
+  "Revealed",
+  "Invalid",
+}
+
 export type AverageGameInstance = {
   id: number;
   name: string;
@@ -33,32 +45,41 @@ export type AverageGameInstance = {
   collateral: string;
   gameFee: string;
   players: string[];
+  gameState: GameState;
+  gameMaster: string;
+  winner: string;
+  rewardClaimed: boolean;
 };
 
+//TODO: Join Game screen, undeutlich, da geheimnis genau unter dem Text "Wähle eine Zahl zwischen 0 und 1000"
 const GamesPage = () => {
   const { wallet } = useWeb3Context();
   const dialog = useRef<DialogRef>(null);
   const createGameRef = useRef<CreateGameRef>(null);
   const [factoryContract, setFactoryContract] =
     useState<TAverageGameFactory | null>(null);
-  const [averageGameContracts, setAverageGameContracts] = useState<
-    TAverageGame[]
-  >([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentFocusedGame, setCurrentFocusedGame] = useState<number | null>(
+    null
+  );
 
   const [averageGameInstances, setAverageGameInstances] = useState<
     AverageGameInstance[]
   >([]);
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    const gameFactory = AverageGameFactory.connect(
-      addresses["AverageGameModule#AverageGameFactory"],
-      wallet
-    );
+    if (wallet) {
+      const gameFactory = AverageGameFactory.connect(
+        addresses["AverageGameModule#AverageGameFactory"],
+        wallet
+      );
 
-    setFactoryContract(gameFactory);
+      setFactoryContract(gameFactory);
+    }
   }, [wallet]);
 
-  useEffect(() => {
+  useMemo(() => {
     if (factoryContract) {
       const createGameInstances = async (
         games: TAverageGame[]
@@ -77,47 +98,124 @@ const GamesPage = () => {
               collateral: formatEther(await game.collateralAmount()),
               gameFee: formatEther(await game.gameFee()),
               players: await game.getPlayers(),
+              gameState: Number(await game.state()),
+              gameMaster: await game.gameMaster(),
+              winner: await game.winner(),
+              rewardClaimed: await game.rewardClaimed(),
             };
           })
         );
       };
 
       const fetchGames = async () => {
+        console.log("Fetch Games");
         try {
+          isMounted.current = false;
           const gameProxies = await factoryContract.getGameProxies();
           const games = gameProxies.map((proxy) =>
             AverageGame.connect(proxy, wallet)
           );
 
-          const gameInstanceDetails: AverageGameInstance[] =
+          const gameInstances: AverageGameInstance[] =
             await createGameInstances(games);
 
-          setAverageGameContracts(games);
-          setAverageGameInstances(gameInstanceDetails);
+          setAverageGameInstances(gameInstances);
         } catch (error) {
           console.error("Error fetching games data:", error);
         }
       };
 
+      const fetchSingleGame = async (id: number) => {
+        console.log("Fetch single game");
+        try {
+          const gameProxies = await factoryContract.getGameProxies();
+          console.log(wallet?.address);
+          const games = gameProxies.map((proxy) =>
+            AverageGame.connect(proxy, wallet)
+          );
+
+          const gameInstance: AverageGameInstance[] = await createGameInstances(
+            [games[id]]
+          );
+
+          setAverageGameInstances((prevInstances) => {
+            console.log("setAverageGameInstances!!!!");
+            const newInstances = prevInstances.filter(
+              (instances) => instances.id !== id
+            );
+            console.log(newInstances, gameInstance);
+            return [...newInstances, ...gameInstance].sort(
+              (a, b) => a.id - b.id
+            );
+          });
+
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error fetching single game data:", error);
+        }
+      };
       fetchGames();
 
-      const onGamesChanged = (gameId: number, proxyAddress: string) => {
+      const onGameChanged = (gameId: number, proxyAddress: string) => {
         console.log("Game #", gameId, "created at", proxyAddress);
-        fetchGames();
+        fetchSingleGame(gameId);
       };
 
       factoryContract.on(
         factoryContract.filters["GameCreated(uint256,address)"],
-        (gameId, proxyAddress) => onGamesChanged(Number(gameId), proxyAddress)
+        (gameId, proxyAddress) => onGameChanged(Number(gameId), proxyAddress)
       );
 
-      for (let i = 0; i < averageGameContracts.length; i++) {
-        averageGameContracts[i].on(
-          averageGameContracts[i].filters["PlayerJoined(address,uint256)"],
-          (player, gameId) => {
-            console.log("Player", player, "joined game", gameId);
-            fetchGames();
+      for (let i = 0; i < averageGameInstances.length; i++) {
+        const averageGame = averageGameInstances[i];
+        averageGame.contract.on(
+          averageGame.contract.filters["PlayerJoined(uint256,address,uint256)"],
+          (gameId, player, totalPlayers) => {
+            console.log(
+              "Player",
+              player,
+              "joined game",
+              gameId,
+              "as player number",
+              totalPlayers
+            );
+            fetchSingleGame(Number(gameId));
           }
+        );
+        averageGame.contract.on(
+          averageGame.contract.filters[
+            "PlayerRevealedGuess(uint256,address,uint256,string,uint8)"
+          ],
+          (gameId, player, guess, salt, revealState) => {
+            console.log(
+              "Player",
+              player,
+              "revealed value",
+              guess,
+              "with salt",
+              salt,
+              "and state",
+              revealState
+            );
+            fetchSingleGame(Number(gameId));
+          }
+        );
+
+        averageGame.contract.on(
+          averageGame.contract.filters["BettingRoundClosed(uint256)"],
+          (gameId) => fetchSingleGame(Number(gameId))
+        );
+
+        averageGame.contract.on(
+          averageGame.contract.filters["GameEnded(uint256)"],
+          (gameId) => fetchSingleGame(Number(gameId))
+        );
+
+        averageGame.contract.on(
+          averageGame.contract.filters[
+            "PrizeAwarded(uint256,address,uint256,uint256)"
+          ],
+          (gameId) => fetchSingleGame(Number(gameId))
         );
       }
 
@@ -126,14 +224,25 @@ const GamesPage = () => {
           factoryContract.filters["GameCreated(uint256,address)"]
         );
 
-        for (let i = 0; i < averageGameContracts.length; i++) {
-          averageGameContracts[i].off(
-            averageGameContracts[i].filters["PlayerJoined(address,uint256)"]
+        for (let i = 0; i < averageGameInstances.length; i++) {
+          const { contract } = averageGameInstances[i];
+          contract.off(
+            contract.filters["PlayerJoined(uint256,address,uint256)"]
+          );
+          contract.off(
+            contract.filters[
+              "PlayerRevealedGuess(uint256,address,uint256,string,uint8)"
+            ]
+          );
+          contract.off(contract.filters["BettingRoundClosed(uint256)"]);
+          contract.off(contract.filters["GameEnded(uint256)"]);
+          contract.off(
+            contract.filters["PrizeAwarded(uint256,address,uint256,uint256)"]
           );
         }
       };
     }
-  }, [averageGameContracts, factoryContract, wallet]);
+  }, [factoryContract, wallet]);
 
   const openModal = () => {
     dialog.current?.open();
@@ -181,15 +290,11 @@ const GamesPage = () => {
           contractAddress={addresses["AverageGameModule#AverageGame"]}
         />
       </Modal>
-      <span className={classes.createGame}>
-        <Button style="grey" onClick={openModal}>
-          <i className={`fas fa-plus ${classes.icon}`}></i>
-        </Button>
-      </span>
       {averageGameInstances.length > 0 && (
         <div className={classes.container}>
           <div className="swiper-button-prev"></div>
           <Swiper
+            className={classes.swiper}
             modules={[Grid, Pagination, Navigation]}
             slidesPerView={3}
             navigation={{
@@ -199,10 +304,22 @@ const GamesPage = () => {
             spaceBetween={100}
             grid={{ rows: 2, fill: "row" }}
           >
+            <span className={classes.createGame}>
+              <Button style="grey" onClick={openModal}>
+                <i className={`fas fa-plus ${classes.icon}`}></i>
+              </Button>
+            </span>
             {averageGameInstances.sort(sortGameInstances).map((game) => {
               return (
                 <SwiperSlide key={game.id}>
-                  <Card gameInstance={game} />
+                  <Card
+                    gameInstance={game}
+                    connectedAccount={wallet!.address}
+                    isLoading={isLoading}
+                    currentFocusedGame={currentFocusedGame}
+                    setCurrentFocusedGame={setCurrentFocusedGame}
+                    setIsLoading={setIsLoading}
+                  />
                 </SwiperSlide>
               );
             })}

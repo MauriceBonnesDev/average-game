@@ -7,21 +7,20 @@ interface Web3ContextType {
   init: () => Promise<void>;
 }
 
-// interface Ethereum {
-//   on(
-//     arg0: string,
-//     handleAccountsChanged: (accounts: unknown) => Promise<void>
-//   ): unknown;
-//   removeListener(
-//     arg0: string,
-//     handleAccountsChanged: (accounts: unknown) => Promise<void>
-//   ): unknown;
-//   request: (request: { method: string }) => Promise<string[]>;
-// }
+interface EthereumEventEmitter {
+  on(
+    address: string,
+    handleAccountsChanged: (accounts: string[]) => void
+  ): void;
+  removeListener(
+    address: string,
+    handleAccountsChanged: (accounts: unknown) => Promise<void>
+  ): unknown;
+}
 
 declare global {
   interface Window {
-    ethereum?: Eip1193Provider;
+    ethereum?: EthereumEventEmitter & Eip1193Provider;
   }
 }
 
@@ -42,7 +41,16 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
       providerValue = ethers.getDefaultProvider();
     } else {
       providerValue = new ethers.BrowserProvider(window.ethereum);
+      window.ethereum.on("accountsChanged", async () => {
+        providerValue = new ethers.BrowserProvider(window.ethereum!);
+
+        signer = await providerValue.getSigner();
+
+        setWalletInstance(signer);
+        setCurrentAddress(signer?.address ?? null);
+      });
       signer = await providerValue.getSigner();
+
       setWalletInstance(signer);
       setCurrentAddress(signer?.address ?? null);
     }

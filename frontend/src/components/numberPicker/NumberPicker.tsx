@@ -25,7 +25,6 @@ const NumberPicker = ({
   onIncrement,
 }: NumberPickerProps) => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("On input change", event.target.value);
     onChange(event);
   };
 

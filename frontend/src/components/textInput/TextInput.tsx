@@ -10,8 +10,6 @@ type TextInputProps = {
 
 const TextInput = ({ label, name, value, onChange }: TextInputProps) => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value);
-    console.log(value);
     onChange(event);
   };
   return (
