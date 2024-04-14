@@ -1,5 +1,55 @@
 @use "../../colors";
 
+.card {
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 342px;
+  width: 465px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: visible;
+
+  .disableCard {
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    border-radius: 15px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  &Purple {
+    background: linear-gradient(colors.$purple-400, colors.$purple-600);
+  }
+
+  &Green {
+    background: linear-gradient(colors.$green-500, colors.$green-700);
+  }
+
+  &Orange {
+    background: linear-gradient(colors.$orange-400, colors.$orange-600);
+  }
+
+  &Turquoise {
+    background: linear-gradient(colors.$turquoise-400, colors.$turquoise-600);
+  }
+
+  .crown {
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    z-index: 2;
+    top: -110px;
+    right: -80px;
+    transform: rotate(25deg);
+  }
+}
+
 .cardBody {
   display: flex;
   flex-direction: column;
@@ -28,26 +78,29 @@
   }
 }
 
-.card {
-  background: linear-gradient(colors.$purple-400, colors.$purple-600);
-  border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  height: 342px;
-  width: 465px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 .cardFooter {
   display: flex;
   align-items: center;
   padding: 0 19px;
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
-  background-color: colors.$purple-700;
   height: 100px;
+
+  &Purple {
+    background-color: colors.$purple-700;
+  }
+
+  &Green {
+    background-color: colors.$green-700;
+  }
+
+  &Orange {
+    background-color: colors.$orange-600;
+  }
+
+  &Turquoise {
+    background-color: colors.$turquoise-600;
+  }
 
   .logoPlaceholder {
     height: 61px;
@@ -106,4 +159,11 @@
     color: colors.$off-white;
     margin-left: 0.5rem;
   }
+}
+
+.phaseProgressContainer {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translate(-50%);
 }

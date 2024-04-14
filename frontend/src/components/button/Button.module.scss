@@ -11,12 +11,75 @@
     box-shadow: 0 5px 15px rgba($color: colors.$purple-800, $alpha: 0.25);
   }
 
-  &.btnLight:hover {
-    background-color: rgba($color: colors.$purple-400, $alpha: 0.25);
+  &:disabled {
+    color: colors.$dark-grey;
+    background-color: transparent;
   }
 
-  &.btnDark:hover {
-    background-color: rgba($color: colors.$purple-950, $alpha: 0.25);
+  &:disabled:hover {
+    transform: translateY(0);
+    box-shadow: none;
+    cursor: unset;
+  }
+
+  &.btnLightPurple {
+    &:hover {
+      background-color: rgba($color: colors.$purple-400, $alpha: 0.25);
+    }
+
+    &:disabled:hover {
+      background-color: rgba($color: colors.$dark-grey, $alpha: 0.15);
+    }
+  }
+
+  &.btnDarkPurple {
+    &:hover {
+      background-color: rgba($color: colors.$purple-950, $alpha: 0.25);
+    }
+
+    &:disabled:hover {
+      background-color: rgba($color: colors.$dark-grey, $alpha: 0.15);
+    }
+  }
+
+  &.btnLightGreen {
+    &:hover {
+      background-color: rgba($color: colors.$green-400, $alpha: 0.25);
+    }
+
+    &:disabled:hover {
+      background-color: transparent;
+    }
+  }
+
+  &.btnDarkGreen {
+    &:hover {
+      background-color: rgba($color: colors.$green-950, $alpha: 0.25);
+    }
+
+    &:disabled:hover {
+      background-color: rgba($color: colors.$dark-grey, $alpha: 0.15);
+    }
+  }
+
+  &.btnLightOrange {
+    &:hover {
+      background-color: rgba($color: colors.$orange-400, $alpha: 0.25);
+    }
+
+    &:disabled:hover {
+      background-color: transparent;
+    }
+  }
+
+  &.btnDarkOrange {
+    &:hover {
+      background-color: rgba($color: colors.$orange-950, $alpha: 0.25);
+    }
+
+    &:disabled:hover {
+      background-color: rgba($color: colors.$dark-grey, $alpha: 0.15);
+    }
   }
 
   &:active {
@@ -53,13 +116,43 @@
     padding: 0 20px;
   }
 
-  &Light {
+  &LightPurple {
     background-color: rgba($color: colors.$purple-300, $alpha: 0.25);
     color: colors.$white;
   }
 
-  &Dark {
+  &DarkPurple {
     background-color: rgba($color: colors.$purple-800, $alpha: 0.25);
+    color: colors.$white;
+  }
+
+  &LightGreen {
+    background-color: rgba($color: colors.$green-300, $alpha: 0.25);
+    color: colors.$white;
+  }
+
+  &DarkGreen {
+    background-color: rgba($color: colors.$green-800, $alpha: 0.25);
+    color: colors.$white;
+  }
+
+  &LightOrange {
+    background-color: rgba($color: colors.$orange-300, $alpha: 0.25);
+    color: colors.$white;
+  }
+
+  &DarkOrange {
+    background-color: rgba($color: colors.$orange-800, $alpha: 0.25);
+    color: colors.$white;
+  }
+
+  &LightTurquoise {
+    background-color: rgba($color: colors.$turquoise-300, $alpha: 0.25);
+    color: colors.$white;
+  }
+
+  &DarkTurquoise {
+    background-color: rgba($color: colors.$turquoise-800, $alpha: 0.25);
     color: colors.$white;
   }
 

@@ -5,9 +5,7 @@ import "./index.scss";
 import Web3Provider from "./components/Web3Provider.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Web3Provider>
-      <App />
-    </Web3Provider>
-  </React.StrictMode>
+  <Web3Provider>
+    <App />
+  </Web3Provider>
 );
