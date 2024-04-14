@@ -27,11 +27,12 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "betAmount"
+      | "blockNumber"
       | "closeBettingRound"
       | "collateralAmount"
       | "endGame"
-      | "factory"
       | "gameFee"
+      | "gameMaster"
       | "getBalance"
       | "getPlayerRevealedState"
       | "getPlayers"
@@ -44,8 +45,9 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "minGuess"
       | "name"
       | "potentialWinners"
+      | "requestRefund"
       | "revealGuess"
-      | "startBettingRound"
+      | "rewardClaimed"
       | "state"
       | "totalBetAmount"
       | "totalCollateralAmount"
@@ -62,7 +64,6 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "FeeCollected"
       | "GameCreated"
       | "GameEnded"
-      | "GameStarted"
       | "PlayerJoined"
       | "PlayerRefunded"
       | "PlayerRevealedGuess"
@@ -72,6 +73,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
 
   encodeFunctionData(functionFragment: "betAmount", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "blockNumber",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "closeBettingRound",
     values?: undefined
   ): string;
@@ -80,8 +85,11 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "endGame", values?: undefined): string;
-  encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(functionFragment: "gameFee", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "gameMaster",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "getBalance",
     values?: undefined
@@ -109,8 +117,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       BigNumberish,
       BigNumberish,
       AddressLike,
-      BigNumberish,
-      AddressLike
+      BigNumberish
     ]
   ): string;
   encodeFunctionData(functionFragment: "joinGame", values: [BytesLike]): string;
@@ -126,11 +133,15 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "requestRefund",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "revealGuess",
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "startBettingRound",
+    functionFragment: "rewardClaimed",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "state", values?: undefined): string;
@@ -158,6 +169,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
 
   decodeFunctionResult(functionFragment: "betAmount", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "blockNumber",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "closeBettingRound",
     data: BytesLike
   ): Result;
@@ -166,8 +181,8 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "endGame", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "gameFee", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "gameMaster", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getBalance", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getPlayerRevealedState",
@@ -190,11 +205,15 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "requestRefund",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "revealGuess",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "startBettingRound",
+    functionFragment: "rewardClaimed",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
@@ -222,9 +241,11 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
 }
 
 export namespace BettingRoundClosedEvent {
-  export type InputTuple = [];
-  export type OutputTuple = [];
-  export interface OutputObject {}
+  export type InputTuple = [gameId: BigNumberish];
+  export type OutputTuple = [gameId: bigint];
+  export interface OutputObject {
+    gameId: bigint;
+  }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
   export type Log = TypedEventLog<Event>;
@@ -232,9 +253,14 @@ export namespace BettingRoundClosedEvent {
 }
 
 export namespace CollateralDepositedEvent {
-  export type InputTuple = [player: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [player: string, amount: bigint];
+  export type InputTuple = [
+    gameId: BigNumberish,
+    player: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [gameId: bigint, player: string, amount: bigint];
   export interface OutputObject {
+    gameId: bigint;
     player: string;
     amount: bigint;
   }
@@ -245,9 +271,14 @@ export namespace CollateralDepositedEvent {
 }
 
 export namespace FeeCollectedEvent {
-  export type InputTuple = [player: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [player: string, amount: bigint];
+  export type InputTuple = [
+    gameId: BigNumberish,
+    player: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [gameId: bigint, player: string, amount: bigint];
   export interface OutputObject {
+    gameId: bigint;
     player: string;
     amount: bigint;
   }
@@ -270,19 +301,11 @@ export namespace GameCreatedEvent {
 }
 
 export namespace GameEndedEvent {
-  export type InputTuple = [];
-  export type OutputTuple = [];
-  export interface OutputObject {}
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace GameStartedEvent {
-  export type InputTuple = [];
-  export type OutputTuple = [];
-  export interface OutputObject {}
+  export type InputTuple = [gameId: BigNumberish];
+  export type OutputTuple = [gameId: bigint];
+  export interface OutputObject {
+    gameId: bigint;
+  }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
   export type Log = TypedEventLog<Event>;
@@ -291,11 +314,17 @@ export namespace GameStartedEvent {
 
 export namespace PlayerJoinedEvent {
   export type InputTuple = [
+    gameId: BigNumberish,
     player: AddressLike,
     totalPlayersAmount: BigNumberish
   ];
-  export type OutputTuple = [player: string, totalPlayersAmount: bigint];
+  export type OutputTuple = [
+    gameId: bigint,
+    player: string,
+    totalPlayersAmount: bigint
+  ];
   export interface OutputObject {
+    gameId: bigint;
     player: string;
     totalPlayersAmount: bigint;
   }
@@ -306,9 +335,14 @@ export namespace PlayerJoinedEvent {
 }
 
 export namespace PlayerRefundedEvent {
-  export type InputTuple = [player: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [player: string, amount: bigint];
+  export type InputTuple = [
+    gameId: BigNumberish,
+    player: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [gameId: bigint, player: string, amount: bigint];
   export interface OutputObject {
+    gameId: bigint;
     player: string;
     amount: bigint;
   }
@@ -320,18 +354,21 @@ export namespace PlayerRefundedEvent {
 
 export namespace PlayerRevealedGuessEvent {
   export type InputTuple = [
+    gameId: BigNumberish,
     player: AddressLike,
     guess: BigNumberish,
     salt: string,
     revealState: BigNumberish
   ];
   export type OutputTuple = [
+    gameId: bigint,
     player: string,
     guess: bigint,
     salt: string,
     revealState: bigint
   ];
   export interface OutputObject {
+    gameId: bigint;
     player: string;
     guess: bigint;
     salt: string;
@@ -345,12 +382,19 @@ export namespace PlayerRevealedGuessEvent {
 
 export namespace PrizeAwardedEvent {
   export type InputTuple = [
+    gameId: BigNumberish,
     player: AddressLike,
     amount: BigNumberish,
     guess: BigNumberish
   ];
-  export type OutputTuple = [player: string, amount: bigint, guess: bigint];
+  export type OutputTuple = [
+    gameId: bigint,
+    player: string,
+    amount: bigint,
+    guess: bigint
+  ];
   export interface OutputObject {
+    gameId: bigint;
     player: string;
     amount: bigint;
     guess: bigint;
@@ -362,9 +406,14 @@ export namespace PrizeAwardedEvent {
 }
 
 export namespace WinnerSelectedEvent {
-  export type InputTuple = [winner: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [winner: string, amount: bigint];
+  export type InputTuple = [
+    gameId: BigNumberish,
+    winner: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [gameId: bigint, winner: string, amount: bigint];
   export interface OutputObject {
+    gameId: bigint;
     winner: string;
     amount: bigint;
   }
@@ -419,15 +468,17 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   betAmount: TypedContractMethod<[], [bigint], "view">;
 
+  blockNumber: TypedContractMethod<[], [bigint], "view">;
+
   closeBettingRound: TypedContractMethod<[], [void], "nonpayable">;
 
   collateralAmount: TypedContractMethod<[], [bigint], "view">;
 
   endGame: TypedContractMethod<[], [void], "nonpayable">;
 
-  factory: TypedContractMethod<[], [string], "view">;
-
   gameFee: TypedContractMethod<[], [bigint], "view">;
+
+  gameMaster: TypedContractMethod<[], [string], "view">;
 
   getBalance: TypedContractMethod<[], [bigint], "view">;
 
@@ -452,11 +503,10 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       _maxPlayers: BigNumberish,
       _betAmount: BigNumberish,
       _gameMaster: AddressLike,
-      _gameFee: BigNumberish,
-      _factory: AddressLike
+      _gameFee: BigNumberish
     ],
     [void],
-    "nonpayable"
+    "payable"
   >;
 
   joinGame: TypedContractMethod<[_guess: BytesLike], [void], "payable">;
@@ -471,13 +521,15 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   potentialWinners: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
 
+  requestRefund: TypedContractMethod<[], [void], "nonpayable">;
+
   revealGuess: TypedContractMethod<
     [_guess: BigNumberish, _salt: string],
     [void],
     "nonpayable"
   >;
 
-  startBettingRound: TypedContractMethod<[], [void], "nonpayable">;
+  rewardClaimed: TypedContractMethod<[], [boolean], "view">;
 
   state: TypedContractMethod<[], [bigint], "view">;
 
@@ -505,6 +557,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     nameOrSignature: "betAmount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "blockNumber"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "closeBettingRound"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
@@ -514,11 +569,11 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     nameOrSignature: "endGame"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "factory"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
     nameOrSignature: "gameFee"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "gameMaster"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "getBalance"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -543,11 +598,10 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       _maxPlayers: BigNumberish,
       _betAmount: BigNumberish,
       _gameMaster: AddressLike,
-      _gameFee: BigNumberish,
-      _factory: AddressLike
+      _gameFee: BigNumberish
     ],
     [void],
-    "nonpayable"
+    "payable"
   >;
   getFunction(
     nameOrSignature: "joinGame"
@@ -568,6 +622,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     nameOrSignature: "potentialWinners"
   ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
   getFunction(
+    nameOrSignature: "requestRefund"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "revealGuess"
   ): TypedContractMethod<
     [_guess: BigNumberish, _salt: string],
@@ -575,8 +632,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "startBettingRound"
-  ): TypedContractMethod<[], [void], "nonpayable">;
+    nameOrSignature: "rewardClaimed"
+  ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
     nameOrSignature: "state"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -635,13 +692,6 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     GameEndedEvent.OutputObject
   >;
   getEvent(
-    key: "GameStarted"
-  ): TypedContractEvent<
-    GameStartedEvent.InputTuple,
-    GameStartedEvent.OutputTuple,
-    GameStartedEvent.OutputObject
-  >;
-  getEvent(
     key: "PlayerJoined"
   ): TypedContractEvent<
     PlayerJoinedEvent.InputTuple,
@@ -678,7 +728,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   >;
 
   filters: {
-    "BettingRoundClosed()": TypedContractEvent<
+    "BettingRoundClosed(uint256)": TypedContractEvent<
       BettingRoundClosedEvent.InputTuple,
       BettingRoundClosedEvent.OutputTuple,
       BettingRoundClosedEvent.OutputObject
@@ -689,7 +739,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       BettingRoundClosedEvent.OutputObject
     >;
 
-    "CollateralDeposited(address,uint256)": TypedContractEvent<
+    "CollateralDeposited(uint256,address,uint256)": TypedContractEvent<
       CollateralDepositedEvent.InputTuple,
       CollateralDepositedEvent.OutputTuple,
       CollateralDepositedEvent.OutputObject
@@ -700,7 +750,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       CollateralDepositedEvent.OutputObject
     >;
 
-    "FeeCollected(address,uint256)": TypedContractEvent<
+    "FeeCollected(uint256,address,uint256)": TypedContractEvent<
       FeeCollectedEvent.InputTuple,
       FeeCollectedEvent.OutputTuple,
       FeeCollectedEvent.OutputObject
@@ -722,7 +772,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       GameCreatedEvent.OutputObject
     >;
 
-    "GameEnded()": TypedContractEvent<
+    "GameEnded(uint256)": TypedContractEvent<
       GameEndedEvent.InputTuple,
       GameEndedEvent.OutputTuple,
       GameEndedEvent.OutputObject
@@ -733,18 +783,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       GameEndedEvent.OutputObject
     >;
 
-    "GameStarted()": TypedContractEvent<
-      GameStartedEvent.InputTuple,
-      GameStartedEvent.OutputTuple,
-      GameStartedEvent.OutputObject
-    >;
-    GameStarted: TypedContractEvent<
-      GameStartedEvent.InputTuple,
-      GameStartedEvent.OutputTuple,
-      GameStartedEvent.OutputObject
-    >;
-
-    "PlayerJoined(address,uint256)": TypedContractEvent<
+    "PlayerJoined(uint256,address,uint256)": TypedContractEvent<
       PlayerJoinedEvent.InputTuple,
       PlayerJoinedEvent.OutputTuple,
       PlayerJoinedEvent.OutputObject
@@ -755,7 +794,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       PlayerJoinedEvent.OutputObject
     >;
 
-    "PlayerRefunded(address,uint256)": TypedContractEvent<
+    "PlayerRefunded(uint256,address,uint256)": TypedContractEvent<
       PlayerRefundedEvent.InputTuple,
       PlayerRefundedEvent.OutputTuple,
       PlayerRefundedEvent.OutputObject
@@ -766,7 +805,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       PlayerRefundedEvent.OutputObject
     >;
 
-    "PlayerRevealedGuess(address,uint256,string,uint8)": TypedContractEvent<
+    "PlayerRevealedGuess(uint256,address,uint256,string,uint8)": TypedContractEvent<
       PlayerRevealedGuessEvent.InputTuple,
       PlayerRevealedGuessEvent.OutputTuple,
       PlayerRevealedGuessEvent.OutputObject
@@ -777,7 +816,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       PlayerRevealedGuessEvent.OutputObject
     >;
 
-    "PrizeAwarded(address,uint256,uint256)": TypedContractEvent<
+    "PrizeAwarded(uint256,address,uint256,uint256)": TypedContractEvent<
       PrizeAwardedEvent.InputTuple,
       PrizeAwardedEvent.OutputTuple,
       PrizeAwardedEvent.OutputObject
@@ -788,7 +827,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       PrizeAwardedEvent.OutputObject
     >;
 
-    "WinnerSelected(address,uint256)": TypedContractEvent<
+    "WinnerSelected(uint256,address,uint256)": TypedContractEvent<
       WinnerSelectedEvent.InputTuple,
       WinnerSelectedEvent.OutputTuple,
       WinnerSelectedEvent.OutputObject

@@ -35,8 +35,7 @@ contract AverageGameFactory {
             _maxPlayers: _maxPlayers,
             _betAmount: _betAmount,
             _gameMaster: msg.sender,
-            _gameFee: _gameFee,
-            _factory: address(this)
+            _gameFee: _gameFee
         });
 
         totalGames++;
