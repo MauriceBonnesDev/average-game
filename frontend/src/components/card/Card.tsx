@@ -1,17 +1,18 @@
 import crown from "../../assets/crown.png";
 import { useEffect, useRef, useState } from "react";
 import ethLogo from "../../assets/eth.svg";
-import {
-  AverageGameInstance,
-  GameState,
-  RevealState,
-} from "../../pages/games/GamesPage";
-import Button, { Color } from "../button/Button";
+import Button from "../button/Button";
 import JoinGame, { JoinGameRef } from "../joinGame/JoinGame";
 import Modal, { DialogRef } from "../modal/Modal";
 import classes from "./Card.module.scss";
 import toast from "react-hot-toast";
-import PhaseProgress from "../phaseProgress/PhaseProgress";
+import {
+  AverageGameInstance,
+  Color,
+  GameState,
+  RevealState,
+} from "../../shared/types";
+import { transformError } from "../../shared/utils";
 
 type CardProps = {
   gameInstance: AverageGameInstance;
@@ -22,15 +23,6 @@ type CardProps = {
   setIsLoading: (isLoading: boolean) => void;
 };
 
-export function transformError(error: unknown) {
-  const errorMessage = String(error);
-  const message = errorMessage.slice(
-    errorMessage.indexOf('"') + 1,
-    errorMessage.indexOf("(") - 2
-  );
-
-  return message;
-}
 const Card = ({
   gameInstance,
   connectedAccount,

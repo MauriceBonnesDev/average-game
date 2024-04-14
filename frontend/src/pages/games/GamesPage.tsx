@@ -21,37 +21,10 @@ import "swiper/css/pagination";
 import "swiper/css/grid";
 import "../../index.scss";
 import Button from "../../components/button/Button";
-
-export enum GameState {
-  "CommitPhase",
-  "RevealPhase",
-  "Ended",
-}
-
-export enum RevealState {
-  "NotRevealed",
-  "Revealed",
-  "Invalid",
-}
-
-export type AverageGameInstance = {
-  id: number;
-  name: string;
-  entryPrice: string;
-  totalPlayers: number;
-  maxPlayers: number;
-  contract: TAverageGame;
-  address: string;
-  collateral: string;
-  gameFee: string;
-  players: string[];
-  gameState: GameState;
-  gameMaster: string;
-  winner: string;
-  rewardClaimed: boolean;
-};
+import { AverageGameInstance } from "../../shared/types";
 
 //TODO: Join Game screen, undeutlich, da geheimnis genau unter dem Text "Wähle eine Zahl zwischen 0 und 1000"
+//TODO: Outsource creation of event handlers into a separate useEffect to only run on initial render -> later on only whenever a new game is created
 const GamesPage = () => {
   const { wallet } = useWeb3Context();
   const dialog = useRef<DialogRef>(null);

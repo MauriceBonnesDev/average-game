@@ -1,7 +1,6 @@
+import { Size, Style, Color } from "../../shared/types";
 import classes from "./Button.module.scss";
-type Size = "small" | "medium" | "large" | "round";
-type Style = "light" | "dark" | "grey";
-export type Color = "purple" | "orange" | "green" | "turquoise" | "grey";
+
 type ButtonProps = {
   children: React.ReactNode;
   disabled?: boolean;

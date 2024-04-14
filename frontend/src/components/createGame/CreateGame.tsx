@@ -5,15 +5,7 @@ import { parseEther } from "ethers";
 import { EventLog } from "ethers";
 import TextInput from "../textInput/TextInput";
 import classes from "./CreateGame.module.scss";
-
-export type GameSettings = {
-  contractAddress: string;
-  gameMaster: string;
-  name: string;
-  maxPlayers: number;
-  betAmount: number;
-  gameFee: number;
-};
+import { GameSettings } from "../../shared/types";
 
 type CreateGameProps = {
   contractAddress: string;

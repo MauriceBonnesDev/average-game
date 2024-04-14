@@ -1,10 +1,10 @@
 import { ChangeEvent, forwardRef, useImperativeHandle, useState } from "react";
-import { AverageGameInstance } from "../../pages/games/GamesPage";
 import { parseEther, solidityPackedKeccak256 } from "ethers";
 import NumberPicker from "../numberPicker/NumberPicker";
 import TextInput from "../textInput/TextInput";
 import toast from "react-hot-toast";
-import { transformError } from "../card/Card";
+import { transformError } from "../../shared/utils";
+import { AverageGameInstance } from "../../shared/types";
 
 type JoinGameProps = {
   gameInstance: AverageGameInstance;
