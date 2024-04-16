@@ -1,10 +1,10 @@
 import classes from "./Navbar.module.scss";
 import Button from "../button/Button";
-import { useWeb3Context } from "../Web3Provider";
 import { NavLink } from "react-router-dom";
+import { useWeb3Context } from "../../hooks/useWeb3Context";
 
 const Navbar = () => {
-  const { address, wallet, init } = useWeb3Context()!;
+  const { address, init, disconnect } = useWeb3Context();
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
@@ -36,8 +36,13 @@ const Navbar = () => {
           </li>
         </ul>
       </nav>
-      <Button onClick={init} size="large" style="light" color="purple">
-        {wallet && address ? formatAddress(address) : "Connect"}
+      <Button
+        onClick={address ? disconnect : init}
+        size="large"
+        style="light"
+        color="purple"
+      >
+        {address ? formatAddress(address) : "Connect"}
       </Button>
     </div>
   );

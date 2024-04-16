@@ -1,7 +1,6 @@
 import classes from "./GamesPage.module.scss";
 import Card from "../../components/card/Card";
 import addresses from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json"; // Change to 11155111 for the Sepolia Testnet, now running on localhost
-import { useWeb3Context } from "../../components/Web3Provider";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AverageGameModule_AverageGameFactory__factory as AverageGameFactory } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGameFactory__factory";
 import { AverageGameModule_AverageGame__factory as AverageGame } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGame__factory";
@@ -22,6 +21,7 @@ import "swiper/css/grid";
 import "../../index.scss";
 import Button from "../../components/button/Button";
 import { AverageGameInstance } from "../../shared/types";
+import { useWeb3Context } from "../../hooks/useWeb3Context";
 
 //TODO: Join Game screen, undeutlich, da geheimnis genau unter dem Text "Wähle eine Zahl zwischen 0 und 1000"
 //TODO: Outsource creation of event handlers into a separate useEffect to only run on initial render -> later on only whenever a new game is created
@@ -53,7 +53,7 @@ const GamesPage = () => {
   }, [wallet]);
 
   useMemo(() => {
-    if (factoryContract) {
+    if (factoryContract && wallet) {
       const createGameInstances = async (
         games: TAverageGame[]
       ): Promise<AverageGameInstance[]> => {
@@ -246,7 +246,7 @@ const GamesPage = () => {
     }
   };
 
-  return (
+  return wallet ? (
     <>
       <Modal
         title="Spiel erstellen"
@@ -301,6 +301,8 @@ const GamesPage = () => {
         </div>
       )}
     </>
+  ) : (
+    <h2>Mit Wallet verbinden um Inhalte zusehen</h2>
   );
 };
 
