@@ -36,14 +36,7 @@ function useConnectedWallets() {
 
   const isWalletConnected = (address: string): boolean => {
     const wallets = getWallets();
-    console.log(
-      "ConnectedWallets:",
-      wallets,
-      "Is",
-      address,
-      "connected?",
-      wallets.includes(address)
-    );
+
     return wallets.includes(address);
   };
 
@@ -80,12 +73,7 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
     JsonRpcSigner | undefined
   >();
   const { isWalletConnected, addWallet, removeWallet } = useConnectedWallets();
-
   useEffect(() => {
-    if (walletInstance && isWalletConnected(walletInstance.address)) {
-      initWallet();
-    }
-
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", async () => {
         const providerValue = new ethers.BrowserProvider(window.ethereum!);
@@ -98,6 +86,8 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
           setWalletInstance(undefined);
         }
       });
+
+      initWallet();
     }
   }, []);
 

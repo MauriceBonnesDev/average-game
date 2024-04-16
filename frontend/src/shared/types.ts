@@ -1,6 +1,6 @@
 import type { AverageGameModule_AverageGame as TAverageGame } from "../../types/ethers-contracts/AverageGameModule_AverageGame";
 
-export type Size = "small" | "medium" | "large" | "round";
+export type Size = "small" | "medium" | "large" | "round" | "round-small";
 export type Style = "light" | "dark" | "grey";
 export type Color = "purple" | "orange" | "green" | "turquoise" | "grey";
 export type GameSettings = {
@@ -39,4 +39,5 @@ export type AverageGameInstance = {
   gameMaster: string;
   winner: string;
   rewardClaimed: boolean;
+  feeClaimed: boolean;
 };

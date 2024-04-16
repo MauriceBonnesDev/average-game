@@ -1,9 +1,11 @@
+import { RotatingLines } from "react-loader-spinner";
 import { Size, Style, Color } from "../../shared/types";
 import classes from "./Button.module.scss";
 
 type ButtonProps = {
   children: React.ReactNode;
   disabled?: boolean;
+  isLoading?: boolean;
   size?: Size;
   style?: Style;
   color?: Color;
@@ -13,6 +15,7 @@ type ButtonProps = {
 const Button = ({
   children,
   disabled,
+  isLoading,
   size,
   style,
   color,
@@ -25,18 +28,24 @@ const Button = ({
       ? classes.btnMedium
       : size === "large"
       ? classes.btnLarge
-      : classes.btnRound;
+      : size === "round"
+      ? classes.btnRound
+      : classes.btnRoundSmall;
 
   let btnStyle = "";
+  let strokeColor = "";
   if (style === "light") {
     if (color === "purple") {
       btnStyle = classes.btnLightPurple;
+      strokeColor = "#beb6fc";
     } else if (color === "orange") {
       btnStyle = classes.btnLightOrange;
+      strokeColor = "#ffd246";
     } else if (color === "green") {
       btnStyle = classes.btnLightGreen;
     } else if (color === "turquoise") {
       btnStyle = classes.btnLightTurquoise;
+      strokeColor = "#49fff5";
     }
   } else if (style === "dark") {
     if (color === "purple") {
@@ -58,7 +67,16 @@ const Button = ({
       disabled={disabled}
       onClick={onClick}
     >
-      {children}
+      {isLoading ? (
+        <RotatingLines
+          strokeWidth="3"
+          width="35"
+          animationDuration="1.25"
+          strokeColor={strokeColor}
+        />
+      ) : (
+        children
+      )}
     </button>
   );
 };

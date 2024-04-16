@@ -5,6 +5,9 @@
   border: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     transform: translateY(-2px);
@@ -92,6 +95,7 @@
     font-weight: 800;
     font-size: 20px;
     padding: 0 15px;
+    min-width: 35;
   }
 
   &Medium {
@@ -114,6 +118,13 @@
     font-weight: 600;
     font-size: 26px;
     padding: 0 20px;
+  }
+
+  &RoundSmall {
+    height: 40px;
+    width: 40px;
+    font-weight: 600;
+    font-size: 26px;
   }
 
   &LightPurple {

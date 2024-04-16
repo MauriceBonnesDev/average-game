@@ -31,6 +31,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "closeBettingRound"
       | "collateralAmount"
       | "endGame"
+      | "feeClaimed"
       | "gameFee"
       | "gameMaster"
       | "getBalance"
@@ -85,6 +86,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "endGame", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "feeClaimed",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "gameFee", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "gameMaster",
@@ -181,6 +186,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "endGame", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "feeClaimed", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "gameFee", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "gameMaster", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getBalance", data: BytesLike): Result;
@@ -476,6 +482,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   endGame: TypedContractMethod<[], [void], "nonpayable">;
 
+  feeClaimed: TypedContractMethod<[], [boolean], "view">;
+
   gameFee: TypedContractMethod<[], [bigint], "view">;
 
   gameMaster: TypedContractMethod<[], [string], "view">;
@@ -568,6 +576,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   getFunction(
     nameOrSignature: "endGame"
   ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "feeClaimed"
+  ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
     nameOrSignature: "gameFee"
   ): TypedContractMethod<[], [bigint], "view">;

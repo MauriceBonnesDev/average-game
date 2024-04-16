@@ -36,6 +36,7 @@ contract AverageGame is ReentrancyGuard {
 
     bool private isInitialized;
     bool public rewardClaimed;
+    bool public feeClaimed;
 
     GameState public state;
 
@@ -517,6 +518,7 @@ contract AverageGame is ReentrancyGuard {
         );
         uint256 collectedFee = totalGameFees;
         totalGameFees = 0;
+        feeClaimed = true;
 
         (bool sent, ) = msg.sender.call{value: collectedFee}("");
         require(sent, "Failed to send Ether");
