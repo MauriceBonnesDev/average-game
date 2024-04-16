@@ -57,6 +57,7 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
     const revealGuess = async () => {
       if (contract) {
         try {
+          setIsLoading(true);
           const transactionResponse = await contract.revealGuess(
             userInput.guess,
             userInput.salt
@@ -66,6 +67,7 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
         } catch (error) {
           console.error("Fehler beim Veröffentlichen deines Tipps", error);
           toast.error(transformError(error), { id: "error" });
+          setIsLoading(false);
         }
       }
     };
@@ -84,19 +86,36 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
       };
     });
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = event.target;
+    const handleSaltChange = (event: ChangeEvent<HTMLInputElement>) => {
       setUserInput((prevState) => ({
         ...prevState,
-        [name]: value,
+        salt: event.target.value,
       }));
     };
 
-    const handleStepChange = (name: string, newValue: number) => {
-      setUserInput((prevState) => ({
-        ...prevState,
-        [name]: newValue,
-      }));
+    const handleGuessChange = (event: ChangeEvent<HTMLInputElement>) => {
+      if (
+        Number(event.target.value) <= 1000 &&
+        Number(event.target.value) >= 0
+      ) {
+        setUserInput((prevState) => ({
+          ...prevState,
+          guess: Number(event.target.value),
+        }));
+      }
+    };
+
+    const handleStepChange = (name: string, step: number) => {
+      setUserInput((prevState) => {
+        let value = Number(prevState.guess);
+        if (value < 1000 && value > 0) {
+          value += step;
+        }
+        return {
+          ...prevState,
+          [name]: value,
+        };
+      });
     };
 
     return (
@@ -104,7 +123,7 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
         <TextInput
           label="Geheimnis"
           name="salt"
-          onChange={handleInputChange}
+          onChange={handleSaltChange}
           value={userInput.salt}
         />
         <NumberPicker
@@ -113,9 +132,8 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
           label="Guess"
           name="guess"
           value={userInput.guess}
-          onChange={handleInputChange}
-          onIncrement={handleStepChange}
-          onDecrement={handleStepChange}
+          onChange={handleGuessChange}
+          onStepChange={handleStepChange}
         />
       </>
     );

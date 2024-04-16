@@ -9,8 +9,7 @@ type NumberPickerProps = {
   max?: number;
   step?: number;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onIncrement: (name: string, step: number) => void;
-  onDecrement: (name: string, step: number) => void;
+  onStepChange: (name: string, step: number) => void;
 };
 
 const NumberPicker = ({
@@ -21,8 +20,7 @@ const NumberPicker = ({
   max,
   step = 1,
   onChange,
-  onDecrement,
-  onIncrement,
+  onStepChange,
 }: NumberPickerProps) => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event);
@@ -32,7 +30,7 @@ const NumberPicker = ({
     <div className={classes.numberPicker}>
       <label htmlFor={label}>{label}</label>
       <div className={classes.inputContainer}>
-        <span onClick={() => onDecrement(name, value - step)}>
+        <span onClick={() => onStepChange(name, -step)}>
           <i className="fas fa-minus"></i>
         </span>
         <input
@@ -45,7 +43,7 @@ const NumberPicker = ({
           max={max}
           onChange={onInputChange}
         />
-        <span onClick={() => onIncrement(name, value + step)}>
+        <span onClick={() => onStepChange(name, step)}>
           <i className="fas fa-plus"></i>
         </span>
       </div>

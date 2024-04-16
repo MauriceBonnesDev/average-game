@@ -75,13 +75,13 @@ const GamesPage = () => {
               gameMaster: await game.gameMaster(),
               winner: await game.winner(),
               rewardClaimed: await game.rewardClaimed(),
+              feeClaimed: await game.feeClaimed(),
             };
           })
         );
       };
 
       const fetchGames = async () => {
-        console.log("Fetch Games");
         try {
           isMounted.current = false;
           const gameProxies = await factoryContract.getGameProxies();
@@ -99,10 +99,8 @@ const GamesPage = () => {
       };
 
       const fetchSingleGame = async (id: number) => {
-        console.log("Fetch single game");
         try {
           const gameProxies = await factoryContract.getGameProxies();
-          console.log(wallet?.address);
           const games = gameProxies.map((proxy) =>
             AverageGame.connect(proxy, wallet)
           );
@@ -112,11 +110,10 @@ const GamesPage = () => {
           );
 
           setAverageGameInstances((prevInstances) => {
-            console.log("setAverageGameInstances!!!!");
             const newInstances = prevInstances.filter(
               (instances) => instances.id !== id
             );
-            console.log(newInstances, gameInstance);
+
             return [...newInstances, ...gameInstance].sort(
               (a, b) => a.id - b.id
             );
@@ -129,29 +126,20 @@ const GamesPage = () => {
       };
       fetchGames();
 
-      const onGameChanged = (gameId: number, proxyAddress: string) => {
-        console.log("Game #", gameId, "created at", proxyAddress);
+      const onGameChanged = (gameId: number) => {
         fetchSingleGame(gameId);
       };
 
       factoryContract.on(
         factoryContract.filters["GameCreated(uint256,address)"],
-        (gameId, proxyAddress) => onGameChanged(Number(gameId), proxyAddress)
+        (gameId) => onGameChanged(Number(gameId))
       );
 
       for (let i = 0; i < averageGameInstances.length; i++) {
         const averageGame = averageGameInstances[i];
         averageGame.contract.on(
           averageGame.contract.filters["PlayerJoined(uint256,address,uint256)"],
-          (gameId, player, totalPlayers) => {
-            console.log(
-              "Player",
-              player,
-              "joined game",
-              gameId,
-              "as player number",
-              totalPlayers
-            );
+          (gameId) => {
             fetchSingleGame(Number(gameId));
           }
         );
@@ -159,17 +147,7 @@ const GamesPage = () => {
           averageGame.contract.filters[
             "PlayerRevealedGuess(uint256,address,uint256,string,uint8)"
           ],
-          (gameId, player, guess, salt, revealState) => {
-            console.log(
-              "Player",
-              player,
-              "revealed value",
-              guess,
-              "with salt",
-              salt,
-              "and state",
-              revealState
-            );
+          (gameId) => {
             fetchSingleGame(Number(gameId));
           }
         );
@@ -278,7 +256,7 @@ const GamesPage = () => {
             grid={{ rows: 2, fill: "row" }}
           >
             <span className={classes.createGame}>
-              <Button style="grey" onClick={openModal}>
+              <Button style="grey" size="round" onClick={openModal}>
                 <i className={`fas fa-plus ${classes.icon}`}></i>
               </Button>
             </span>
