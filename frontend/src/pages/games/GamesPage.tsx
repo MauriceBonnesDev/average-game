@@ -1,11 +1,14 @@
 import classes from "./GamesPage.module.scss";
 import Card from "../../components/card/Card";
 import addresses from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json"; // Change to 11155111 for the Sepolia Testnet, now running on localhost
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AverageGameModule_AverageGameFactory__factory as AverageGameFactory } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGameFactory__factory";
 import { AverageGameModule_AverageGame__factory as AverageGame } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGame__factory";
 import type { AverageGameModule_AverageGameFactory as TAverageGameFactory } from "../../../types/ethers-contracts/AverageGameModule_AverageGameFactory";
-import type { AverageGameModule_AverageGame as TAverageGame } from "../../../types/ethers-contracts/AverageGameModule_AverageGame";
+import type {
+  AverageGameModule_AverageGame as TAverageGame,
+  AverageGame as AvgGame,
+} from "../../../types/ethers-contracts/AverageGameModule_AverageGame";
 import { formatEther } from "ethers";
 import Modal, { DialogRef } from "../../components/modal/Modal";
 import CreateGame, {
@@ -22,6 +25,7 @@ import "../../index.scss";
 import Button from "../../components/button/Button";
 import { AverageGameInstance } from "../../shared/types";
 import { useWeb3Context } from "../../hooks/useWeb3Context";
+import useEventListening from "../../hooks/useEventListening";
 
 //TODO: Join Game screen, undeutlich, da geheimnis genau unter dem Text "Wähle eine Zahl zwischen 0 und 1000"
 //TODO: Outsource creation of event handlers into a separate useEffect to only run on initial render -> later on only whenever a new game is created
@@ -40,6 +44,10 @@ const GamesPage = () => {
     AverageGameInstance[]
   >([]);
   const isMounted = useRef(true);
+  const { setGameId } = useEventListening(
+    averageGameInstances,
+    fetchSingleGame
+  );
 
   useEffect(() => {
     if (wallet) {
@@ -52,148 +60,140 @@ const GamesPage = () => {
     }
   }, [wallet]);
 
-  useMemo(() => {
-    if (factoryContract && wallet) {
-      const createGameInstances = async (
-        games: TAverageGame[]
-      ): Promise<AverageGameInstance[]> => {
-        return await Promise.all(
-          games.map(async (game) => {
-            const id = Number(await game.id());
-            return {
-              id,
-              name: await game.name(),
-              entryPrice: formatEther(await game.betAmount()),
-              totalPlayers: Number(await game.totalPlayers()),
-              maxPlayers: Number(await game.maxPlayers()),
-              contract: game,
-              address: await factoryContract.getGameProxyAt(id),
-              collateral: formatEther(await game.collateralAmount()),
-              gameFee: formatEther(await game.gameFee()),
-              players: await game.getPlayers(),
-              gameState: Number(await game.state()),
-              gameMaster: await game.gameMaster(),
-              winner: await game.winner(),
-              rewardClaimed: await game.rewardClaimed(),
-              feeClaimed: await game.feeClaimed(),
-            };
-          })
+  const fetchGames = async () => {
+    console.log("Fetch Games");
+    try {
+      isMounted.current = false;
+      const gameProxies = await factoryContract!.getGameProxies();
+      const games = gameProxies.map((proxy) =>
+        AverageGame.connect(proxy, wallet)
+      );
+
+      const gameInstances: AverageGameInstance[] = await createGameInstances(
+        games
+      );
+      setGameId(-1);
+      setAverageGameInstances(gameInstances);
+    } catch (error) {
+      console.error("Error fetching games data:", error);
+    }
+  };
+
+  async function fetchSingleGame(id: number) {
+    console.log("Fetch single game");
+    try {
+      const gameProxies = await factoryContract!.getGameProxies();
+      const games = gameProxies.map((proxy) =>
+        AverageGame.connect(proxy, wallet)
+      );
+      console.log(games);
+      const gameInstance: AverageGameInstance[] = await createGameInstances([
+        games[id],
+      ]);
+
+      setAverageGameInstances((prevInstances) => {
+        console.log("setAverageGameInstances!!!!");
+        const newInstances = prevInstances.filter(
+          (instances) => instances.id !== id
         );
-      };
+        console.log(newInstances, gameInstance);
+        return [...newInstances, ...gameInstance].sort((a, b) => a.id - b.id);
+      });
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching single game data:", error);
+    }
+  }
+  const averageGameInstanceMapper = (
+    contract: TAverageGame,
+    gameInstance: AvgGame.AverageGameInstanceStructOutput
+  ): AverageGameInstance => {
+    const [
+      id,
+      name,
+      entryPrice,
+      totalPlayers,
+      maxPlayers,
+      contractAddress,
+      collateral,
+      gameFee,
+      players,
+      gameState,
+      gameMaster,
+      winner,
+      rewardClaimed,
+      feeClaimed,
+    ] = gameInstance;
+    return {
+      id: Number(id),
+      name,
+      entryPrice: formatEther(entryPrice),
+      totalPlayers: Number(totalPlayers),
+      maxPlayers: Number(maxPlayers),
+      contract,
+      address: contractAddress,
+      collateral: formatEther(collateral),
+      gameFee: formatEther(gameFee),
+      players,
+      gameState: Number(gameState),
+      gameMaster,
+      winner,
+      rewardClaimed,
+      feeClaimed,
+    };
+  };
 
-      const fetchGames = async () => {
-        try {
-          isMounted.current = false;
-          const gameProxies = await factoryContract.getGameProxies();
-          const games = gameProxies.map((proxy) =>
-            AverageGame.connect(proxy, wallet)
-          );
+  const createGameInstances = async (
+    games: TAverageGame[]
+  ): Promise<AverageGameInstance[]> => {
+    return await Promise.all(
+      games.map(async (game) => {
+        const gameInstance = await game.getAverageGameInstance();
+        return averageGameInstanceMapper(game, gameInstance);
+      })
+    );
+  };
 
-          const gameInstances: AverageGameInstance[] =
-            await createGameInstances(games);
-
-          setAverageGameInstances(gameInstances);
-        } catch (error) {
-          console.error("Error fetching games data:", error);
-        }
-      };
-
-      const fetchSingleGame = async (id: number) => {
-        try {
-          const gameProxies = await factoryContract.getGameProxies();
-          const games = gameProxies.map((proxy) =>
-            AverageGame.connect(proxy, wallet)
-          );
-
-          const gameInstance: AverageGameInstance[] = await createGameInstances(
-            [games[id]]
-          );
-
-          setAverageGameInstances((prevInstances) => {
-            const newInstances = prevInstances.filter(
-              (instances) => instances.id !== id
-            );
-
-            return [...newInstances, ...gameInstance].sort(
-              (a, b) => a.id - b.id
-            );
-          });
-
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error fetching single game data:", error);
-        }
-      };
+  useEffect(() => {
+    if (factoryContract && wallet) {
       fetchGames();
 
-      const onGameChanged = (gameId: number) => {
-        fetchSingleGame(gameId);
+      const onGameChanged = (gameCount: number, proxyAddress: string) => {
+        console.log("Game #", gameCount, "created at", proxyAddress);
+        fetchSingleGame(gameCount - 1);
+        setGameId(gameCount - 1);
       };
 
       factoryContract.on(
         factoryContract.filters["GameCreated(uint256,address)"],
-        (gameId) => onGameChanged(Number(gameId))
+        (id, proxyAddress) => onGameChanged(Number(id), proxyAddress)
       );
-
-      for (let i = 0; i < averageGameInstances.length; i++) {
-        const averageGame = averageGameInstances[i];
-        averageGame.contract.on(
-          averageGame.contract.filters["PlayerJoined(uint256,address,uint256)"],
-          (gameId) => {
-            fetchSingleGame(Number(gameId));
-          }
-        );
-        averageGame.contract.on(
-          averageGame.contract.filters[
-            "PlayerRevealedGuess(uint256,address,uint256,string,uint8)"
-          ],
-          (gameId) => {
-            fetchSingleGame(Number(gameId));
-          }
-        );
-
-        averageGame.contract.on(
-          averageGame.contract.filters["BettingRoundClosed(uint256)"],
-          (gameId) => fetchSingleGame(Number(gameId))
-        );
-
-        averageGame.contract.on(
-          averageGame.contract.filters["GameEnded(uint256)"],
-          (gameId) => fetchSingleGame(Number(gameId))
-        );
-
-        averageGame.contract.on(
-          averageGame.contract.filters[
-            "PrizeAwarded(uint256,address,uint256,uint256)"
-          ],
-          (gameId) => fetchSingleGame(Number(gameId))
-        );
-      }
-
-      return () => {
-        factoryContract.off(
-          factoryContract.filters["GameCreated(uint256,address)"]
-        );
-
-        for (let i = 0; i < averageGameInstances.length; i++) {
-          const { contract } = averageGameInstances[i];
-          contract.off(
-            contract.filters["PlayerJoined(uint256,address,uint256)"]
-          );
-          contract.off(
-            contract.filters[
-              "PlayerRevealedGuess(uint256,address,uint256,string,uint8)"
-            ]
-          );
-          contract.off(contract.filters["BettingRoundClosed(uint256)"]);
-          contract.off(contract.filters["GameEnded(uint256)"]);
-          contract.off(
-            contract.filters["PrizeAwarded(uint256,address,uint256,uint256)"]
-          );
-        }
-      };
     }
   }, [factoryContract, wallet]);
+
+  // Cleanup event listeners
+  useEffect(() => {
+    return () => {
+      factoryContract?.off(
+        factoryContract.filters["GameCreated(uint256,address)"]
+      );
+
+      averageGameInstances.forEach(({ contract }) => {
+        contract.off(contract.filters["PlayerJoined(uint256,address,uint256)"]);
+        contract.off(
+          contract.filters[
+            "PlayerRevealedGuess(uint256,address,uint256,string,uint8)"
+          ]
+        );
+        contract.off(contract.filters["BettingRoundClosed(uint256)"]);
+        contract.off(contract.filters["GameEnded(uint256)"]);
+        contract.off(
+          contract.filters["PrizeAwarded(uint256,address,uint256,uint256)"]
+        );
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openModal = () => {
     dialog.current?.open();

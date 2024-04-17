@@ -72,6 +72,7 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
   const [walletInstance, setWalletInstance] = useState<
     JsonRpcSigner | undefined
   >();
+  const [isMounted, setIsMounted] = useState(false);
   const { isWalletConnected, addWallet, removeWallet } = useConnectedWallets();
   useEffect(() => {
     if (window.ethereum) {
@@ -89,6 +90,7 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
 
       initWallet();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function initWallet() {
@@ -104,9 +106,11 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
         params: [{ chainId: "0x7a69" }], // 0xaa36a7 für Sepolia
       });
       signer = await providerValue.getSigner();
-
-      setWalletInstance(signer);
-      addWallet(signer?.address ?? null);
+      if (isMounted || isWalletConnected(signer.address)) {
+        setWalletInstance(signer);
+        addWallet(signer?.address ?? null);
+      }
+      setIsMounted(true);
     }
     setProvider(provider);
   }
