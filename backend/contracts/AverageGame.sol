@@ -26,6 +26,7 @@ contract AverageGame is ReentrancyGuard {
     uint256 private totalGameFees;
     int256 private totalPotentialWinners;
     uint256 public blockNumber;
+    uint16 public timeToPass = 10;
 
     string public name;
 
@@ -39,6 +40,23 @@ contract AverageGame is ReentrancyGuard {
     bool public feeClaimed;
 
     GameState public state;
+
+    struct AverageGameInstance {
+        uint256 id;
+        string name;
+        uint256 entryPrice;
+        uint256 totalPlayers;
+        uint256 maxPlayers;
+        address contractAddress;
+        uint256 collateral;
+        uint256 gameFee;
+        address[] players;
+        GameState gameState;
+        address gameMaster;
+        address winner;
+        bool rewardClaimed;
+        bool feeClaimed;
+    }
 
     mapping(address => bytes32) private commitments;
     mapping(address => bool) private playerAlreadyJoined;
@@ -62,21 +80,30 @@ contract AverageGame is ReentrancyGuard {
     modifier onlyGameMaster() {
         require(
             gameMaster == msg.sender,
-            "Only game master can call this function"
+            "Nur der Spielleiter kann diese Funktion aufrufen!"
         );
         _;
     }
 
     modifier onlyValidPlayers(address _player) {
-        require(_player != address(0), "Address can't be 0x0");
-        require(playerAlreadyJoined[_player], "Not a valid player address");
+        require(
+            _player != address(0),
+            "Adresse darf nicht die 0x0 Adresse sein!"
+        );
+        require(
+            playerAlreadyJoined[_player],
+            "Keine g\xC3\xBCltige Spieleradresse!"
+        );
         _;
     }
 
     modifier onlyWinner() {
         console.log("Winner:", winner);
         console.log("Msg.sender", msg.sender);
-        require(winner == msg.sender, "Only winner can call this function");
+        require(
+            winner == msg.sender,
+            "Nur der Sieger kann diese Funktion aufrufen!"
+        );
         _;
     }
 
@@ -144,7 +171,7 @@ contract AverageGame is ReentrancyGuard {
         address _gameMaster,
         uint256 _gameFee
     ) external payable {
-        require(!isInitialized, "Game is already initialized");
+        require(!isInitialized, "Spiel wurde bereits initialisiert!");
         id = _gameId;
         name = _name;
         minGuess = _minGuess;
@@ -157,9 +184,6 @@ contract AverageGame is ReentrancyGuard {
         gameFee = _gameFee;
         isInitialized = true;
         gameMaster = _gameMaster;
-        console.log("Game initialized", _betAmount);
-        console.log("Fee", _gameFee);
-        console.log("Collateral", collateralAmount);
         blockNumber = block.number;
         emit GameCreated(_gameId);
     }
@@ -170,18 +194,21 @@ contract AverageGame is ReentrancyGuard {
      * @param _guess The guess of the player
      */
     function joinGame(bytes32 _guess) external payable {
-        require(state == GameState.CommitPhase, "Game has not started yet");
+        require(
+            state == GameState.CommitPhase,
+            "Spiel hat noch nicht begonnen!"
+        );
         require(
             msg.sender != gameMaster,
-            "Game master can't join their own game"
+            "Spielleiter kann nicht am eigenen Spiel teilnehmen!"
         );
         require(
             msg.value == collateralAmount + betAmount + gameFee,
-            "Insufficient amount, must be the bet amount + 3 times the bet amount as collateral including the game fee"
+            "Unzureichender Betrag: Bitte zahlen Sie den Einsatz, die dreifache Kaution und die Spielgeb\xC3\xBChr!"
         );
         require(
             !playerAlreadyJoined[msg.sender],
-            "Player has already joined the game"
+            "Spieler ist dem Spiel bereits beigetreten!"
         );
 
         totalBetAmount += betAmount;
@@ -202,16 +229,19 @@ contract AverageGame is ReentrancyGuard {
      * @notice Closes the betting round and starts the reveal phase. This is the first function a game master has to call
      * @dev Only allowed once 3 players have joined the game
      */
-    function closeBettingRound() external onlyGameMaster {
-        require(state == GameState.CommitPhase, "Game has not started yet");
+    function startRevealPhase() external onlyGameMaster {
+        require(
+            state == GameState.CommitPhase,
+            "Reveal Phase kann nur gestartet werden, wenn aktuell die Commit Phase ist!"
+        );
         require(
             totalPlayers >= 3,
-            "Atleast 3 players are required to start the game"
+            "Mindestens 3 Spieler werden ben\xC3\xB6tigt um das Spiel zu starten!"
         );
 
         state = GameState.RevealPhase;
         blockNumber = block.number;
-        console.log("Betting round closed");
+        console.log("Commit Phase ended, Reveal Phase started");
         emit BettingRoundClosed(id);
     }
 
@@ -224,11 +254,14 @@ contract AverageGame is ReentrancyGuard {
         uint256 _guess,
         string memory _salt
     ) external onlyValidPlayers(msg.sender) {
-        require(state == GameState.RevealPhase, "Game has not ended yet");
+        require(
+            state == GameState.RevealPhase,
+            "Reveal Phase hat noch nicht begonnen!"
+        );
         RevealState revealState = playerRevealed[msg.sender];
         require(
             revealState == RevealState.NotRevealed,
-            "Player already revealed their guess"
+            "Spieler hat bereits seinen Tipp ver\xC3\xB6ffentlicht!"
         );
 
         revealedGuesses[msg.sender] = _guess;
@@ -253,7 +286,10 @@ contract AverageGame is ReentrancyGuard {
      * @dev This function will be automatically called from within the factory, after the random number has been generated
      */
     function endGame() external onlyGameMaster {
-        require(state == GameState.RevealPhase, "Game has not ended yet");
+        require(
+            state == GameState.RevealPhase,
+            "Reveal Phase hat noch nicht begonnen!"
+        );
 
         determinePotentialWinners();
 
@@ -277,7 +313,10 @@ contract AverageGame is ReentrancyGuard {
      * @dev Stores the potential winners in state variable potentialWinners
      */
     function determinePotentialWinners() private {
-        require(state == GameState.RevealPhase, "Game has not ended yet");
+        require(
+            state == GameState.RevealPhase,
+            "Reveal Phase hat noch nicht begonnen!"
+        );
         console.log("Determining potential winners");
         int256 twoThirdAverage = calculateTwoThirdAverage();
 
@@ -378,11 +417,11 @@ contract AverageGame is ReentrancyGuard {
      * @dev The winner is selected by using the chainlink VRF if multiple potential winners are found
      */
     function selectWinner() private {
-        require(state == GameState.Ended, "Game has not ended yet");
+        require(state == GameState.Ended, "Spiel ist noch nicht beendet!");
         uint256 pricePool = totalBetAmount + totalCollateralAmount;
         require(
             getBalance() >= pricePool,
-            "Not enough funds to payout the winners"
+            "Preispool reicht nicht aus um den Gewinner auszuzahlen!"
         );
 
         if (totalPotentialWinners > 1) {
@@ -428,12 +467,12 @@ contract AverageGame is ReentrancyGuard {
     function withdrawPricepool(
         address _winner
     ) external onlyWinner nonReentrant {
-        require(state == GameState.Ended, "Game has not ended yet");
+        require(state == GameState.Ended, "Spiel ist noch nicht beendet!");
         uint256 payout = totalBetAmount + totalCollateralAmount;
-        require(payout > 0, "No price pool to payout");
+        require(payout > 0, "Kein Preispool vorhanden!");
         require(
             getBalance() >= payout,
-            "Not enough funds to payout the winner"
+            "Preispool reicht nicht aus um den Gewinner auszuzahlen!"
         );
 
         totalBetAmount = 0;
@@ -441,7 +480,7 @@ contract AverageGame is ReentrancyGuard {
         rewardClaimed = true;
 
         (bool sent, ) = _winner.call{value: payout}("");
-        require(sent, "Failed to send Ether");
+        require(sent, "Senden von Ether ist fehlgeschlagen!");
 
         uint256 guess = revealedGuesses[_winner];
         emit PrizeAwarded(id, _winner, payout, guess);
@@ -454,22 +493,26 @@ contract AverageGame is ReentrancyGuard {
     function payoutCollateral(address _player) private nonReentrant {
         require(
             totalCollateralAmount >= collateralAmount,
-            "Not enough funds to payout the collateral amount"
+            "Nicht gen\xC3\xBCgend Ether in dem Vertrag um die Kaution auszuzahlen!"
         );
         require(
             collateralOfPlayer[_player] >= collateralAmount,
-            "Not enough funds to payout the collateral amount"
+            "Hinterlegte Kaution reicht nicht aus!"
+        );
+        require(
+            collateralOfPlayer[_player] >= 0,
+            "Kaution wurde bereits ausgezahlt!"
         );
         require(
             playerRevealed[_player] == RevealState.Revealed,
-            "Player did not reveal their guess"
+            "Spieler hat seinen Tipp nicht ver\xC3\xB6ffentlicht!"
         );
 
         collateralOfPlayer[_player] -= collateralAmount;
         totalCollateralAmount -= collateralAmount;
 
         (bool sent, ) = _player.call{value: collateralAmount}("");
-        require(sent, "Failed to send Ether");
+        require(sent, "Senden von Ether fehlgeschlagen!");
 
         emit CollateralDeposited(id, _player, collateralAmount);
     }
@@ -489,7 +532,7 @@ contract AverageGame is ReentrancyGuard {
             uint256 refund = collateral + bet + fee;
 
             (bool sent, ) = currentPlayer.call{value: refund}("");
-            require(sent, "Failed to send Ether");
+            require(sent, "Senden von Ether fehlgeschlagen!");
             emit PlayerRefunded(id, currentPlayer, refund);
         }
     }
@@ -497,11 +540,15 @@ contract AverageGame is ReentrancyGuard {
     /**
      * @notice Allows a player to request a refund if the GameMaster does not act, immediately ends the game
      */
-    function requestRefund() external {
-        require(
-            blockNumber + 10 < block.number,
-            "A minimum of 10 Blocks has to pass before you can request a refund"
+    function requestRefund() external onlyValidPlayers(msg.sender) {
+        string memory message = string(
+            abi.encodePacked(
+                "Mindestens ",
+                timeToPass,
+                " Bl\xC3\xB6cke m\xC3\xBCssen vergangen sein um eine R\xC3\xBCckerstattung zu beantragen!"
+            )
         );
+        require(blockNumber + timeToPass < block.number, message);
         refundPlayers();
         emit GameEnded(id);
     }
@@ -510,18 +557,18 @@ contract AverageGame is ReentrancyGuard {
      * @notice Withdraws the game fees to the game master
      */
     function withdrawGameFees() external onlyGameMaster nonReentrant {
-        require(state == GameState.Ended, "Game has not ended yet");
-        require(winner != address(0), "No winner found");
+        require(state == GameState.Ended, "Spiel ist noch nicht beendet!");
+        require(winner != address(0), "Es wurde noch kein Gewinner gefunden!");
         require(
             getBalance() >= totalGameFees,
-            "Not enough funds to withdraw the game fees"
+            "Nicht gen\xC3\xBCgend Ether in dem Vertrag um die Spielgeb\xC3\xBChr auszuzahlen!"
         );
         uint256 collectedFee = totalGameFees;
         totalGameFees = 0;
         feeClaimed = true;
 
         (bool sent, ) = msg.sender.call{value: collectedFee}("");
-        require(sent, "Failed to send Ether");
+        require(sent, "Senden von Ether fehlgeschlagen!");
 
         emit FeeCollected(id, msg.sender, collectedFee);
     }
@@ -556,5 +603,29 @@ contract AverageGame is ReentrancyGuard {
 
     function getPlayers() public view returns (address[] memory) {
         return players;
+    }
+
+    function getAverageGameInstance()
+        public
+        view
+        returns (AverageGameInstance memory)
+    {
+        return
+            AverageGameInstance(
+                id,
+                name,
+                betAmount,
+                totalPlayers,
+                maxPlayers,
+                address(this),
+                collateralAmount,
+                gameFee,
+                players,
+                state,
+                gameMaster,
+                winner,
+                rewardClaimed,
+                feeClaimed
+            );
     }
 }
