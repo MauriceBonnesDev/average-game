@@ -10,6 +10,7 @@ export type GameSettings = {
   maxPlayers: number;
   betAmount: number;
   gameFee: number;
+  icon: GameIcon;
 };
 
 export enum GameState {
@@ -22,6 +23,18 @@ export enum RevealState {
   "NotRevealed",
   "Revealed",
   "Invalid",
+}
+
+enum GameIcon {
+  "Bar",
+  "Bell",
+  "Coin",
+  "Crown",
+  "Diamond",
+  "Horseshoe",
+  "Seven",
+  "Shamrock",
+  "Star",
 }
 
 export type AverageGameInstance = {
@@ -40,4 +53,5 @@ export type AverageGameInstance = {
   winner: string;
   rewardClaimed: boolean;
   feeClaimed: boolean;
+  icon: GameIcon;
 };

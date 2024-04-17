@@ -39,7 +39,14 @@ export interface AverageGameModule_AverageGameFactoryInterface
 
   encodeFunctionData(
     functionFragment: "createAverageGame",
-    values: [AddressLike, string, BigNumberish, BigNumberish, BigNumberish]
+    values: [
+      AddressLike,
+      string,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "getGameMasterAt",
@@ -147,7 +154,8 @@ export interface AverageGameModule_AverageGameFactory extends BaseContract {
       _name: string,
       _maxPlayers: BigNumberish,
       _betAmount: BigNumberish,
-      _gameFee: BigNumberish
+      _gameFee: BigNumberish,
+      _icon: BigNumberish
     ],
     [string],
     "nonpayable"
@@ -179,7 +187,8 @@ export interface AverageGameModule_AverageGameFactory extends BaseContract {
       _name: string,
       _maxPlayers: BigNumberish,
       _betAmount: BigNumberish,
-      _gameFee: BigNumberish
+      _gameFee: BigNumberish,
+      _icon: BigNumberish
     ],
     [string],
     "nonpayable"

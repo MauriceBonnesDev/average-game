@@ -107,6 +107,12 @@
     width: 61px;
     border-radius: 10px;
     background-color: colors.$purple-50;
+
+    & > img {
+      height: 61px;
+      width: 61px;
+      filter: grayscale(100%);
+    }
   }
 
   & > img {

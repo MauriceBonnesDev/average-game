@@ -26,6 +26,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
       maxPlayers: 0,
       betAmount: 0,
       gameFee: 0,
+      icon: 0,
     });
 
     useImperativeHandle(ref, () => {
@@ -38,6 +39,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
             maxPlayers: 0,
             betAmount: 0,
             gameFee: 0,
+            icon: 0,
           });
         },
         createGame() {
@@ -56,7 +58,8 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
             parseEther(gameSettings.betAmount.toString()),
             parseEther(
               ((gameSettings.gameFee / 100) * gameSettings.betAmount).toString()
-            )
+            ),
+            gameSettings.icon
           );
           const test = await transactionResponse.wait();
           const eventLog = test?.logs[1] as EventLog;

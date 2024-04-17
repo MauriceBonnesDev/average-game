@@ -19,7 +19,8 @@ contract AverageGameFactory {
         string memory _name,
         uint256 _maxPlayers,
         uint256 _betAmount,
-        uint256 _gameFee
+        uint256 _gameFee,
+        uint256 _icon
     ) public returns (address) {
         console.log("Creating Game!!!!!");
         address proxy = Clones.clone(_address);
@@ -35,7 +36,8 @@ contract AverageGameFactory {
             _maxPlayers: _maxPlayers,
             _betAmount: _betAmount,
             _gameMaster: msg.sender,
-            _gameFee: _gameFee
+            _gameFee: _gameFee,
+            _icon: _icon
         });
 
         totalGames++;

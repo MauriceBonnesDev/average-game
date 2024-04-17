@@ -39,6 +39,7 @@ export declare namespace AverageGame {
     winner: AddressLike;
     rewardClaimed: boolean;
     feeClaimed: boolean;
+    icon: BigNumberish;
   };
 
   export type AverageGameInstanceStructOutput = [
@@ -55,7 +56,8 @@ export declare namespace AverageGame {
     gameMaster: string,
     winner: string,
     rewardClaimed: boolean,
-    feeClaimed: boolean
+    feeClaimed: boolean,
+    icon: bigint
   ] & {
     id: bigint;
     name: string;
@@ -71,6 +73,7 @@ export declare namespace AverageGame {
     winner: string;
     rewardClaimed: boolean;
     feeClaimed: boolean;
+    icon: bigint;
   };
 }
 
@@ -89,6 +92,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "getPlayerRevealedState"
       | "getPlayers"
       | "getPotentialWinners"
+      | "icon"
       | "id"
       | "initGame"
       | "joinGame"
@@ -164,6 +168,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     functionFragment: "getPotentialWinners",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "icon", values?: undefined): string;
   encodeFunctionData(functionFragment: "id", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initGame",
@@ -175,6 +180,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       BigNumberish,
       BigNumberish,
       AddressLike,
+      BigNumberish,
       BigNumberish
     ]
   ): string;
@@ -260,6 +266,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     functionFragment: "getPotentialWinners",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "icon", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "id", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initGame", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "joinGame", data: BytesLike): Result;
@@ -570,6 +577,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   getPotentialWinners: TypedContractMethod<[], [string[]], "view">;
 
+  icon: TypedContractMethod<[], [bigint], "view">;
+
   id: TypedContractMethod<[], [bigint], "view">;
 
   initGame: TypedContractMethod<
@@ -581,7 +590,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       _maxPlayers: BigNumberish,
       _betAmount: BigNumberish,
       _gameMaster: AddressLike,
-      _gameFee: BigNumberish
+      _gameFee: BigNumberish,
+      _icon: BigNumberish
     ],
     [void],
     "payable"
@@ -675,6 +685,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   getFunction(
     nameOrSignature: "getPotentialWinners"
   ): TypedContractMethod<[], [string[]], "view">;
+  getFunction(
+    nameOrSignature: "icon"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(nameOrSignature: "id"): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "initGame"
@@ -687,7 +700,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       _maxPlayers: BigNumberish,
       _betAmount: BigNumberish,
       _gameMaster: AddressLike,
-      _gameFee: BigNumberish
+      _gameFee: BigNumberish,
+      _icon: BigNumberish
     ],
     [void],
     "payable"

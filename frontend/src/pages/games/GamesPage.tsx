@@ -123,7 +123,9 @@ const GamesPage = () => {
       winner,
       rewardClaimed,
       feeClaimed,
+      icon,
     ] = gameInstance;
+    console.log(icon);
     return {
       id: Number(id),
       name,
@@ -140,6 +142,7 @@ const GamesPage = () => {
       winner,
       rewardClaimed,
       feeClaimed,
+      icon: Number(icon),
     };
   };
 

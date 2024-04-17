@@ -40,6 +40,7 @@ contract AverageGame is ReentrancyGuard {
     bool public feeClaimed;
 
     GameState public state;
+    GameIcon public icon;
 
     struct AverageGameInstance {
         uint256 id;
@@ -56,6 +57,7 @@ contract AverageGame is ReentrancyGuard {
         address winner;
         bool rewardClaimed;
         bool feeClaimed;
+        GameIcon icon;
     }
 
     mapping(address => bytes32) private commitments;
@@ -69,6 +71,18 @@ contract AverageGame is ReentrancyGuard {
         CommitPhase, // Participants are committing their guesses
         RevealPhase, // Participants are revealing their guesses
         Ended // The game has ended
+    }
+
+    enum GameIcon {
+        Bar,
+        Bell,
+        Coin,
+        Crown,
+        Diamond,
+        Horseshoe,
+        Seven,
+        Shamrock,
+        Star
     }
 
     enum RevealState {
@@ -169,7 +183,8 @@ contract AverageGame is ReentrancyGuard {
         uint256 _maxPlayers,
         uint256 _betAmount,
         address _gameMaster,
-        uint256 _gameFee
+        uint256 _gameFee,
+        uint256 _icon
     ) external payable {
         require(!isInitialized, "Spiel wurde bereits initialisiert!");
         id = _gameId;
@@ -181,6 +196,7 @@ contract AverageGame is ReentrancyGuard {
         collateralAmount = _betAmount * 3;
         players = new address[](maxPlayers);
         state = GameState.CommitPhase;
+        icon = GameIcon(_icon);
         gameFee = _gameFee;
         isInitialized = true;
         gameMaster = _gameMaster;
@@ -625,7 +641,8 @@ contract AverageGame is ReentrancyGuard {
                 gameMaster,
                 winner,
                 rewardClaimed,
-                feeClaimed
+                feeClaimed,
+                icon
             );
     }
 }

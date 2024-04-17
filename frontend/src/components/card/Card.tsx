@@ -1,4 +1,13 @@
 import crown from "../../assets/crown.png";
+import bar from "../../assets/bar.png";
+import bell from "../../assets/bell.png";
+import coin from "../../assets/coin.png";
+import crownIcon from "../../assets/crownIcon.png";
+import diamond from "../../assets/diamond.png";
+import horseshoe from "../../assets/horseshoe.png";
+import seven from "../../assets/seven.png";
+import shamrock from "../../assets/shamrock.png";
+import star from "../../assets/star.png";
 import { useEffect, useRef, useState } from "react";
 import ethLogo from "../../assets/eth.svg";
 import Button from "../button/Button";
@@ -23,6 +32,18 @@ type CardProps = {
   setIsLoading: (isLoading: boolean) => void;
 };
 
+const icons = [
+  bar,
+  bell,
+  coin,
+  crownIcon,
+  diamond,
+  horseshoe,
+  seven,
+  shamrock,
+  star,
+];
+
 const Card = ({
   gameInstance,
   connectedAccount,
@@ -42,7 +63,7 @@ const Card = ({
   const isWinner = gameInstance.winner === connectedAccount;
   const rewardClaimed = gameInstance.rewardClaimed;
   const feeClaimed = gameInstance.feeClaimed;
-
+  console.log(gameInstance.icon);
   useEffect(() => {
     const getPlayerRevealedState = async () => {
       gameInstance.contract
@@ -214,7 +235,9 @@ const Card = ({
           <p>Trete bei und vervielfache dein Cash!</p>
         </div>
         <div className={`${classes.cardFooter} ${footerColor}`}>
-          <div className={classes.logoPlaceholder}></div>
+          <div className={classes.logoPlaceholder}>
+            <img src={icons[gameInstance.icon]} />
+          </div>
           <div className={classes.cardInfoRows}>
             <div className={classes.cardInfoRow}>
               <img src={ethLogo} />

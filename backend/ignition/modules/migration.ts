@@ -9,11 +9,12 @@ const AverageGameModule = buildModule("AverageGameModule", (m) => {
   let betAmount = parseEther(amount.toString());
   let gameFee = BigInt((10 / 100) * 1e18 * amount);
   let id = "createAverageGame1";
+  let icon = 0;
 
   m.call(
     averageGameFactory,
     "createAverageGame",
-    [averageGame, name, maxPlayers, betAmount, gameFee],
+    [averageGame, name, maxPlayers, betAmount, gameFee, icon],
     { id }
   );
 
@@ -23,11 +24,12 @@ const AverageGameModule = buildModule("AverageGameModule", (m) => {
   betAmount = parseEther(amount.toString());
   gameFee = BigInt((10 / 100) * 1e18 * amount);
   id = "createAverageGame2";
+  icon = 1;
 
   m.call(
     averageGameFactory,
     "createAverageGame",
-    [averageGame, name, maxPlayers, betAmount, gameFee],
+    [averageGame, name, maxPlayers, betAmount, gameFee, icon],
     { id }
   );
 
@@ -37,11 +39,12 @@ const AverageGameModule = buildModule("AverageGameModule", (m) => {
   betAmount = parseEther(amount.toString());
   gameFee = BigInt((10 / 100) * 1e18 * amount);
   id = "createAverageGame3";
+  icon = 2;
 
   m.call(
     averageGameFactory,
     "createAverageGame",
-    [averageGame, name, maxPlayers, betAmount, gameFee],
+    [averageGame, name, maxPlayers, betAmount, gameFee, icon],
     { id }
   );
 
@@ -51,11 +54,12 @@ const AverageGameModule = buildModule("AverageGameModule", (m) => {
   betAmount = parseEther(amount.toString());
   gameFee = BigInt((10 / 100) * 1e18 * amount);
   id = "createAverageGame4";
+  icon = 3;
 
   m.call(
     averageGameFactory,
     "createAverageGame",
-    [averageGame, name, maxPlayers, betAmount, gameFee],
+    [averageGame, name, maxPlayers, betAmount, gameFee, icon],
     { id }
   );
 
@@ -65,11 +69,12 @@ const AverageGameModule = buildModule("AverageGameModule", (m) => {
   betAmount = parseEther(amount.toString());
   gameFee = BigInt((10 / 100) * 1e18 * amount);
   id = "createAverageGame5";
+  icon = 4;
 
   m.call(
     averageGameFactory,
     "createAverageGame",
-    [averageGame, name, maxPlayers, betAmount, gameFee],
+    [averageGame, name, maxPlayers, betAmount, gameFee, icon],
     { id }
   );
 
@@ -79,11 +84,12 @@ const AverageGameModule = buildModule("AverageGameModule", (m) => {
   betAmount = parseEther(amount.toString());
   gameFee = BigInt((10 / 100) * 1e18 * amount);
   id = "createAverageGame6";
+  icon = 5;
 
   m.call(
     averageGameFactory,
     "createAverageGame",
-    [averageGame, name, maxPlayers, betAmount, gameFee],
+    [averageGame, name, maxPlayers, betAmount, gameFee, icon],
     { id }
   );
 
@@ -93,11 +99,12 @@ const AverageGameModule = buildModule("AverageGameModule", (m) => {
   betAmount = parseEther(amount.toString());
   gameFee = BigInt((10 / 100) * 1e18 * amount);
   id = "createAverageGame7";
+  icon = 6;
 
   m.call(
     averageGameFactory,
     "createAverageGame",
-    [averageGame, name, maxPlayers, betAmount, gameFee],
+    [averageGame, name, maxPlayers, betAmount, gameFee, icon],
     { id }
   );
 
