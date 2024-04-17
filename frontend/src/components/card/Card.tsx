@@ -89,7 +89,7 @@ const Card = ({
     try {
       setIsLoading(true);
       if (phase === GameState.CommitPhase) {
-        await gameInstance.contract.closeBettingRound();
+        await gameInstance.contract.startRevealPhase();
       } else if (phase === GameState.RevealPhase) {
         await gameInstance.contract.endGame();
       } else if (phase === GameState.Ended && !feeClaimed) {
@@ -106,6 +106,17 @@ const Card = ({
       setIsLoading(true);
       setCurrentFocusedGame(gameInstance.id);
       await gameInstance.contract.withdrawPricepool(connectedAccount);
+    } catch (error) {
+      toast.error(transformError(error), { id: "error" });
+      setIsLoading(false);
+    }
+  };
+
+  const requestRefund = async () => {
+    try {
+      setIsLoading(true);
+      setCurrentFocusedGame(gameInstance.id);
+      await gameInstance.contract.requestRefund();
     } catch (error) {
       toast.error(transformError(error), { id: "error" });
       setIsLoading(false);
@@ -177,21 +188,20 @@ const Card = ({
             <div className={classes.disableCard}></div>
           )}
         {isWinner && <img className={classes.crown} src={crown} />}
-        {/* <div className={classes.phaseProgressContainer}>
-          <PhaseProgress />
-        </div> */}
 
-        <div className={classes.refundButton}>
+        <div
+          className={`${classes.refundButton} ${
+            gameInstance.gameState === GameState.Ended ? classes.hide : ""
+          }`}
+        >
           <Button
             color={color}
             style="light"
             size="round-small"
-            disabled={
-              (isLoading && currentFocusedGame === gameInstance.id) ||
-              (gameInstance.gameState === GameState.Ended && feeClaimed)
-            }
+            disabled={isLoading && currentFocusedGame === gameInstance.id}
             isLoading={isLoading && currentFocusedGame === gameInstance.id}
-            onClick={nextPhase}
+            onClick={requestRefund}
+            info="Refund beantragen: Beendet das aktuelle Spiel und zahlt alle Spieler aus!"
           >
             !
           </Button>

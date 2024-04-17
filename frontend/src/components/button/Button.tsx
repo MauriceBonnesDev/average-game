@@ -1,11 +1,13 @@
 import { RotatingLines } from "react-loader-spinner";
 import { Size, Style, Color } from "../../shared/types";
+import Tooltip from "@mui/material/Tooltip";
 import classes from "./Button.module.scss";
 
 type ButtonProps = {
   children: React.ReactNode;
   disabled?: boolean;
   isLoading?: boolean;
+  info?: string;
   size?: Size;
   style?: Style;
   color?: Color;
@@ -16,6 +18,7 @@ const Button = ({
   children,
   disabled,
   isLoading,
+  info,
   size,
   style,
   color,
@@ -62,22 +65,26 @@ const Button = ({
   }
 
   return (
-    <button
-      className={`${classes.btn} ${btnSize} ${btnStyle}`}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {isLoading ? (
-        <RotatingLines
-          strokeWidth="3"
-          width="35"
-          animationDuration="1.25"
-          strokeColor={strokeColor}
-        />
-      ) : (
-        children
-      )}
-    </button>
+    <Tooltip title={info} arrow>
+      <span>
+        <button
+          className={`${classes.btn} ${btnSize} ${btnStyle}`}
+          disabled={disabled}
+          onClick={onClick}
+        >
+          {isLoading ? (
+            <RotatingLines
+              strokeWidth="3"
+              width="35"
+              animationDuration="1.25"
+              strokeColor={strokeColor}
+            />
+          ) : (
+            children
+          )}
+        </button>
+      </span>
+    </Tooltip>
   );
 };
 
