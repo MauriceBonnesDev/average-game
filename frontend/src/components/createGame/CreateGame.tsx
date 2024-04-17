@@ -68,19 +68,64 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
       }
     };
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = event.target;
-      setGameSettings((prevState) => ({
-        ...prevState,
-        [name]: value,
-      }));
+    const handleMaxPlayersChange = (name: string, step: number) => {
+      setGameSettings((prevState) => {
+        let value = Number(prevState.maxPlayers);
+        value += step;
+        if (value < 0) {
+          value = 0;
+        }
+
+        return {
+          ...prevState,
+          [name]: value,
+        };
+      });
     };
 
-    const handleStepChange = (name: string, newValue: number) => {
-      setGameSettings((prevState) => ({
-        ...prevState,
-        [name]: newValue,
-      }));
+    const handleBetAmountChange = (name: string, step: number) => {
+      setGameSettings((prevState) => {
+        let value = Number(prevState.betAmount);
+        value += step;
+        if (value < 0) {
+          value = 0;
+        }
+
+        return {
+          ...prevState,
+          [name]: value,
+        };
+      });
+    };
+
+    const handleGameFeeChange = (name: string, step: number) => {
+      setGameSettings((prevState) => {
+        let value = Number(prevState.gameFee);
+        if (value < 100 || step < 0) {
+          value += step;
+        }
+        if (value < 0) {
+          value = 0;
+        }
+
+        return {
+          ...prevState,
+          [name]: value,
+        };
+      });
+    };
+
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+      if (
+        Number(event.target.value) >= 0 && event.target.name === "gameFee"
+          ? Number(event.target.value) <= 100
+          : true
+      ) {
+        setGameSettings((prevState) => ({
+          ...prevState,
+          [event.target.name]: Number(event.target.value),
+        }));
+      }
     };
 
     return (
@@ -97,19 +142,15 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
             name="maxPlayers"
             value={gameSettings.maxPlayers}
             onChange={handleInputChange}
-            onIncrement={handleStepChange}
-            onDecrement={handleStepChange}
+            onStepChange={handleMaxPlayersChange}
           />
           <NumberPicker
-            min={0}
-            max={1000}
             label="Einsatz"
             name="betAmount"
             step={0.01}
             value={gameSettings.betAmount}
             onChange={handleInputChange}
-            onIncrement={handleStepChange}
-            onDecrement={handleStepChange}
+            onStepChange={handleBetAmountChange}
           />
           <NumberPicker
             min={0}
@@ -118,8 +159,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
             name="gameFee"
             value={gameSettings.gameFee}
             onChange={handleInputChange}
-            onIncrement={handleStepChange}
-            onDecrement={handleStepChange}
+            onStepChange={handleGameFeeChange}
           />
         </div>
       </div>
