@@ -2,7 +2,13 @@ import type { AverageGameModule_AverageGame as TAverageGame } from "../../types/
 
 export type Size = "small" | "medium" | "large" | "round" | "round-small";
 export type Style = "light" | "dark" | "grey";
-export type Color = "purple" | "orange" | "green" | "turquoise" | "grey";
+export type Color =
+  | "purple"
+  | "orange"
+  | "green"
+  | "turquoise"
+  | "grey"
+  | "red";
 export type GameSettings = {
   contractAddress: string;
   gameMaster: string;
@@ -25,7 +31,7 @@ export enum RevealState {
   "Invalid",
 }
 
-enum GameIcon {
+export enum GameIcon {
   "Bar",
   "Bell",
   "Coin",

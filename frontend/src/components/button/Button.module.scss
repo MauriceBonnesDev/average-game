@@ -86,6 +86,12 @@
     }
   }
 
+  &.btnLightRed {
+    &:disabled:hover {
+      background-color: transparent;
+    }
+  }
+
   &:active {
     transform: translateY(0);
     box-shadow: 0 2px 5px rgba($color: colors.$purple-950, $alpha: 0.25);
@@ -144,7 +150,7 @@
   }
 
   &DarkGreen {
-    background-color: rgba($color: colors.$green-800, $alpha: 0.25);
+    background-color: colors.$green-600;
     color: colors.$white;
   }
 
@@ -166,6 +172,11 @@
   &DarkTurquoise {
     background-color: rgba($color: colors.$turquoise-800, $alpha: 0.25);
     color: colors.$white;
+  }
+
+  &LightRed {
+    background-color: #e5e5ea;
+    color: colors.$red;
   }
 
   &Grey {

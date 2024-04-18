@@ -49,20 +49,25 @@ const Modal = React.forwardRef<DialogRef, ModalProps>(
         onClose={onClose}
       >
         <div id={classes.modalBody}>
-          <button
-            className={classes.closeBtn}
-            onClick={() => dialog.current?.close()}
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
+          <span className={classes.closeBtn}>
+            <Button
+              style="light"
+              color="red"
+              onClick={() => dialog.current?.close()}
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </Button>
+          </span>
           <h2>{title}</h2>
           <p>{disclaimer}</p>
           <form className={classes.modalForm} onSubmit={onSubmit}>
             {children}
 
-            <Button size="large" style="dark">
-              {submitText}
-            </Button>
+            <span className={classes.submitButton}>
+              <Button size="large" style="dark" color="green">
+                {submitText}
+              </Button>
+            </span>
           </form>
         </div>
       </dialog>,

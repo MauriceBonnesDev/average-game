@@ -5,10 +5,17 @@ type TextInputProps = {
   label: string;
   name: string;
   value: string;
+  placeholder: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
-const TextInput = ({ label, name, value, onChange }: TextInputProps) => {
+const TextInput = ({
+  label,
+  name,
+  value,
+  placeholder,
+  onChange,
+}: TextInputProps) => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event);
   };
@@ -20,6 +27,7 @@ const TextInput = ({ label, name, value, onChange }: TextInputProps) => {
         id={name}
         type="text"
         value={value}
+        placeholder={placeholder}
         onChange={onInputChange}
       />
     </div>

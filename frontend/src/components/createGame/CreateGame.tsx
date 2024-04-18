@@ -6,6 +6,7 @@ import { EventLog } from "ethers";
 import TextInput from "../textInput/TextInput";
 import classes from "./CreateGame.module.scss";
 import { GameSettings } from "../../shared/types";
+import IconPicker from "../iconPicker/IconPicker";
 
 type CreateGameProps = {
   contractAddress: string;
@@ -131,39 +132,57 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
       }
     };
 
+    const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+      setGameSettings((prevState) => ({
+        ...prevState,
+        [event.target.name]: event.target.value,
+      }));
+    };
+
+    const handleSetIcon = (icon: number) => {
+      setGameSettings((prevState) => ({
+        ...prevState,
+        icon,
+      }));
+    };
+
     return (
       <div className={classes.content}>
         <TextInput
           name="name"
-          label="Spielname"
-          onChange={handleInputChange}
+          label="Wähle einen Namen fürs Spiel"
+          placeholder="Spielname"
+          onChange={handleNameChange}
           value={gameSettings.name}
         />
-        <div className={classes.numberInputs}>
-          <NumberPicker
-            label="Max Players"
-            name="maxPlayers"
-            value={gameSettings.maxPlayers}
-            onChange={handleInputChange}
-            onStepChange={handleMaxPlayersChange}
-          />
-          <NumberPicker
-            label="Einsatz"
-            name="betAmount"
-            step={0.01}
-            value={gameSettings.betAmount}
-            onChange={handleInputChange}
-            onStepChange={handleBetAmountChange}
-          />
-          <NumberPicker
-            min={0}
-            max={100}
-            label="Gebühren"
-            name="gameFee"
-            value={gameSettings.gameFee}
-            onChange={handleInputChange}
-            onStepChange={handleGameFeeChange}
-          />
+        <div className={classes.contentBottom}>
+          <div className={classes.numberInputs}>
+            <NumberPicker
+              label="Max Players"
+              name="maxPlayers"
+              value={gameSettings.maxPlayers}
+              onChange={handleInputChange}
+              onStepChange={handleMaxPlayersChange}
+            />
+            <NumberPicker
+              label="Einsatz"
+              name="betAmount"
+              step={0.01}
+              value={gameSettings.betAmount}
+              onChange={handleInputChange}
+              onStepChange={handleBetAmountChange}
+            />
+            <NumberPicker
+              min={0}
+              max={100}
+              label="Gebühren"
+              name="gameFee"
+              value={gameSettings.gameFee}
+              onChange={handleInputChange}
+              onStepChange={handleGameFeeChange}
+            />
+          </div>
+          <IconPicker setIcon={handleSetIcon} />
         </div>
       </div>
     );

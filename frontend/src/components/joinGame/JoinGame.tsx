@@ -125,6 +125,7 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
           name="salt"
           onChange={handleSaltChange}
           value={userInput.salt}
+          placeholder="Geheimnis eingeben"
         />
         <NumberPicker
           min={0}

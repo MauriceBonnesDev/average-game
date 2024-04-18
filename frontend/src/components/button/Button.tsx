@@ -49,6 +49,8 @@ const Button = ({
     } else if (color === "turquoise") {
       btnStyle = classes.btnLightTurquoise;
       strokeColor = "#49fff5";
+    } else if (color === "red") {
+      btnStyle = classes.btnLightRed;
     }
   } else if (style === "dark") {
     if (color === "purple") {

@@ -230,10 +230,9 @@ const GamesPage = () => {
   return wallet ? (
     <>
       <Modal
-        title="Spiel erstellen"
-        submitText="Erstellen"
-        disclaimer="Hier kommt nochmal ein kurzer Disclaimer hin, was zu beachten ist
-          beim Erstellen eines Spiels"
+        title="Create Game"
+        submitText="Start Game"
+        disclaimer="" // Hier kommt nochmal ein kurzer Disclaimer hin, was zu beachten ist beim Erstellen eines Spiels
         onClick={createGame}
         onClose={handleCreateGameClose}
         ref={dialog}

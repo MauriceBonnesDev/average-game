@@ -2,16 +2,15 @@
 .numberPicker {
   display: flex;
   flex-direction: column;
-  align-items: center;
 
   input {
     border: 1px solid colors.$dark-grey;
     border-left: none;
     border-right: none;
-    background-color: transparent;
+    background-color: colors.$turquoise-100;
     text-align: center;
     font-size: 20px;
-    padding: 10px;
+    padding: 10px 25px;
     line-height: unset;
     width: 80px;
 
@@ -25,7 +24,6 @@
 
 .inputContainer {
   display: flex;
-  align-items: center;
 
   & > span {
     display: flex;
@@ -36,6 +34,14 @@
     border: 1px solid colors.$dark-grey;
     padding: 15px;
     font-size: 20px;
-    color: colors.$purple-800;
+    color: white;
   }
+}
+
+.rightButton {
+  background-color: colors.$turquoise-500;
+}
+
+.leftButton {
+  background-color: colors.$turquoise-600;
 }

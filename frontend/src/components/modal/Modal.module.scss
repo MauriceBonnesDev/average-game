@@ -14,10 +14,8 @@
     background: rgba(0, 0, 0, 0.7);
   }
   h2 {
-    font-family: "Handjet", monospace;
     margin: 0 0 0.25rem 0;
     font-size: 3rem;
-    text-transform: uppercase;
   }
 
   &Form {
@@ -33,8 +31,9 @@
 }
 
 #modalBody {
-  padding: 2rem;
+  padding: 4rem;
   position: relative;
+  width: 560px;
 }
 
 @keyframes slide-in-from-top {
@@ -62,10 +61,22 @@
 
 .closeBtn {
   position: absolute;
-  top: 19px;
-  right: 19px;
+  top: 35px;
+  right: 35px;
   border: none;
   font-size: 28px;
   background-color: transparent;
   cursor: pointer;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  line-height: initial;
+}
+
+.submitButton {
+  align-self: center;
+  margin-top: 2rem;
 }

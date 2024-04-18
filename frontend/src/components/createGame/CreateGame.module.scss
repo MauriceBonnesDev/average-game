@@ -1,6 +1,17 @@
 .content {
   display: flex;
   flex-direction: column;
+  padding-top: 1.3rem;
+
+  & > :first-child {
+    margin-bottom: 2.2rem;
+  }
+
+  &Bottom {
+    display: flex;
+    justify-content: space-between;
+    height: 300px;
+  }
 }
 
 .numberInputs {

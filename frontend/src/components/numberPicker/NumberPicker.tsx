@@ -30,7 +30,10 @@ const NumberPicker = ({
     <div className={classes.numberPicker}>
       <label htmlFor={label}>{label}</label>
       <div className={classes.inputContainer}>
-        <span onClick={() => onStepChange(name, -step)}>
+        <span
+          className={classes.leftButton}
+          onClick={() => onStepChange(name, -step)}
+        >
           <i className="fas fa-minus"></i>
         </span>
         <input
@@ -43,7 +46,10 @@ const NumberPicker = ({
           max={max}
           onChange={onInputChange}
         />
-        <span onClick={() => onStepChange(name, step)}>
+        <span
+          className={classes.rightButton}
+          onClick={() => onStepChange(name, step)}
+        >
           <i className="fas fa-plus"></i>
         </span>
       </div>
