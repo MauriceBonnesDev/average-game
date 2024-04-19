@@ -9,7 +9,6 @@ import seven from "../../assets/seven.png";
 import shamrock from "../../assets/shamrock.png";
 import star from "../../assets/star.png";
 import { useEffect, useRef, useState } from "react";
-import ethLogo from "../../assets/eth.svg";
 import Button from "../button/Button";
 import JoinGame, { JoinGameRef } from "../joinGame/JoinGame";
 import Modal, { DialogRef } from "../modal/Modal";
@@ -22,6 +21,7 @@ import {
   RevealState,
 } from "../../shared/types";
 import { transformError } from "../../shared/utils";
+import CardInfoRow from "./CardInfoRow";
 
 type CardProps = {
   gameInstance: AverageGameInstance;
@@ -63,7 +63,7 @@ const Card = ({
   const isWinner = gameInstance.winner === connectedAccount;
   const rewardClaimed = gameInstance.rewardClaimed;
   const feeClaimed = gameInstance.feeClaimed;
-  console.log(gameInstance.icon);
+
   useEffect(() => {
     const getPlayerRevealedState = async () => {
       gameInstance.contract
@@ -114,6 +114,7 @@ const Card = ({
       } else if (phase === GameState.RevealPhase) {
         await gameInstance.contract.endGame();
       } else if (phase === GameState.Ended && !feeClaimed) {
+        console.log(connectedAccount, gameInstance.gameMaster);
         await gameInstance.contract.withdrawGameFees();
       }
     } catch (error) {
@@ -167,40 +168,38 @@ const Card = ({
   const openModal = () => {
     dialog.current?.open();
   };
+  const modalTitle =
+    gameInstance.gameState === GameState.CommitPhase
+      ? "Join Game"
+      : "Veröffentliche deinen Tipp!";
+  const disclaimer =
+    gameInstance.gameState === GameState.CommitPhase
+      ? "Wähle eine Zahl zwischen 0 und 1000"
+      : "Wähle genau die Zahl und das Geheimnis was du vorher gewählt hast.";
+  const submitText =
+    gameInstance.gameState === GameState.CommitPhase ? "Join" : "Reveal";
+  const onModalClick = () => {
+    gameInstance.gameState === GameState.CommitPhase
+      ? joinGame()
+      : revealGuess();
+  };
 
   return (
     <>
-      {gameInstance.gameState === GameState.CommitPhase ? (
-        <Modal
-          title="Join Game"
-          disclaimer="Wähle eine Zahl zwischen 0 und 1000"
-          submitText="Join"
-          onClick={joinGame}
-          onClose={handleJoinGameClose}
-          ref={dialog}
-        >
-          <JoinGame
-            ref={joinGameRef}
-            setIsLoading={setIsLoading}
-            gameInstance={gameInstance}
-          />
-        </Modal>
-      ) : (
-        <Modal
-          title="Veröffentliche deinen Tipp!"
-          disclaimer="Wähle genau die Zahl und das Geheimnis was du vorher gewählt hast."
-          submitText="Reveal"
-          onClick={revealGuess}
-          onClose={handleJoinGameClose}
-          ref={dialog}
-        >
-          <JoinGame
-            ref={joinGameRef}
-            setIsLoading={setIsLoading}
-            gameInstance={gameInstance}
-          />
-        </Modal>
-      )}
+      <Modal
+        title={modalTitle}
+        disclaimer={disclaimer}
+        submitText={submitText}
+        onClick={onModalClick}
+        onClose={handleJoinGameClose}
+        ref={dialog}
+      >
+        <JoinGame
+          ref={joinGameRef}
+          setIsLoading={setIsLoading}
+          gameInstance={gameInstance}
+        />
+      </Modal>
       <div className={`${classes.card} ${cardColor}`}>
         {gameInstance.gameState === GameState.Ended &&
           ((!isWinner && !gameMasterConnected) ||
@@ -239,16 +238,8 @@ const Card = ({
             <img src={icons[gameInstance.icon]} />
           </div>
           <div className={classes.cardInfoRows}>
-            <div className={classes.cardInfoRow}>
-              <img src={ethLogo} />
-              <p className={classes.cardInfoPrice}>{betAmount.toFixed(2)}</p>
-              <p className={classes.cardInfoName}>Entry</p>
-            </div>
-            <div className={classes.cardInfoRow}>
-              <img className={classes.cardInfoLogo} src={ethLogo} />
-              <p className={classes.cardInfoPrice}>{pricePool.toFixed(2)}</p>
-              <p className={classes.cardInfoName}>Pricepool</p>
-            </div>
+            <CardInfoRow amount={betAmount} title="Entry" />
+            <CardInfoRow amount={pricePool} title="Pricepool" />
           </div>
           <div className={classes.cardJoinSection}>
             {connectedAccount === gameInstance.gameMaster ? (

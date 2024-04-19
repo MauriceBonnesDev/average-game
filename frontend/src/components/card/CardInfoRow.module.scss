@@ -1,0 +1,27 @@
+@use "../../colors";
+
+.cardInfoRow {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+
+  & > img {
+    width: 16px;
+    height: 16px;
+    color: colors.$white;
+  }
+
+  .cardInfoPrice {
+    font-weight: 800;
+    color: colors.$white;
+    font-size: 20px;
+    margin-left: 0.2rem;
+  }
+
+  .cardInfoName {
+    font-weight: 200;
+    font-size: 17px;
+    color: colors.$off-white;
+    margin-left: 0.5rem;
+  }
+}

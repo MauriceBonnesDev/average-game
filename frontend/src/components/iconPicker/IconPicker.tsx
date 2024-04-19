@@ -9,21 +9,81 @@ import rocket from "../../assets/test/rocket.png";
 import shamrock from "../../assets/test/shamrock.png";
 import star from "../../assets/test/star.png";
 import { GameIcon } from "../../shared/types";
+import SelectIcon from "../selectIcon/SelectIcon";
 import { useState } from "react";
 
 type IconPickerProps = { setIcon: (icon: GameIcon) => void };
 const IconPicker = ({ setIcon }: IconPickerProps) => {
-  const [selected, setSelected] = useState<GameIcon | null>();
-  const handleOnClick = (icon: GameIcon) => {
-    setIcon(icon);
-    setSelected(icon);
-  };
+  const [selected, setSelected] = useState<GameIcon | null>(null);
 
   return (
     <div className={classes.container}>
       <label>Icon aussuchen</label>
       <div className={classes.grid}>
-        <img
+        <SelectIcon
+          icon={GameIcon.Cards}
+          src={cards}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <SelectIcon
+          icon={GameIcon.CasinoChip}
+          src={casinoChip}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <SelectIcon
+          icon={GameIcon.Coin}
+          src={coin}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <SelectIcon
+          icon={GameIcon.Crown}
+          src={crownIcon}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <SelectIcon
+          icon={GameIcon.Diamond}
+          src={diamond}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <SelectIcon
+          icon={GameIcon.Medal}
+          src={medal}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <SelectIcon
+          icon={GameIcon.Rocket}
+          src={rocket}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <SelectIcon
+          icon={GameIcon.Shamrock}
+          src={shamrock}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <SelectIcon
+          icon={GameIcon.Star}
+          src={star}
+          setIcon={setIcon}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        {/* <img
           className={selected === GameIcon.Bar ? classes.active : undefined}
           src={cards}
           onClick={() => handleOnClick(GameIcon.Bar)}
@@ -71,7 +131,7 @@ const IconPicker = ({ setIcon }: IconPickerProps) => {
           className={selected === GameIcon.Star ? classes.active : undefined}
           src={star}
           onClick={() => handleOnClick(GameIcon.Star)}
-        />
+        /> */}
       </div>
     </div>
   );

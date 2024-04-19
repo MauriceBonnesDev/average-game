@@ -32,13 +32,13 @@ export enum RevealState {
 }
 
 export enum GameIcon {
-  "Bar",
-  "Bell",
+  "Cards",
+  "CasinoChip",
   "Coin",
   "Crown",
   "Diamond",
-  "Horseshoe",
-  "Seven",
+  "Medal",
+  "Rocket",
   "Shamrock",
   "Star",
 }

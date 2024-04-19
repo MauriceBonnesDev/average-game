@@ -5,7 +5,7 @@ import { useWeb3Context } from "../../hooks/useWeb3Context";
 
 const Navbar = () => {
   const { address, init, disconnect } = useWeb3Context();
-
+  console.log(address);
   const formatAddress = (address: string) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };

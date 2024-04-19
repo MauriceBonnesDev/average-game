@@ -11,7 +11,6 @@ const useEventListening = (
     averageGameInstances
       .filter((game) => game.id === gameId || gameId === -1)
       .map((averageGame) => {
-        // console.log("Listener initialized for game", averageGame.id);
         averageGame.contract.on(
           averageGame.contract.filters["PlayerJoined(uint256,address,uint256)"],
           (gameId, player, totalPlayers) => {
@@ -40,6 +39,20 @@ const useEventListening = (
               salt,
               "and state",
               revealState
+            );
+            fetchSingleGame(Number(gameId));
+          }
+        );
+        averageGame.contract.on(
+          averageGame.contract.filters["FeeCollected(uint256,address,uint256)"],
+          (gameId, player, amount) => {
+            console.log(
+              "Player",
+              player,
+              "collected fee",
+              amount,
+              "in game",
+              gameId
             );
             fetchSingleGame(Number(gameId));
           }

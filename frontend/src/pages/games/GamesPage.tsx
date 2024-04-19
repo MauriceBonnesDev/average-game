@@ -125,7 +125,7 @@ const GamesPage = () => {
       feeClaimed,
       icon,
     ] = gameInstance;
-    console.log(icon);
+
     return {
       id: Number(id),
       name,

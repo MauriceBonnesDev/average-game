@@ -1,0 +1,37 @@
+@use "../../colors.scss";
+
+.container {
+  position: relative;
+  color: transparent;
+
+  & img {
+    height: 65px;
+    width: 65px;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+      cursor: pointer;
+      transform: translate3d(0, -5px, 10px);
+    }
+
+    &:active {
+      transform: unset;
+    }
+  }
+
+  .active {
+    filter: unset;
+  }
+}
+
+.checkIt {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  font-size: 25px;
+}
+
+.active {
+  color: colors.$green-600;
+}
