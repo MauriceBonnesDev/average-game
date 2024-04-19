@@ -334,13 +334,12 @@ contract AverageGame is ReentrancyGuard {
             "Reveal Phase hat noch nicht begonnen!"
         );
         console.log("Determining potential winners");
-        int256 twoThirdAverage = calculateTwoThirdAverage();
+        UD60x18 twoThirdAverage = calculateTwoThirdAverage();
 
-        if (twoThirdAverage == -1) {
+        if (twoThirdAverage == convert(1000)) {
             totalPotentialWinners = -1;
             return;
         }
-        UD60x18 average = convert(uint256(twoThirdAverage));
 
         potentialWinners = new address[](totalPlayers);
         UD60x18 minDistance = convert(maxGuess);
@@ -350,10 +349,10 @@ contract AverageGame is ReentrancyGuard {
             address currentPlayer = players[i];
             UD60x18 guess = convert(revealedGuesses[currentPlayer]);
             UD60x18 distance = ZERO;
-            if (guess < average) {
-                distance = average - guess;
+            if (guess < twoThirdAverage) {
+                distance = twoThirdAverage - guess;
             } else {
-                distance = guess - average;
+                distance = guess - twoThirdAverage;
             }
 
             if (distance < minDistance) {
@@ -384,7 +383,7 @@ contract AverageGame is ReentrancyGuard {
      * @dev participants is the amount of players that correctly revealed their guesses
      * @return result The 2/3 average of the correctly revealed guesses
      */
-    function calculateTwoThirdAverage() private view returns (int256 result) {
+    function calculateTwoThirdAverage() private view returns (UD60x18 result) {
         UD60x18 sum = ZERO;
         UD60x18 participants = ZERO;
         UD60x18 average = ZERO;
@@ -401,12 +400,11 @@ contract AverageGame is ReentrancyGuard {
         }
 
         if (isZero(participants)) {
-            return -1;
+            return convert(1000);
         }
 
         average = div(sum, participants);
-
-        result = int256(convert(div(mul(average, convert(2)), convert(3))));
+        result = div(mul(average, convert(2)), convert(3));
     }
 
     /**
