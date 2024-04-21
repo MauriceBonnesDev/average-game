@@ -1,11 +1,10 @@
-import crown from "../../assets/crown.png";
-import bar from "../../assets/bar.png";
-import bell from "../../assets/bell.png";
+import cards from "../../assets/cards.png";
+import casinoChip from "../../assets/casinoChip.png";
 import coin from "../../assets/coin.png";
-import crownIcon from "../../assets/crownIcon.png";
+import crown from "../../assets/crown.png";
 import diamond from "../../assets/diamond.png";
-import horseshoe from "../../assets/horseshoe.png";
-import seven from "../../assets/seven.png";
+import medal from "../../assets/medal.png";
+import rocket from "../../assets/rocket.png";
 import shamrock from "../../assets/shamrock.png";
 import star from "../../assets/star.png";
 import { useEffect, useRef, useState } from "react";
@@ -33,13 +32,13 @@ type CardProps = {
 };
 
 const icons = [
-  bar,
-  bell,
+  cards,
+  casinoChip,
   coin,
-  crownIcon,
+  crown,
   diamond,
-  horseshoe,
-  seven,
+  medal,
+  rocket,
   shamrock,
   star,
 ];

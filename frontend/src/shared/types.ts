@@ -16,7 +16,7 @@ export type GameSettings = {
   maxPlayers: number;
   betAmount: number;
   gameFee: number;
-  icon: GameIcon;
+  icon: GameIcon | null;
 };
 
 export enum GameState {
