@@ -14,6 +14,7 @@ type ModalProps = {
 
 export type DialogRef = {
   open: () => void;
+  close: () => void;
 };
 
 const Modal = React.forwardRef<DialogRef, ModalProps>(
@@ -24,6 +25,9 @@ const Modal = React.forwardRef<DialogRef, ModalProps>(
       return {
         open() {
           dialog.current?.showModal();
+        },
+        close() {
+          dialog.current?.close();
         },
       };
     });
@@ -38,7 +42,6 @@ const Modal = React.forwardRef<DialogRef, ModalProps>(
     const onSubmit = (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       onClick();
-      dialog.current?.close();
     };
 
     return createPortal(
@@ -64,7 +67,7 @@ const Modal = React.forwardRef<DialogRef, ModalProps>(
             {children}
 
             <span className={classes.submitButton}>
-              <Button size="large" style="dark" color="green">
+              <Button size="large" style="dark" color="green" type="submit">
                 {submitText}
               </Button>
             </span>

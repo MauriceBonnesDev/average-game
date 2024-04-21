@@ -241,6 +241,7 @@ const GamesPage = () => {
           ref={createGameRef}
           factoryContract={factoryContract}
           contractAddress={addresses["AverageGameModule#AverageGame"]}
+          closeModal={dialog.current?.close}
         />
       </Modal>
       {averageGameInstances.length > 0 && (
