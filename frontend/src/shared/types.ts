@@ -22,6 +22,7 @@ export type GameSettings = {
 export enum GameState {
   "CommitPhase",
   "RevealPhase",
+  "Cancelled",
   "Ended",
 }
 

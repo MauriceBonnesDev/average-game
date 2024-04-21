@@ -103,14 +103,29 @@
     background-color: colors.$turquoise-600;
   }
 
-  .logoPlaceholder {
+  .logo {
     height: 61px;
     width: 61px;
     border-radius: 10px;
-    background-color: colors.$purple-50;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    &Purple {
+      background-color: colors.$purple-50;
+    }
+
+    &Orange {
+      background-color: colors.$orange-50;
+    }
+
+    &Green {
+      background-color: colors.$green-50;
+    }
+
+    &Turquoise {
+      background-color: colors.$turquoise-50;
+    }
 
     & > img {
       height: 50px;

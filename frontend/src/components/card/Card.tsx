@@ -64,6 +64,9 @@ const Card = ({
   const isWinner = gameInstance.winner === connectedAccount;
   const rewardClaimed = gameInstance.rewardClaimed;
   const feeClaimed = gameInstance.feeClaimed;
+  const [loadingButton, setLoadingButton] = useState<"refund" | "action">(
+    "action"
+  );
 
   useEffect(() => {
     const getPlayerRevealedState = async () => {
@@ -82,12 +85,14 @@ const Card = ({
   let cardColor = classes.cardPurple;
 
   let footerColor = classes.cardFooterPurple;
+  let logoColor = classes.logoPurple;
 
   let color: Color = "purple";
 
   if (gameMasterConnected) {
     cardColor = classes.cardTurquoise;
     footerColor = classes.cardFooterTurquoise;
+    logoColor = classes.logoTurquoise;
     color = "turquoise";
   } else if (
     playerJoined &&
@@ -96,6 +101,7 @@ const Card = ({
   ) {
     cardColor = classes.cardGreen;
     footerColor = classes.cardFooterGreen;
+    logoColor = classes.logoGreen;
     color = "green";
   } else if (
     gameInstance.gameState === GameState.RevealPhase ||
@@ -103,6 +109,7 @@ const Card = ({
   ) {
     cardColor = classes.cardOrange;
     footerColor = classes.cardFooterOrange;
+    logoColor = classes.logoOrange;
     color = "orange";
   }
 
@@ -110,6 +117,8 @@ const Card = ({
     const phase = gameInstance.gameState;
     try {
       setIsLoading(true);
+      setLoadingButton("action");
+      setCurrentFocusedGame(gameInstance.id);
       if (phase === GameState.CommitPhase) {
         await gameInstance.contract.startRevealPhase();
       } else if (phase === GameState.RevealPhase) {
@@ -137,6 +146,7 @@ const Card = ({
   const requestRefund = async () => {
     try {
       setIsLoading(true);
+      setLoadingButton("refund");
       setCurrentFocusedGame(gameInstance.id);
       await gameInstance.contract.requestRefund();
     } catch (error) {
@@ -148,6 +158,7 @@ const Card = ({
   const joinGame = () => {
     if (joinGameRef.current) {
       setCurrentFocusedGame(gameInstance.id);
+      setLoadingButton("action");
       joinGameRef.current.joinGame();
     }
   };
@@ -155,6 +166,7 @@ const Card = ({
   const revealGuess = () => {
     if (joinGameRef.current) {
       setCurrentFocusedGame(gameInstance.id);
+      setLoadingButton("action");
       joinGameRef.current.revealGuess();
     }
   };
@@ -203,17 +215,25 @@ const Card = ({
         />
       </Modal>
       <div className={`${classes.card} ${cardColor}`}>
-        {gameInstance.gameState === GameState.Ended &&
+        {gameInstance.gameState === GameState.Cancelled ? (
+          <div className={classes.disableCard}></div>
+        ) : (
+          gameInstance.gameState === GameState.Ended &&
           ((!isWinner && !gameMasterConnected) ||
             (isWinner && rewardClaimed) ||
             (gameMasterConnected && feeClaimed)) && (
             <div className={classes.disableCard}></div>
-          )}
+          )
+        )}
         {isWinner && <img className={classes.crown} src={winnerCrown} />}
 
         <div
           className={`${classes.refundButton} ${
-            gameInstance.gameState === GameState.Ended ? classes.hide : ""
+            gameInstance.gameState === GameState.Ended ||
+            gameInstance.gameState === GameState.Cancelled ||
+            connectedAccount === gameInstance.gameMaster
+              ? classes.hide
+              : ""
           }`}
         >
           <Button
@@ -221,7 +241,11 @@ const Card = ({
             style="light"
             size="round-small"
             disabled={isLoading && currentFocusedGame === gameInstance.id}
-            isLoading={isLoading && currentFocusedGame === gameInstance.id}
+            isLoading={
+              isLoading &&
+              loadingButton === "refund" &&
+              currentFocusedGame === gameInstance.id
+            }
             onClick={requestRefund}
             info="Refund beantragen: Beendet das aktuelle Spiel und zahlt alle Spieler aus!"
           >
@@ -240,7 +264,7 @@ const Card = ({
           <p>Trete bei und vervielfache dein Cash!</p>
         </div>
         <div className={`${classes.cardFooter} ${footerColor}`}>
-          <div className={classes.logoPlaceholder}>
+          <div className={`${classes.logo} ${logoColor}`}>
             <img src={icons[gameInstance.icon]} />
           </div>
           <div className={classes.cardInfoRows}>
@@ -254,9 +278,14 @@ const Card = ({
                 style="light"
                 disabled={
                   (isLoading && currentFocusedGame === gameInstance.id) ||
-                  (gameInstance.gameState === GameState.Ended && feeClaimed)
+                  (gameInstance.gameState === GameState.Ended && feeClaimed) ||
+                  gameInstance.gameState === GameState.Cancelled
                 }
-                isLoading={isLoading && currentFocusedGame === gameInstance.id}
+                isLoading={
+                  isLoading &&
+                  loadingButton === "action" &&
+                  currentFocusedGame === gameInstance.id
+                }
                 onClick={nextPhase}
                 size="small"
               >
@@ -266,6 +295,8 @@ const Card = ({
                   ? "End Game"
                   : gameInstance.gameState === GameState.Ended && feeClaimed
                   ? "Game ended"
+                  : gameInstance.gameState === GameState.Cancelled
+                  ? "Cancelled"
                   : "Claim Fee"}
               </Button>
             ) : gameInstance.gameState === GameState.CommitPhase ? (
@@ -275,7 +306,11 @@ const Card = ({
                   playerJoined ||
                   (isLoading && currentFocusedGame === gameInstance.id)
                 }
-                isLoading={isLoading && currentFocusedGame === gameInstance.id}
+                isLoading={
+                  isLoading &&
+                  loadingButton === "action" &&
+                  currentFocusedGame === gameInstance.id
+                }
                 style="light"
                 onClick={openModal}
                 size="small"
@@ -289,7 +324,11 @@ const Card = ({
                   playerRevealed ||
                   (isLoading && currentFocusedGame === gameInstance.id)
                 }
-                isLoading={isLoading && currentFocusedGame === gameInstance.id}
+                isLoading={
+                  isLoading &&
+                  loadingButton === "action" &&
+                  currentFocusedGame === gameInstance.id
+                }
                 style="light"
                 onClick={openModal}
                 size="small"
@@ -303,7 +342,11 @@ const Card = ({
                   rewardClaimed ||
                   (isLoading && currentFocusedGame === gameInstance.id)
                 }
-                isLoading={isLoading && currentFocusedGame === gameInstance.id}
+                isLoading={
+                  isLoading &&
+                  loadingButton === "action" &&
+                  currentFocusedGame === gameInstance.id
+                }
                 style="light"
                 onClick={claimReward}
                 size="small"
@@ -313,12 +356,14 @@ const Card = ({
             ) : (
               <Button
                 color={color}
-                disabled
+                disabled={true}
                 style="light"
                 onClick={claimReward}
                 size="small"
               >
-                Lost
+                {gameInstance.gameState === GameState.Cancelled
+                  ? "Cancelled"
+                  : "Lost"}
               </Button>
             )}
             <p className={classes.playerCount}>

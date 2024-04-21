@@ -70,6 +70,7 @@ contract AverageGame is ReentrancyGuard {
     enum GameState {
         CommitPhase, // Participants are committing their guesses
         RevealPhase, // Participants are revealing their guesses
+        Cancelled,
         Ended // The game has ended
     }
 
@@ -564,7 +565,7 @@ contract AverageGame is ReentrancyGuard {
         );
         require(blockNumber + timeToPass < block.number, message);
         refundPlayers();
-        state = GameState.Ended;
+        state = GameState.Cancelled;
         emit GameEnded(id);
     }
 
