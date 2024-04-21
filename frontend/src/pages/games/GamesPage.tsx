@@ -172,6 +172,7 @@ const GamesPage = () => {
         (id, proxyAddress) => onGameChanged(Number(id), proxyAddress)
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [factoryContract, wallet]);
 
   // Cleanup event listeners

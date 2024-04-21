@@ -22,6 +22,7 @@ import {
 } from "../../shared/types";
 import { transformError } from "../../shared/utils";
 import CardInfoRow from "./CardInfoRow";
+import { Box, Tooltip } from "@mui/material";
 
 type CardProps = {
   gameInstance: AverageGameInstance;
@@ -229,9 +230,13 @@ const Card = ({
         </div>
         <div className={classes.cardBody}>
           <h5>Get Started</h5>
-          <h3>
-            {name} #{id}
-          </h3>
+          <Tooltip title={`${name} #${id}`}>
+            <h3 style={{ width: "100%", textWrap: "nowrap" }}>
+              <Box component="h3" textOverflow="ellipsis" overflow="hidden">
+                {name} #{id}
+              </Box>
+            </h3>
+          </Tooltip>
           <p>Trete bei und vervielfache dein Cash!</p>
         </div>
         <div className={`${classes.cardFooter} ${footerColor}`}>

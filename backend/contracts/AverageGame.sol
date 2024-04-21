@@ -106,7 +106,7 @@ contract AverageGame is ReentrancyGuard {
         );
         require(
             playerAlreadyJoined[_player],
-            "Keine g\xC3\xBCltige Spieleradresse!"
+            "Nur beigetretene Spieler k\xC3\xB6nnen diese Funktion aufrufen!"
         );
         _;
     }
@@ -224,7 +224,7 @@ contract AverageGame is ReentrancyGuard {
         );
         require(
             !playerAlreadyJoined[msg.sender],
-            "Spieler ist dem Spiel bereits beigetreten!"
+            "Du bist dem Spiel bereits beigetreten!"
         );
 
         totalBetAmount += betAmount;
@@ -564,6 +564,7 @@ contract AverageGame is ReentrancyGuard {
         );
         require(blockNumber + timeToPass < block.number, message);
         refundPlayers();
+        state = GameState.Ended;
         emit GameEnded(id);
     }
 
