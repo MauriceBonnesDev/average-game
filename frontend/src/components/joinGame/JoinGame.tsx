@@ -5,10 +5,12 @@ import TextInput from "../textInput/TextInput";
 import toast from "react-hot-toast";
 import { transformError } from "../../shared/utils";
 import { AverageGameInstance } from "../../shared/types";
+import { FormikErrors, useFormik } from "formik";
 
 type JoinGameProps = {
   gameInstance: AverageGameInstance;
   setIsLoading: (isLoading: boolean) => void;
+  closeModal?: () => void;
 };
 
 export type JoinGameRef = {
@@ -23,12 +25,59 @@ type UserGuessSubmission = {
 };
 
 const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
-  ({ gameInstance, setIsLoading }, ref) => {
-    const [userInput, setUserInput] = useState<UserGuessSubmission>({
-      guess: 0,
-      salt: "",
-    });
+  ({ gameInstance, setIsLoading, closeModal }, ref) => {
+    const [functionToCall, setFunction] = useState<"joinGame" | "revealGuess">(
+      "joinGame"
+    );
     const { contract, entryPrice, collateral, gameFee } = gameInstance;
+
+    useImperativeHandle(ref, () => {
+      return {
+        close() {
+          formik.resetForm();
+        },
+        joinGame() {
+          setFunction("joinGame");
+          formik.handleSubmit();
+        },
+        revealGuess() {
+          setFunction("revealGuess");
+          formik.handleSubmit();
+        },
+      };
+    });
+
+    const validate = (values: UserGuessSubmission) => {
+      const errors: FormikErrors<UserGuessSubmission> = {};
+      if (!values.guess) {
+        errors.guess = "Bitte geben Sie einen Tipp ein";
+      }
+
+      if (!values.salt) {
+        errors.salt = "Bitte geben Sie einen Geheimnis ein";
+      }
+
+      return errors;
+    };
+
+    const formik = useFormik<UserGuessSubmission>({
+      initialValues: {
+        guess: 0,
+        salt: "",
+      },
+      validate,
+      onSubmit: () => {
+        if (functionToCall === "joinGame") {
+          joinGame();
+        } else {
+          revealGuess();
+        }
+
+        if (closeModal) {
+          closeModal();
+        }
+      },
+    });
 
     const joinGame = async () => {
       if (contract) {
@@ -36,7 +85,7 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
           setIsLoading(true);
           const hash = solidityPackedKeccak256(
             ["uint256", "string"],
-            [userInput.guess, userInput.salt]
+            [formik.values.guess, formik.values.salt]
           );
           const transactionResponse = await contract.joinGame(hash, {
             value:
@@ -59,8 +108,8 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
         try {
           setIsLoading(true);
           const transactionResponse = await contract.revealGuess(
-            userInput.guess,
-            userInput.salt
+            formik.values.guess,
+            formik.values.salt
           );
           await transactionResponse.wait();
           console.log("Erfolgreich veröffentlicht");
@@ -72,22 +121,8 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
       }
     };
 
-    useImperativeHandle(ref, () => {
-      return {
-        close() {
-          setUserInput({ guess: 0, salt: "" });
-        },
-        joinGame() {
-          joinGame();
-        },
-        revealGuess() {
-          revealGuess();
-        },
-      };
-    });
-
     const handleSaltChange = (event: ChangeEvent<HTMLInputElement>) => {
-      setUserInput((prevState) => ({
+      formik.setValues((prevState) => ({
         ...prevState,
         salt: event.target.value,
       }));
@@ -98,7 +133,7 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
         Number(event.target.value) <= 1000 &&
         Number(event.target.value) >= 0
       ) {
-        setUserInput((prevState) => ({
+        formik.setValues((prevState) => ({
           ...prevState,
           guess: Number(event.target.value),
         }));
@@ -106,7 +141,7 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
     };
 
     const handleStepChange = (name: string, step: number) => {
-      setUserInput((prevState) => {
+      formik.setValues((prevState) => {
         let value = Number(prevState.guess);
         if (value < 1000 && value > 0) {
           value += step;
@@ -124,17 +159,29 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
           label="Geheimnis"
           name="salt"
           onChange={handleSaltChange}
-          value={userInput.salt}
+          value={formik.values.salt}
           placeholder="Geheimnis eingeben"
+          onBlur={formik.handleBlur}
+          error={
+            formik.errors.salt && formik.touched.salt
+              ? formik.errors.salt
+              : undefined
+          }
         />
         <NumberPicker
           min={0}
           max={1000}
           label="Guess"
           name="guess"
-          value={userInput.guess}
+          value={formik.values.guess}
           onChange={handleGuessChange}
           onStepChange={handleStepChange}
+          onBlur={formik.handleBlur}
+          error={
+            formik.errors.guess && formik.touched.guess
+              ? formik.errors.guess
+              : undefined
+          }
         />
       </>
     );

@@ -7,6 +7,7 @@ import medal from "../../assets/medal.png";
 import rocket from "../../assets/rocket.png";
 import shamrock from "../../assets/shamrock.png";
 import star from "../../assets/star.png";
+import winnerCrown from "../../assets/winnerCrown.png";
 import { useEffect, useRef, useState } from "react";
 import Button from "../button/Button";
 import JoinGame, { JoinGameRef } from "../joinGame/JoinGame";
@@ -113,7 +114,6 @@ const Card = ({
       } else if (phase === GameState.RevealPhase) {
         await gameInstance.contract.endGame();
       } else if (phase === GameState.Ended && !feeClaimed) {
-        console.log(connectedAccount, gameInstance.gameMaster);
         await gameInstance.contract.withdrawGameFees();
       }
     } catch (error) {
@@ -167,6 +167,7 @@ const Card = ({
   const openModal = () => {
     dialog.current?.open();
   };
+
   const modalTitle =
     gameInstance.gameState === GameState.CommitPhase
       ? "Join Game"
@@ -197,6 +198,7 @@ const Card = ({
           ref={joinGameRef}
           setIsLoading={setIsLoading}
           gameInstance={gameInstance}
+          closeModal={dialog.current?.close}
         />
       </Modal>
       <div className={`${classes.card} ${cardColor}`}>
@@ -206,7 +208,7 @@ const Card = ({
             (gameMasterConnected && feeClaimed)) && (
             <div className={classes.disableCard}></div>
           )}
-        {isWinner && <img className={classes.crown} src={crown} />}
+        {isWinner && <img className={classes.crown} src={winnerCrown} />}
 
         <div
           className={`${classes.refundButton} ${

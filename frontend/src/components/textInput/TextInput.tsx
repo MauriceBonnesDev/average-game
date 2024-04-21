@@ -6,7 +6,9 @@ type TextInputProps = {
   name: string;
   value: string;
   placeholder: string;
+  error?: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onBlur: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 const TextInput = ({
@@ -14,7 +16,9 @@ const TextInput = ({
   name,
   value,
   placeholder,
+  error,
   onChange,
+  onBlur,
 }: TextInputProps) => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event);
@@ -29,7 +33,10 @@ const TextInput = ({
         value={value}
         placeholder={placeholder}
         onChange={onInputChange}
+        onBlur={onBlur}
+        className={error ? classes.inputError : ""}
       />
+      <p className={classes.error}>{error ? error : null}</p>
     </div>
   );
 };

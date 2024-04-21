@@ -4,7 +4,7 @@
   padding-top: 1.3rem;
 
   & > :first-child {
-    margin-bottom: 2.2rem;
+    margin-bottom: 0.8rem;
   }
 
   &Bottom {
@@ -17,6 +17,5 @@
 .numberInputs {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 17px;
+  gap: 2px;
 }

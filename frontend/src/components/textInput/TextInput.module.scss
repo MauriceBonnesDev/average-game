@@ -20,5 +20,14 @@
     &::placeholder {
       color: rgba(0, 0, 0, 0.2);
     }
+
+    &.inputError {
+      outline: colors.$red 1px solid;
+    }
   }
+}
+
+.error {
+  height: 24px;
+  color: colors.$red;
 }

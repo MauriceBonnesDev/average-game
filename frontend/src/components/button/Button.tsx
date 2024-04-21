@@ -11,6 +11,7 @@ type ButtonProps = {
   size?: Size;
   style?: Style;
   color?: Color;
+  type?: "submit" | "button";
   onClick?: () => void;
 };
 
@@ -22,6 +23,7 @@ const Button = ({
   size,
   style,
   color,
+  type,
   onClick,
 }: ButtonProps) => {
   const btnSize =
@@ -73,6 +75,7 @@ const Button = ({
           className={`${classes.btn} ${btnSize} ${btnStyle}`}
           disabled={disabled}
           onClick={onClick}
+          type={type}
         >
           {isLoading ? (
             <RotatingLines

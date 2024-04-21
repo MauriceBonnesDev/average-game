@@ -4,9 +4,7 @@
   flex-direction: column;
 
   input {
-    border: 1px solid colors.$dark-grey;
-    border-left: none;
-    border-right: none;
+    border: none;
     background-color: colors.$turquoise-100;
     text-align: center;
     font-size: 20px;
@@ -19,11 +17,22 @@
       -webkit-appearance: none;
       margin: 0;
     }
+
+    &:focus,
+    &:active {
+      outline: none;
+    }
   }
 }
 
 .inputContainer {
   display: flex;
+  width: fit-content;
+  border: 1px solid transparent;
+
+  &Error {
+    border: 1px solid colors.$red;
+  }
 
   & > span {
     display: flex;
@@ -31,7 +40,6 @@
   }
 
   & svg {
-    border: 1px solid colors.$dark-grey;
     padding: 15px;
     font-size: 20px;
     color: white;
@@ -44,4 +52,9 @@
 
 .leftButton {
   background-color: colors.$turquoise-600;
+}
+
+.error {
+  height: 24px;
+  color: colors.$red;
 }

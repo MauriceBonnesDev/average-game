@@ -1,4 +1,4 @@
-import { ChangeEvent, forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle } from "react";
 import NumberPicker from "../numberPicker/NumberPicker";
 import type { AverageGameModule_AverageGameFactory as TAverageGameFactory } from "../../../types/ethers-contracts/AverageGameModule_AverageGameFactory";
 import { parseEther } from "ethers";
@@ -7,10 +7,12 @@ import TextInput from "../textInput/TextInput";
 import classes from "./CreateGame.module.scss";
 import { GameSettings } from "../../shared/types";
 import IconPicker from "../iconPicker/IconPicker";
+import { FormikErrors, useFormik } from "formik";
 
 type CreateGameProps = {
   contractAddress: string;
   factoryContract: TAverageGameFactory | null;
+  closeModal?: () => void;
 };
 
 export type CreateGameRef = {
@@ -19,48 +21,77 @@ export type CreateGameRef = {
 };
 
 const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
-  ({ contractAddress, factoryContract }, ref) => {
-    const [gameSettings, setGameSettings] = useState<GameSettings>({
-      contractAddress,
-      gameMaster: "",
-      name: "",
-      maxPlayers: 0,
-      betAmount: 0,
-      gameFee: 0,
-      icon: 0,
-    });
+  ({ contractAddress, factoryContract, closeModal }, ref) => {
+    const validate = (values: GameSettings) => {
+      const errors: FormikErrors<GameSettings> = {};
+      if (!values.name) {
+        errors.name = "Bitte geben Sie einen Namen ein";
+      }
 
+      if (values.maxPlayers < 3) {
+        errors.maxPlayers = "Mindestens 3 Spieler werden benötigt";
+      }
+
+      if (values.betAmount <= 0) {
+        errors.betAmount = "Bitte wählen Sie einen Einsatz aus";
+      }
+
+      if (values.gameFee <= 0) {
+        errors.gameFee = "Bitte wählen Sie einen Gebührensatz aus";
+      }
+
+      if (values.icon === null) {
+        errors.icon = "Bitte wählen Sie ein Icon aus";
+      }
+
+      return errors;
+    };
+
+    const formik = useFormik<GameSettings>({
+      initialValues: {
+        contractAddress,
+        gameMaster: "",
+        name: "",
+        maxPlayers: 0,
+        betAmount: 0,
+        gameFee: 0,
+        icon: null,
+      },
+      validate,
+      onSubmit: (values) => {
+        console.log(values);
+        createGame();
+        if (closeModal) {
+          closeModal();
+        }
+      },
+    });
     useImperativeHandle(ref, () => {
       return {
         close() {
-          setGameSettings({
-            contractAddress,
-            gameMaster: "",
-            name: "",
-            maxPlayers: 0,
-            betAmount: 0,
-            gameFee: 0,
-            icon: 0,
-          });
+          formik.resetForm();
         },
         createGame() {
-          createGame();
+          formik.handleSubmit();
         },
       };
     });
 
     const createGame = async () => {
-      if (factoryContract) {
+      if (factoryContract && formik.values.icon) {
         try {
           const transactionResponse = await factoryContract.createAverageGame(
-            contractAddress,
-            gameSettings.name,
-            gameSettings.maxPlayers,
-            parseEther(gameSettings.betAmount.toString()),
+            formik.values.contractAddress,
+            formik.values.name,
+            formik.values.maxPlayers,
+            parseEther(formik.values.betAmount.toString()),
             parseEther(
-              ((gameSettings.gameFee / 100) * gameSettings.betAmount).toString()
+              (
+                (formik.values.gameFee / 100) *
+                formik.values.betAmount
+              ).toString()
             ),
-            gameSettings.icon
+            formik.values.icon
           );
           const test = await transactionResponse.wait();
           const eventLog = test?.logs[1] as EventLog;
@@ -73,7 +104,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
     };
 
     const handleMaxPlayersChange = (name: string, step: number) => {
-      setGameSettings((prevState) => {
+      formik.setValues((prevState) => {
         let value = Number(prevState.maxPlayers);
         value += step;
         if (value < 0) {
@@ -88,7 +119,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
     };
 
     const handleBetAmountChange = (name: string, step: number) => {
-      setGameSettings((prevState) => {
+      formik.setValues((prevState) => {
         let value = Number(prevState.betAmount);
         value += step;
         if (value < 0) {
@@ -103,7 +134,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
     };
 
     const handleGameFeeChange = (name: string, step: number) => {
-      setGameSettings((prevState) => {
+      formik.setValues((prevState) => {
         let value = Number(prevState.gameFee);
         if (value < 100 || step < 0) {
           value += step;
@@ -119,31 +150,15 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
       });
     };
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-      if (
-        Number(event.target.value) >= 0 && event.target.name === "gameFee"
-          ? Number(event.target.value) <= 100
-          : true
-      ) {
-        setGameSettings((prevState) => ({
-          ...prevState,
-          [event.target.name]: Number(event.target.value),
-        }));
-      }
-    };
-
-    const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-      setGameSettings((prevState) => ({
-        ...prevState,
-        [event.target.name]: event.target.value,
-      }));
-    };
-
     const handleSetIcon = (icon: number) => {
-      setGameSettings((prevState) => ({
-        ...prevState,
-        icon,
-      }));
+      formik.setTouched({ icon: true });
+      formik.setValues((prevState) => {
+        const newIcon = prevState.icon === icon ? null : icon;
+        return {
+          ...prevState,
+          icon: newIcon,
+        };
+      });
     };
 
     return (
@@ -152,37 +167,68 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
           name="name"
           label="Wähle einen Namen fürs Spiel"
           placeholder="Spielname"
-          onChange={handleNameChange}
-          value={gameSettings.name}
+          error={
+            formik.errors.name && formik.touched.name
+              ? formik.errors.name
+              : undefined
+          }
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.name}
         />
         <div className={classes.contentBottom}>
           <div className={classes.numberInputs}>
             <NumberPicker
               label="Max Players"
               name="maxPlayers"
-              value={gameSettings.maxPlayers}
-              onChange={handleInputChange}
+              value={formik.values.maxPlayers}
+              error={
+                formik.errors.maxPlayers && formik.touched.maxPlayers
+                  ? formik.errors.maxPlayers
+                  : undefined
+              }
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               onStepChange={handleMaxPlayersChange}
             />
             <NumberPicker
-              label="Einsatz"
+              label="Einsatz (ETH)"
               name="betAmount"
               step={0.01}
-              value={gameSettings.betAmount}
-              onChange={handleInputChange}
+              value={formik.values.betAmount}
+              error={
+                formik.errors.betAmount && formik.touched.betAmount
+                  ? formik.errors.betAmount
+                  : undefined
+              }
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               onStepChange={handleBetAmountChange}
             />
             <NumberPicker
               min={0}
               max={100}
-              label="Gebühren"
+              label="Gebühren (%)"
               name="gameFee"
-              value={gameSettings.gameFee}
-              onChange={handleInputChange}
+              value={formik.values.gameFee}
+              error={
+                formik.errors.gameFee && formik.touched.gameFee
+                  ? formik.errors.gameFee
+                  : undefined
+              }
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               onStepChange={handleGameFeeChange}
             />
           </div>
-          <IconPicker setIcon={handleSetIcon} />
+          <IconPicker
+            error={
+              formik.errors.icon && formik.touched.icon
+                ? formik.errors.icon
+                : undefined
+            }
+            setIcon={handleSetIcon}
+          />
         </div>
       </div>
     );
