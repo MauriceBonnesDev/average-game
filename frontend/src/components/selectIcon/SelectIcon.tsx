@@ -30,7 +30,7 @@ const SelectIcon = ({
       }`}
       onClick={handleOnClick}
     >
-      <i className={`fa-regular fa-circle-check ${classes.checkIt}`}></i>
+      <i className={`fa-solid fa-circle-check ${classes.check}`}></i>
       <img src={src} />
     </div>
   );

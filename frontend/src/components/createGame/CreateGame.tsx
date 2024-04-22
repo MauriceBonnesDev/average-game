@@ -104,11 +104,23 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
     };
 
     const handleMaxPlayersChange = (name: string, step: number) => {
+      formik.setTouched({
+        maxPlayers: true,
+        gameFee: formik.touched.gameFee,
+        icon: formik.touched.icon,
+        betAmount: formik.touched.betAmount,
+        name: formik.touched.name,
+      });
+
       formik.setValues((prevState) => {
         let value = Number(prevState.maxPlayers);
         value += step;
         if (value < 0) {
           value = 0;
+        }
+
+        if (value < 3) {
+          value = 3;
         }
 
         return {
@@ -119,6 +131,16 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
     };
 
     const handleBetAmountChange = (name: string, step: number) => {
+      formik.setTouched(
+        {
+          betAmount: true,
+          gameFee: formik.touched.gameFee,
+          icon: formik.touched.icon,
+          maxPlayers: formik.touched.maxPlayers,
+          name: formik.touched.name,
+        },
+        true
+      );
       formik.setValues((prevState) => {
         let value = Number(prevState.betAmount);
         value += step;
@@ -134,6 +156,16 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
     };
 
     const handleGameFeeChange = (name: string, step: number) => {
+      formik.setTouched(
+        {
+          gameFee: true,
+          icon: formik.touched.icon,
+          betAmount: formik.touched.betAmount,
+          maxPlayers: formik.touched.maxPlayers,
+          name: formik.touched.name,
+        },
+        true
+      );
       formik.setValues((prevState) => {
         let value = Number(prevState.gameFee);
         if (value < 100 || step < 0) {
@@ -151,7 +183,16 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
     };
 
     const handleSetIcon = (icon: number) => {
-      formik.setTouched({ icon: true });
+      formik.setTouched(
+        {
+          icon: true,
+          betAmount: formik.touched.betAmount,
+          maxPlayers: formik.touched.maxPlayers,
+          name: formik.touched.name,
+          gameFee: formik.touched.gameFee,
+        },
+        true
+      );
       formik.setValues((prevState) => {
         const newIcon = prevState.icon === icon ? null : icon;
         return {
@@ -181,6 +222,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
             <NumberPicker
               label="Max Players"
               name="maxPlayers"
+              min={3}
               value={formik.values.maxPlayers}
               error={
                 formik.errors.maxPlayers && formik.touched.maxPlayers

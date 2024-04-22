@@ -1,11 +1,10 @@
 @use "../../colors";
 
 .container {
-  width: 75vw;
   min-width: 2000px;
   height: 800px;
   display: flex;
-  margin: 0 auto;
+  margin: 10rem auto;
   align-items: center;
   justify-content: space-between;
 }

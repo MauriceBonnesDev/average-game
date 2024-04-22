@@ -1,0 +1,164 @@
+@use "../../colors";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.section {
+  padding: 5rem 0;
+  &Heading {
+    color: #000000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    background-color: colors.$purple-300;
+    padding-top: 10rem;
+    padding-bottom: 5rem;
+
+    & > h1 {
+      font-size: 56px;
+      font-weight: 600;
+    }
+
+    & > h3 {
+      font-size: 28px;
+      font-weight: 400;
+      margin-bottom: 2rem;
+    }
+  }
+  &HowToPlay {
+    & .timelineContainer {
+      width: 75vw;
+      position: relative;
+      height: 1770px;
+      display: flex;
+      justify-content: center;
+
+      & > img {
+        position: absolute;
+        width: 90px;
+        left: 50%;
+        transform: translate(-50%);
+      }
+
+      & ul {
+        list-style: none;
+        & > li {
+          position: absolute;
+          width: 450px;
+          color: white;
+          padding: 30px;
+          border-radius: 15px;
+
+          & h3 {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: normal;
+          }
+
+          & h5 {
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 18px;
+            font-weight: 600;
+          }
+
+          & p {
+            font-size: 18px;
+            line-height: 1.5;
+            margin-top: 0.3rem;
+          }
+
+          &:nth-child(1) {
+            top: 95px;
+            background-color: rgb(105, 74, 213);
+          }
+
+          &:nth-child(2) {
+            top: 231px;
+            background-color: rgb(114, 72, 202);
+          }
+
+          &:nth-child(3) {
+            top: 367px;
+            background-color: rgb(123, 70, 191);
+          }
+
+          &:nth-child(4) {
+            top: 502px;
+            background-color: rgb(130, 69, 180);
+          }
+
+          &:nth-child(5) {
+            top: 638px;
+            background-color: rgb(139, 67, 170);
+          }
+
+          &:nth-child(6) {
+            top: 773px;
+            background-color: rgb(148, 65, 158);
+          }
+
+          &:nth-child(7) {
+            top: 908px;
+            background-color: rgb(155, 63, 148);
+          }
+
+          &:nth-child(8) {
+            top: 1044px;
+            background-color: rgb(163, 61, 136);
+          }
+
+          &:nth-child(9) {
+            top: 1179px;
+            background-color: rgb(172, 59, 125);
+          }
+
+          &:nth-child(10) {
+            top: 1313px;
+            background-color: rgb(180, 57, 115);
+          }
+
+          &:nth-child(11) {
+            top: 1450px;
+            background-color: rgb(188, 54, 104);
+          }
+
+          &:nth-child(12) {
+            top: 1585px;
+            background-color: rgb(196, 53, 92);
+          }
+
+          &:nth-of-type(odd) {
+            left: 25%;
+            transform: translate(-50%);
+          }
+
+          &:nth-of-type(even) {
+            left: 75%;
+            transform: translate(-50%);
+          }
+        }
+      }
+    }
+  }
+
+  &Explanation {
+    width: 100%;
+    background-color: colors.$purple-300;
+  }
+
+  &Rules {
+    & > div {
+      width: 850px;
+      background-color: colors.$purple-600;
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+    }
+  }
+}

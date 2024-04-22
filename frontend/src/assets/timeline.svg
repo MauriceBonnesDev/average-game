@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" zoomAndPan="magnify" viewBox="0 0 810 809.999993" height="1080" preserveAspectRatio="xMidYMid meet" version="1.0">
+    <!-- Definiere den linearen Gradient -->
+    <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="red"/>
+            <stop offset="100%" stop-color="green"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Ersetze alle grauen Füllungen durch den linearen Gradienten -->
+    <g clip-path="url(#66ac26d38e)">
+        <g clip-path="url(#2f9743af96)">
+            <path fill="url(#gradient)" d="M 371.097656 15.003906 L 405 15.003906 L 405 48.90625 L 371.097656 48.90625 Z M 371.097656 15.003906 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#550472558f)">
+        <g clip-path="url(#4e053627c7)">
+            <path fill="url(#gradient)" d="M 371.097656 240.941406 L 405 240.941406 L 405 274.839844 L 371.097656 274.839844 Z M 371.097656 240.941406 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#e0b12f667b)">
+        <g clip-path="url(#3f6ad128b2)">
+            <path fill="url(#gradient)" d="M 371.097656 466.875 L 405 466.875 L 405 500.773438 L 371.097656 500.773438 Z M 371.097656 466.875 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#cd2f33aeb9)">
+        <g clip-path="url(#42c2eb5877)">
+            <path fill="url(#gradient)" d="M 371.097656 127.972656 L 405 127.972656 L 405 161.875 L 371.097656 161.875 Z M 371.097656 127.972656 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#1551e4b5e8)">
+        <g clip-path="url(#560f8ecbb4)">
+            <path fill="url(#gradient)" d="M 371.097656 353.90625 L 405 353.90625 L 405 387.808594 L 371.097656 387.808594 Z M 371.097656 353.90625 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#f1019a99e0)">
+        <g clip-path="url(#b164f28834)">
+            <path fill="url(#gradient)" d="M 371.097656 579.839844 L 405 579.839844 L 405 613.742188 L 371.097656 613.742188 Z M 371.097656 579.839844 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#2cd8d3fe42)">
+        <g clip-path="url(#233915277b)">
+            <path fill="url(#gradient)" d="M 371.097656 71.574219 L 405 71.574219 L 405 105.472656 L 371.097656 105.472656 Z M 371.097656 71.574219 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#b547790724)">
+        <g clip-path="url(#7ae16e9915)">
+            <path fill="url(#gradient)" d="M 371.097656 297.507812 L 405 297.507812 L 405 331.40625 L 371.097656 331.40625 Z M 371.097656 297.507812 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#d79bb743ce)">
+        <g clip-path="url(#ece513fe58)">
+            <path fill="url(#gradient)" d="M 371.097656 523.441406 L 405 523.441406 L 405 557.339844 L 371.097656 557.339844 Z M 371.097656 523.441406 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#2b13db48b1)">
+        <g clip-path="url(#766f800aa6)">
+            <path fill="url(#gradient)" d="M 371.097656 184.539062 L 405 184.539062 L 405 218.441406 L 371.097656 218.441406 Z M 371.097656 184.539062 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#d81416c42f)">
+        <g clip-path="url(#998e728821)">
+            <path fill="url(#gradient)" d="M 371.097656 410.472656 L 405 410.472656 L 405 444.375 L 371.097656 444.375 Z M 371.097656 410.472656 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <g clip-path="url(#384415b104)">
+        <g clip-path="url(#02a2fe6e4d)">
+            <path fill="url(#gradient)" d="M 371.097656 636.40625 L 405 636.40625 L 405 670.308594 L 371.097656 670.308594 Z M 371.097656 636.40625 " fill-opacity="1" fill-rule="nonzero"/>
+        </g>
+    </g>
+    <path stroke-linecap="butt" transform="matrix(0, 0.75, -0.75, 0, 389.549456, 34.693033)" fill="none" stroke-linejoin="miter" d="M -0.00216961 1.998233 L 818.612455 1.998233 " stroke="#919191" stroke-width="4" stroke-opacity="1" stroke-miterlimit="4"/>
+</svg>
