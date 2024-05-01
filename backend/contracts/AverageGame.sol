@@ -71,7 +71,7 @@ contract AverageGame is ReentrancyGuard {
     mapping(address => uint256) private revealedGuesses;
     mapping(address => uint256) private collateralOfPlayer;
     mapping(address => uint256) private betAmountOfPlayer;
-    mapping(address => bool) private potentialWinner;
+    mapping(address => bool) private isPotentialWinner;
 
     enum GameState {
         CommitPhase, // Participants are committing their guesses
@@ -494,7 +494,7 @@ contract AverageGame is ReentrancyGuard {
         }
 
         for (uint16 i = 0; i < winnerIndex + 1; i++) {
-            potentialWinner[potentialWinners[i]] = true;
+            isPotentialWinner[potentialWinners[i]] = true;
         }
 
         totalPotentialWinners = int256(winnerIndex + 1);
@@ -644,11 +644,11 @@ contract AverageGame is ReentrancyGuard {
             "Gewinner kann sich keine Kaution auszahlen!"
         );
         require(
-            potentialWinner[msg.sender],
+            isPotentialWinner[msg.sender],
             "Spieler hat nicht das Recht einen Teil des Collaterals auszuzahlen!"
         );
 
-        potentialWinner[msg.sender] = false;
+        isPotentialWinner[msg.sender] = false;
 
         (bool sent, ) = msg.sender.call{value: convert(collateralShare)}("");
         require(sent, "Senden von Ether ist fehlgeschlagen!");
@@ -768,6 +768,10 @@ contract AverageGame is ReentrancyGuard {
 
     function getPotentialWinners() public view returns (address[] memory) {
         return potentialWinners;
+    }
+
+    function getIsPotentialWinner(address _player) public view returns (bool) {
+        return isPotentialWinner[_player];
     }
 
     function getPlayers() public view returns (address[] memory) {

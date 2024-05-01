@@ -90,6 +90,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "gameMaster"
       | "getAverageGameInstance"
       | "getBalance"
+      | "getIsPotentialWinner"
       | "getPlayerRevealedState"
       | "getPlayers"
       | "getPotentialWinners"
@@ -165,6 +166,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getBalance",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getIsPotentialWinner",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getPlayerRevealedState",
@@ -287,6 +292,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getBalance", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getIsPotentialWinner",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getPlayerRevealedState",
     data: BytesLike
@@ -630,6 +639,12 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   getBalance: TypedContractMethod<[], [bigint], "view">;
 
+  getIsPotentialWinner: TypedContractMethod<
+    [_player: AddressLike],
+    [boolean],
+    "view"
+  >;
+
   getPlayerRevealedState: TypedContractMethod<
     [_player: AddressLike],
     [bigint],
@@ -754,6 +769,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   getFunction(
     nameOrSignature: "getBalance"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getIsPotentialWinner"
+  ): TypedContractMethod<[_player: AddressLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "getPlayerRevealedState"
   ): TypedContractMethod<[_player: AddressLike], [bigint], "view">;
