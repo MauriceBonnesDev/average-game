@@ -58,7 +58,7 @@
 
   &.btnDarkGreen {
     &:hover {
-      background-color: rgba($color: colors.$green-950, $alpha: 0.25);
+      background-color: colors.$green-700;
     }
 
     &:disabled:hover {

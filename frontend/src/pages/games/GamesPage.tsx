@@ -197,6 +197,9 @@ const GamesPage = () => {
           contract.filters["PrizeAwarded(uint256,address,uint256,uint256)"]
         );
         contract.off(
+          contract.filters["CollateralShareDeposited(uint256,address,uint256)"]
+        );
+        contract.off(
           contract.filters["PlayerRefunded(uint256,address,uint256)"]
         );
         contract.off(contract.filters["FeeCollected(uint256,address,uint256)"]);

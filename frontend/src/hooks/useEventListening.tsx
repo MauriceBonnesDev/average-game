@@ -79,6 +79,13 @@ const useEventListening = (
 
         averageGame.contract.on(
           averageGame.contract.filters[
+            "CollateralShareDeposited(uint256,address,uint256)"
+          ],
+          (gameId) => fetchSingleGame(Number(gameId))
+        );
+
+        averageGame.contract.on(
+          averageGame.contract.filters[
             "PrizeAwarded(uint256,address,uint256,uint256)"
           ],
           (gameId) => fetchSingleGame(Number(gameId))

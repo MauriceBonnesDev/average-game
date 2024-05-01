@@ -1,5 +1,6 @@
 import React, { FormEvent, useImperativeHandle, useRef } from "react";
 import classes from "./Modal.module.scss";
+import closeIcon from "../../assets/close.svg";
 import { createPortal } from "react-dom";
 import Button from "../button/Button";
 
@@ -58,7 +59,7 @@ const Modal = React.forwardRef<DialogRef, ModalProps>(
               color="red"
               onClick={() => dialog.current?.close()}
             >
-              <i className="fa-solid fa-xmark"></i>
+              <img src={closeIcon} />
             </Button>
           </span>
           <h2>{title}</h2>

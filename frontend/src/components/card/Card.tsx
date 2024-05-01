@@ -1,4 +1,6 @@
 import cards from "../../assets/cards.png";
+import arrowRight from "../../assets/arrowRight.svg";
+import closeIcon from "../../assets/close.svg";
 import casinoChip from "../../assets/casinoChip.png";
 import coin from "../../assets/coin.png";
 import crown from "../../assets/crown.png";
@@ -7,7 +9,6 @@ import medal from "../../assets/medal.png";
 import rocket from "../../assets/rocket.png";
 import shamrock from "../../assets/shamrock.png";
 import star from "../../assets/star.png";
-import winnerCrown from "../../assets/winnerCrown.png";
 import { useEffect, useRef, useState } from "react";
 import Button from "../button/Button";
 import JoinGame, { JoinGameRef } from "../joinGame/JoinGame";
@@ -61,12 +62,14 @@ const Card = ({
   const gameMasterConnected = connectedAccount === gameInstance.gameMaster;
   const playerJoined = gameInstance.players.includes(connectedAccount);
   const [playerRevealed, setPlayerRevealed] = useState(false);
+  const [isPotentialWinner, setIsPotentialWinner] = useState(false);
+  const [collateralShare, setCollateralShare] = useState(0);
   const isWinner = gameInstance.winner === connectedAccount;
   const rewardClaimed = gameInstance.rewardClaimed;
   const feeClaimed = gameInstance.feeClaimed;
-  const [loadingButton, setLoadingButton] = useState<"refund" | "action">(
-    "action"
-  );
+  const [loadingButton, setLoadingButton] = useState<
+    "refund" | "action" | "nextPhase" | "collateralShare" | "gameFee"
+  >("action");
 
   useEffect(() => {
     const getPlayerRevealedState = async () => {
@@ -79,7 +82,22 @@ const Card = ({
           );
         });
     };
+
+    const getIsPotentialWinner = async () => {
+      const isPotWinner = await gameInstance.contract.getIsPotentialWinner(
+        connectedAccount
+      );
+      setIsPotentialWinner(isPotWinner);
+    };
+
+    const getCollateralShare = async () => {
+      const share = Number(await gameInstance.contract.collateralShare());
+      setCollateralShare(share);
+    };
+
     getPlayerRevealedState();
+    getCollateralShare();
+    getIsPotentialWinner();
   }, [connectedAccount, gameInstance.contract]);
 
   let cardColor = classes.cardPurple;
@@ -89,16 +107,7 @@ const Card = ({
 
   let color: Color = "purple";
 
-  if (gameMasterConnected) {
-    cardColor = classes.cardTurquoise;
-    footerColor = classes.cardFooterTurquoise;
-    logoColor = classes.logoTurquoise;
-    color = "turquoise";
-  } else if (
-    playerJoined &&
-    !gameMasterConnected &&
-    gameInstance.gameState === GameState.CommitPhase
-  ) {
+  if (playerJoined && gameInstance.gameState === GameState.CommitPhase) {
     cardColor = classes.cardGreen;
     footerColor = classes.cardFooterGreen;
     logoColor = classes.logoGreen;
@@ -107,17 +116,29 @@ const Card = ({
     gameInstance.gameState === GameState.RevealPhase ||
     gameInstance.gameState === GameState.Ended
   ) {
-    cardColor = classes.cardOrange;
-    footerColor = classes.cardFooterOrange;
-    logoColor = classes.logoOrange;
-    color = "orange";
+    cardColor = classes.cardTurquoise;
+    footerColor = classes.cardFooterTurquoise;
+    logoColor = classes.logoTurquoise;
+    color = "turquoise";
   }
+
+  const claimFee = async () => {
+    try {
+      setIsLoading(true);
+      setLoadingButton("gameFee");
+      setCurrentFocusedGame(gameInstance.id);
+      await gameInstance.contract.withdrawGameFees();
+    } catch (error) {
+      toast.error(transformError(error), { id: "error" });
+      setIsLoading(false);
+    }
+  };
 
   const nextPhase = async () => {
     const phase = gameInstance.gameState;
     try {
       setIsLoading(true);
-      setLoadingButton("action");
+      setLoadingButton("nextPhase");
       setCurrentFocusedGame(gameInstance.id);
       if (phase === GameState.CommitPhase) {
         await gameInstance.contract.startRevealPhase();
@@ -149,6 +170,18 @@ const Card = ({
       setLoadingButton("refund");
       setCurrentFocusedGame(gameInstance.id);
       await gameInstance.contract.requestRefund();
+    } catch (error) {
+      toast.error(transformError(error), { id: "error" });
+      setIsLoading(false);
+    }
+  };
+
+  const withdrawCollateralShare = async () => {
+    try {
+      setIsLoading(true);
+      setLoadingButton("collateralShare");
+      setCurrentFocusedGame(gameInstance.id);
+      await gameInstance.contract.withdrawCollateralShare();
     } catch (error) {
       toast.error(transformError(error), { id: "error" });
       setIsLoading(false);
@@ -197,6 +230,31 @@ const Card = ({
       : revealGuess();
   };
 
+  const showDisableCard = () => {
+    if (gameInstance.gameState !== GameState.Ended) {
+      return false;
+    }
+
+    const canClaimShare = isPotentialWinner && !isWinner && collateralShare > 0;
+    if (
+      !isWinner &&
+      ((!gameMasterConnected && !canClaimShare) ||
+        (gameMasterConnected && feeClaimed && !canClaimShare))
+    ) {
+      return true;
+    }
+
+    if (
+      isWinner &&
+      ((!gameMasterConnected && rewardClaimed) ||
+        (gameMasterConnected && feeClaimed && rewardClaimed))
+    ) {
+      return true;
+    }
+
+    return false;
+  };
+
   return (
     <>
       <Modal
@@ -215,54 +273,46 @@ const Card = ({
         />
       </Modal>
       <div className={`${classes.card} ${cardColor}`}>
-        {gameInstance.gameState === GameState.Cancelled ? (
-          <div className={classes.disableCard}></div>
-        ) : (
-          gameInstance.gameState === GameState.Ended &&
-          ((!isWinner && !gameMasterConnected) ||
-            (isWinner && rewardClaimed) ||
-            (gameMasterConnected && feeClaimed)) && (
-            <div className={classes.disableCard}></div>
-          )
-        )}
-        {isWinner && <img className={classes.crown} src={winnerCrown} />}
+        {showDisableCard() && <div className={classes.disableCard}></div>}
+        {isWinner && <img className={classes.crown} src={crown} />}
 
         <div
           className={`${classes.refundButton} ${
-            gameInstance.gameState === GameState.Ended ||
-            gameInstance.gameState === GameState.Cancelled ||
-            connectedAccount === gameInstance.gameMaster
+            gameInstance.gameState !== GameState.CommitPhase || !playerJoined
               ? classes.hide
               : ""
           }`}
-        >
-          <Button
-            color={color}
-            style="light"
-            size="round-small"
-            disabled={isLoading && currentFocusedGame === gameInstance.id}
-            isLoading={
-              isLoading &&
-              loadingButton === "refund" &&
-              currentFocusedGame === gameInstance.id
-            }
-            onClick={requestRefund}
-            info="Refund beantragen: Beendet das aktuelle Spiel und zahlt alle Spieler aus!"
-          >
-            !
-          </Button>
-        </div>
-        <div className={classes.cardBody}>
+        ></div>
+        <div className={classes.cardBodyContent}>
           <h5>Get Started</h5>
           <Tooltip title={`${name} #${id}`}>
-            <h3 style={{ width: "100%", textWrap: "nowrap" }}>
+            <div style={{ width: "100%", textWrap: "nowrap" }}>
               <Box component="h3" textOverflow="ellipsis" overflow="hidden">
                 {name} #{id}
               </Box>
-            </h3>
+            </div>
           </Tooltip>
           <p>Trete bei und vervielfache dein Cash!</p>
         </div>
+        {gameInstance.gameState === GameState.CommitPhase && playerJoined && (
+          <div className={classes.refundButton}>
+            <Button
+              color={color}
+              style="light"
+              size="round-small"
+              disabled={isLoading && currentFocusedGame === gameInstance.id}
+              isLoading={
+                isLoading &&
+                loadingButton === "refund" &&
+                currentFocusedGame === gameInstance.id
+              }
+              onClick={requestRefund}
+              info="Refund beantragen: Du bekommst dein Einsatz und deine Kaution zurück!"
+            >
+              <img src={closeIcon} />
+            </Button>
+          </div>
+        )}
         <div className={`${classes.cardFooter} ${footerColor}`}>
           <div className={`${classes.logo} ${logoColor}`}>
             <img src={icons[gameInstance.icon]} />
@@ -272,34 +322,8 @@ const Card = ({
             <CardInfoRow amount={pricePool} title="Pricepool" />
           </div>
           <div className={classes.cardJoinSection}>
-            {connectedAccount === gameInstance.gameMaster ? (
-              <Button
-                color={color}
-                style="light"
-                disabled={
-                  (isLoading && currentFocusedGame === gameInstance.id) ||
-                  (gameInstance.gameState === GameState.Ended && feeClaimed) ||
-                  gameInstance.gameState === GameState.Cancelled
-                }
-                isLoading={
-                  isLoading &&
-                  loadingButton === "action" &&
-                  currentFocusedGame === gameInstance.id
-                }
-                onClick={nextPhase}
-                size="small"
-              >
-                {gameInstance.gameState === GameState.CommitPhase
-                  ? "Start Reveal"
-                  : gameInstance.gameState === GameState.RevealPhase
-                  ? "End Game"
-                  : gameInstance.gameState === GameState.Ended && feeClaimed
-                  ? "Game ended"
-                  : gameInstance.gameState === GameState.Cancelled
-                  ? "Cancelled"
-                  : "Claim Fee"}
-              </Button>
-            ) : gameInstance.gameState === GameState.CommitPhase ? (
+            {gameInstance.gameState === GameState.CommitPhase &&
+            !playerJoined ? (
               <Button
                 color={color}
                 disabled={
@@ -315,12 +339,14 @@ const Card = ({
                 onClick={openModal}
                 size="small"
               >
-                {playerJoined ? "Joined" : "Join"}
+                Join
               </Button>
-            ) : gameInstance.gameState === GameState.RevealPhase ? (
+            ) : gameInstance.gameState === GameState.RevealPhase &&
+              !playerRevealed ? (
               <Button
                 color={color}
                 disabled={
+                  !playerJoined ||
                   playerRevealed ||
                   (isLoading && currentFocusedGame === gameInstance.id)
                 }
@@ -333,9 +359,11 @@ const Card = ({
                 onClick={openModal}
                 size="small"
               >
-                {playerRevealed ? "Revealed" : "Reveal"}
+                Reveal
               </Button>
-            ) : gameInstance.gameState === GameState.Ended && isWinner ? (
+            ) : gameInstance.gameState === GameState.Ended &&
+              isWinner &&
+              !rewardClaimed ? (
               <Button
                 color={color}
                 disabled={
@@ -351,7 +379,65 @@ const Card = ({
                 onClick={claimReward}
                 size="small"
               >
-                {rewardClaimed ? "Reward claimed" : "Claim Reward"}
+                Claim Reward
+              </Button>
+            ) : gameInstance.gameState === GameState.Ended &&
+              playerRevealed &&
+              isPotentialWinner &&
+              !isWinner ? (
+              <Button
+                color={color}
+                disabled={
+                  !isPotentialWinner ||
+                  (isLoading && currentFocusedGame === gameInstance.id)
+                }
+                isLoading={
+                  isLoading &&
+                  loadingButton === "action" &&
+                  currentFocusedGame === gameInstance.id
+                }
+                style="light"
+                onClick={withdrawCollateralShare}
+                size="small"
+                info="Die Kaution von denjenigen, die nicht reavealt haben, wird unter allen Teilnehmern aufgeteilt."
+              >
+                Claim Share
+              </Button>
+            ) : connectedAccount === gameInstance.gameMaster &&
+              gameInstance.gameState === GameState.Ended &&
+              !feeClaimed ? (
+              <Button
+                color={color}
+                style="light"
+                disabled={
+                  (isLoading && currentFocusedGame === gameInstance.id) ||
+                  (gameInstance.gameState === GameState.Ended && feeClaimed)
+                }
+                isLoading={
+                  isLoading &&
+                  loadingButton === "gameFee" &&
+                  currentFocusedGame === gameInstance.id
+                }
+                onClick={claimFee}
+                size="small"
+              >
+                Claim Fee
+              </Button>
+            ) : gameInstance.gameState !== GameState.Ended ? (
+              <Button
+                color={color}
+                style="light"
+                size="round-small"
+                disabled={isLoading && currentFocusedGame === gameInstance.id}
+                isLoading={
+                  isLoading &&
+                  loadingButton === "nextPhase" &&
+                  currentFocusedGame === gameInstance.id
+                }
+                onClick={nextPhase}
+                info="Leitet die nächste Phase ein!"
+              >
+                <img src={arrowRight} />
               </Button>
             ) : (
               <Button
@@ -361,9 +447,11 @@ const Card = ({
                 onClick={claimReward}
                 size="small"
               >
-                {gameInstance.gameState === GameState.Cancelled
-                  ? "Cancelled"
-                  : "Lost"}
+                {playerJoined && !isWinner
+                  ? "Lost"
+                  : isWinner
+                  ? "Rewards claimed"
+                  : "Ended"}
               </Button>
             )}
             <p className={classes.playerCount}>
