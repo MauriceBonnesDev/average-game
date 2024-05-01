@@ -75,10 +75,10 @@ const HomePage = () => {
             </li>
             <li>
               <h5>Step 7</h5>
-              <h3>Warte auf die nächste Phase</h3>
+              <h3>Leite die Reveal Phase ein</h3>
               <p>
-                Das Spiel wird nach einer gewissen Zeit in die nächste Phase zum
-                Veröffentlichen der Werte gelangen.
+                Das Spiel kann nach einer gewissen Zeit durch jeden in die
+                Reveal Phase geleitet werden.
               </p>
             </li>
             <li>
@@ -115,10 +115,10 @@ const HomePage = () => {
             </li>
             <li>
               <h5>Step 12</h5>
-              <h3>Warte auf das Spielende</h3>
+              <h3>Beenden des Spiels</h3>
               <p>
-                Schaue nach Spielende ob dein Tipp am nächsten am
-                2/3-Durchschnitt liegt und GEWINNE!
+                Leite das Spielende ein und schaue nach, ob dein Tipp am
+                nächsten am 2/3-Durchschnitt liegt und GEWINNE!
               </p>
             </li>
           </ul>
@@ -126,19 +126,28 @@ const HomePage = () => {
       </section>
 
       <section className={`${classes.section} ${classes.sectionExplanation}`}>
-        Zum Schutz und zur Spielintegrität setzen wir auf ein
-        Commit-Reveal-Schema, bei dem Sie in zwei Schritten handeln. Ihr
-        initialer Commit verwandelt Ihre Zahl und ihr Geheimnis mithilfe einer
-        Hashfunktion in einen unkenntlichen Wert, sodass Ihre Zahl geheim
-        bleibt. Nach der Commit-Phase müssen Sie ihre Zahl und das Geheimnis
-        erneut veröffentlichen. Ergibt die Prüfung, dass sie beide male die
-        selben Werte veröffentlicht haben, fließt Ihr Einsatz in die Auswertung
-        ein, wenn nicht, verfällt Ihr Einsatz samt Hinterlegung.
+        <h1>Commit-Reveal</h1>
+        <h3>
+          Wir nutzen für Fairness ein Commit-Reveal Schema mit Permutation
+        </h3>
+        <p>
+          Zum Schutz und zur Spielintegrität setzen wir auf ein
+          Commit-Reveal-Schema, bei dem Sie in zwei Schritten handeln. Ihr
+          initialer Commit verwandelt Ihre Zahl und ihr Geheimnis mithilfe einer
+          Hashfunktion in einen unkenntlichen Wert, sodass Ihre Zahl geheim
+          bleibt. Sobald die Reveal Phase gestartet wird, wird die Reihenfolge,
+          in der sie ihre Werte veröffentlichen müssen, zufällig festgelegt.
+          Nach der Commit-Phase müssen Sie ihre Zahl und das Geheimnis erneut
+          veröffentlichen. Ergibt die Prüfung, dass sie beide male die selben
+          Werte veröffentlicht haben, fließt Ihr Einsatz in die Auswertung ein.
+          Wenn die Prüfung fehlschlägt, verfällt Ihr Einsatz samt Kaution.
+        </p>
       </section>
 
       <section className={`${classes.section} ${classes.sectionRules}`}>
         <div>
-          <h3>Regeln</h3>
+          <h5>Regeln</h5>
+          <h3>Nach diesen Regeln wird gespielt</h3>
           <ol>
             <li>
               Offenlegen falscher Werte für zu Verlust von Einsatz und Kaution.
