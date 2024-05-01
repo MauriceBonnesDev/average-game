@@ -17,7 +17,7 @@ contract AverageGameFactory {
     function createAverageGame(
         address _address,
         string memory _name,
-        uint256 _maxPlayers,
+        uint16 _maxPlayers,
         uint256 _betAmount,
         uint256 _gameFee,
         uint256 _icon

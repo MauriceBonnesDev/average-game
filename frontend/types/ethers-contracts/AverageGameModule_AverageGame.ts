@@ -83,6 +83,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "betAmount"
       | "blockNumber"
       | "collateralAmount"
+      | "collateralShare"
       | "endGame"
       | "feeClaimed"
       | "gameFee"
@@ -101,24 +102,28 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "minGuess"
       | "name"
       | "potentialWinners"
+      | "quickSort"
       | "requestRefund"
       | "revealGuess"
       | "rewardClaimed"
+      | "sort"
+      | "startOfReveal"
       | "startRevealPhase"
       | "state"
-      | "timeToPass"
+      | "timeToReveal"
       | "totalBetAmount"
       | "totalCollateralAmount"
       | "totalPlayers"
       | "winner"
+      | "withdrawCollateralShare"
       | "withdrawGameFees"
       | "withdrawPricepool"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
-      | "BettingRoundClosed"
       | "CollateralDeposited"
+      | "CollateralShareDeposited"
       | "FeeCollected"
       | "GameCreated"
       | "GameEnded"
@@ -126,6 +131,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "PlayerRefunded"
       | "PlayerRevealedGuess"
       | "PrizeAwarded"
+      | "StartRevealPhase"
       | "WinnerSelected"
   ): EventFragment;
 
@@ -136,6 +142,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "collateralAmount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "collateralShare",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "endGame", values?: undefined): string;
@@ -197,6 +207,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "quickSort",
+    values: [AddressLike[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "requestRefund",
     values?: undefined
   ): string;
@@ -209,12 +223,20 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "sort",
+    values: [AddressLike[], BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "startOfReveal",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "startRevealPhase",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "state", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "timeToPass",
+    functionFragment: "timeToReveal",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -231,6 +253,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "winner", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "withdrawCollateralShare",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "withdrawGameFees",
     values?: undefined
   ): string;
@@ -246,6 +272,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "collateralAmount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "collateralShare",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "endGame", data: BytesLike): Result;
@@ -278,6 +308,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     functionFragment: "potentialWinners",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "quickSort", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "requestRefund",
     data: BytesLike
@@ -290,12 +321,20 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     functionFragment: "rewardClaimed",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "sort", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "startOfReveal",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "startRevealPhase",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "timeToPass", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "timeToReveal",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "totalBetAmount",
     data: BytesLike
@@ -310,6 +349,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "winner", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "withdrawCollateralShare",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "withdrawGameFees",
     data: BytesLike
   ): Result;
@@ -319,11 +362,17 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   ): Result;
 }
 
-export namespace BettingRoundClosedEvent {
-  export type InputTuple = [gameId: BigNumberish];
-  export type OutputTuple = [gameId: bigint];
+export namespace CollateralDepositedEvent {
+  export type InputTuple = [
+    gameId: BigNumberish,
+    player: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [gameId: bigint, player: string, amount: bigint];
   export interface OutputObject {
     gameId: bigint;
+    player: string;
+    amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -331,7 +380,7 @@ export namespace BettingRoundClosedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace CollateralDepositedEvent {
+export namespace CollateralShareDepositedEvent {
   export type InputTuple = [
     gameId: BigNumberish,
     player: AddressLike,
@@ -484,6 +533,18 @@ export namespace PrizeAwardedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace StartRevealPhaseEvent {
+  export type InputTuple = [gameId: BigNumberish];
+  export type OutputTuple = [gameId: bigint];
+  export interface OutputObject {
+    gameId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace WinnerSelectedEvent {
   export type InputTuple = [
     gameId: BigNumberish,
@@ -551,6 +612,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   collateralAmount: TypedContractMethod<[], [bigint], "view">;
 
+  collateralShare: TypedContractMethod<[], [bigint], "view">;
+
   endGame: TypedContractMethod<[], [void], "nonpayable">;
 
   feeClaimed: TypedContractMethod<[], [boolean], "view">;
@@ -597,7 +660,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     "payable"
   >;
 
-  joinGame: TypedContractMethod<[_guess: BytesLike], [void], "payable">;
+  joinGame: TypedContractMethod<[_commitment: BytesLike], [void], "payable">;
 
   maxGuess: TypedContractMethod<[], [bigint], "view">;
 
@@ -609,6 +672,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   potentialWinners: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
 
+  quickSort: TypedContractMethod<[arr: AddressLike[]], [string[]], "view">;
+
   requestRefund: TypedContractMethod<[], [void], "nonpayable">;
 
   revealGuess: TypedContractMethod<
@@ -619,11 +684,19 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   rewardClaimed: TypedContractMethod<[], [boolean], "view">;
 
+  sort: TypedContractMethod<
+    [arr: AddressLike[], left: BigNumberish, right: BigNumberish],
+    [void],
+    "view"
+  >;
+
+  startOfReveal: TypedContractMethod<[], [bigint], "view">;
+
   startRevealPhase: TypedContractMethod<[], [void], "nonpayable">;
 
   state: TypedContractMethod<[], [bigint], "view">;
 
-  timeToPass: TypedContractMethod<[], [bigint], "view">;
+  timeToReveal: TypedContractMethod<[], [bigint], "view">;
 
   totalBetAmount: TypedContractMethod<[], [bigint], "view">;
 
@@ -632,6 +705,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   totalPlayers: TypedContractMethod<[], [bigint], "view">;
 
   winner: TypedContractMethod<[], [string], "view">;
+
+  withdrawCollateralShare: TypedContractMethod<[], [void], "nonpayable">;
 
   withdrawGameFees: TypedContractMethod<[], [void], "nonpayable">;
 
@@ -653,6 +728,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "collateralAmount"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "collateralShare"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "endGame"
@@ -708,7 +786,7 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "joinGame"
-  ): TypedContractMethod<[_guess: BytesLike], [void], "payable">;
+  ): TypedContractMethod<[_commitment: BytesLike], [void], "payable">;
   getFunction(
     nameOrSignature: "maxGuess"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -725,6 +803,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     nameOrSignature: "potentialWinners"
   ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
   getFunction(
+    nameOrSignature: "quickSort"
+  ): TypedContractMethod<[arr: AddressLike[]], [string[]], "view">;
+  getFunction(
     nameOrSignature: "requestRefund"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
@@ -738,13 +819,23 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     nameOrSignature: "rewardClaimed"
   ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
+    nameOrSignature: "sort"
+  ): TypedContractMethod<
+    [arr: AddressLike[], left: BigNumberish, right: BigNumberish],
+    [void],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "startOfReveal"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "startRevealPhase"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "state"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "timeToPass"
+    nameOrSignature: "timeToReveal"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "totalBetAmount"
@@ -759,6 +850,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     nameOrSignature: "winner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "withdrawCollateralShare"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "withdrawGameFees"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
@@ -766,18 +860,18 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   ): TypedContractMethod<[_winner: AddressLike], [void], "nonpayable">;
 
   getEvent(
-    key: "BettingRoundClosed"
-  ): TypedContractEvent<
-    BettingRoundClosedEvent.InputTuple,
-    BettingRoundClosedEvent.OutputTuple,
-    BettingRoundClosedEvent.OutputObject
-  >;
-  getEvent(
     key: "CollateralDeposited"
   ): TypedContractEvent<
     CollateralDepositedEvent.InputTuple,
     CollateralDepositedEvent.OutputTuple,
     CollateralDepositedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CollateralShareDeposited"
+  ): TypedContractEvent<
+    CollateralShareDepositedEvent.InputTuple,
+    CollateralShareDepositedEvent.OutputTuple,
+    CollateralShareDepositedEvent.OutputObject
   >;
   getEvent(
     key: "FeeCollected"
@@ -829,6 +923,13 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     PrizeAwardedEvent.OutputObject
   >;
   getEvent(
+    key: "StartRevealPhase"
+  ): TypedContractEvent<
+    StartRevealPhaseEvent.InputTuple,
+    StartRevealPhaseEvent.OutputTuple,
+    StartRevealPhaseEvent.OutputObject
+  >;
+  getEvent(
     key: "WinnerSelected"
   ): TypedContractEvent<
     WinnerSelectedEvent.InputTuple,
@@ -837,17 +938,6 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   >;
 
   filters: {
-    "BettingRoundClosed(uint256)": TypedContractEvent<
-      BettingRoundClosedEvent.InputTuple,
-      BettingRoundClosedEvent.OutputTuple,
-      BettingRoundClosedEvent.OutputObject
-    >;
-    BettingRoundClosed: TypedContractEvent<
-      BettingRoundClosedEvent.InputTuple,
-      BettingRoundClosedEvent.OutputTuple,
-      BettingRoundClosedEvent.OutputObject
-    >;
-
     "CollateralDeposited(uint256,address,uint256)": TypedContractEvent<
       CollateralDepositedEvent.InputTuple,
       CollateralDepositedEvent.OutputTuple,
@@ -857,6 +947,17 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       CollateralDepositedEvent.InputTuple,
       CollateralDepositedEvent.OutputTuple,
       CollateralDepositedEvent.OutputObject
+    >;
+
+    "CollateralShareDeposited(uint256,address,uint256)": TypedContractEvent<
+      CollateralShareDepositedEvent.InputTuple,
+      CollateralShareDepositedEvent.OutputTuple,
+      CollateralShareDepositedEvent.OutputObject
+    >;
+    CollateralShareDeposited: TypedContractEvent<
+      CollateralShareDepositedEvent.InputTuple,
+      CollateralShareDepositedEvent.OutputTuple,
+      CollateralShareDepositedEvent.OutputObject
     >;
 
     "FeeCollected(uint256,address,uint256)": TypedContractEvent<
@@ -934,6 +1035,17 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       PrizeAwardedEvent.InputTuple,
       PrizeAwardedEvent.OutputTuple,
       PrizeAwardedEvent.OutputObject
+    >;
+
+    "StartRevealPhase(uint256)": TypedContractEvent<
+      StartRevealPhaseEvent.InputTuple,
+      StartRevealPhaseEvent.OutputTuple,
+      StartRevealPhaseEvent.OutputObject
+    >;
+    StartRevealPhase: TypedContractEvent<
+      StartRevealPhaseEvent.InputTuple,
+      StartRevealPhaseEvent.OutputTuple,
+      StartRevealPhaseEvent.OutputObject
     >;
 
     "WinnerSelected(uint256,address,uint256)": TypedContractEvent<
