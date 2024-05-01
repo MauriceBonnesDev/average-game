@@ -2,7 +2,15 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.24",
+  solidity: {
+    version: "0.8.24",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
   networks: {
     sepolia: {
       url: "https://ethereum-sepolia-rpc.publicnode.com",
@@ -11,9 +19,11 @@ const config: HardhatUserConfig = {
       ],
     },
     hardhat: {
-      forking: {
-        url: "https://ethereum.publicnode.com",
+      mining: {
+        auto: true,
+        interval: 2000,
       },
+      allowBlocksWithSameTimestamp: true,
     },
   },
 };
