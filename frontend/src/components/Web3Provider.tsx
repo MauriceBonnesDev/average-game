@@ -95,7 +95,6 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
 
   async function initWallet() {
     let providerValue;
-    let signer;
     if (window.ethereum == null) {
       console.log("MetaMask not installed; using read-only defaults");
       providerValue = ethers.getDefaultProvider();
@@ -105,7 +104,7 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
         method: "wallet_switchEthereumChain",
         params: [{ chainId: "0x7a69" }], // 0xaa36a7 für Sepolia
       });
-      signer = await providerValue.getSigner();
+      const signer = await providerValue.getSigner();
       if (isMounted || isWalletConnected(signer.address)) {
         setWalletInstance(signer);
         addWallet(signer?.address ?? null);

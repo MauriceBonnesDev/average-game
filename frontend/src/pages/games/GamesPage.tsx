@@ -28,7 +28,9 @@ import { useWeb3Context } from "../../hooks/useWeb3Context";
 import useEventListening from "../../hooks/useEventListening";
 
 //TODO: Join Game screen, undeutlich, da geheimnis genau unter dem Text "Wähle eine Zahl zwischen 0 und 1000"
-//TODO: Outsource creation of event handlers into a separate useEffect to only run on initial render -> later on only whenever a new game is created
+//TODO: Collateral removed from payout, since that makes room for malicious behaviour by players -> Check if that fits now!
+//TODO: Next Phase Button oben rechts neben Ausrufezeichen
+//TODO: Claim Feed Button unten von Ended oder auch oben rechts
 const GamesPage = () => {
   const { wallet } = useWeb3Context();
   const dialog = useRef<DialogRef>(null);
@@ -46,7 +48,8 @@ const GamesPage = () => {
   const isMounted = useRef(true);
   const { setGameId } = useEventListening(
     averageGameInstances,
-    fetchSingleGame
+    fetchSingleGame,
+    wallet
   );
 
   useEffect(() => {
@@ -61,7 +64,6 @@ const GamesPage = () => {
   }, [wallet]);
 
   const fetchGames = async () => {
-    console.log("Fetch Games");
     try {
       isMounted.current = false;
       const gameProxies = await factoryContract!.getGameProxies();
@@ -83,10 +85,11 @@ const GamesPage = () => {
     console.log("Fetch single game");
     try {
       const gameProxies = await factoryContract!.getGameProxies();
+      console.log("Wallet:", wallet);
       const games = gameProxies.map((proxy) =>
         AverageGame.connect(proxy, wallet)
       );
-      console.log(games);
+
       const gameInstance: AverageGameInstance[] = await createGameInstances([
         games[id],
       ]);
@@ -96,7 +99,6 @@ const GamesPage = () => {
         const newInstances = prevInstances.filter(
           (instances) => instances.id !== id
         );
-        console.log(newInstances, gameInstance);
         return [...newInstances, ...gameInstance].sort((a, b) => a.id - b.id);
       });
       setIsLoading(false);
@@ -163,7 +165,7 @@ const GamesPage = () => {
 
       const onGameChanged = (gameCount: number, proxyAddress: string) => {
         console.log("Game #", gameCount, "created at", proxyAddress);
-        fetchSingleGame(gameCount - 1);
+        fetchGames();
         setGameId(gameCount - 1);
       };
 
@@ -189,15 +191,19 @@ const GamesPage = () => {
             "PlayerRevealedGuess(uint256,address,uint256,string,uint8)"
           ]
         );
-        contract.off(contract.filters["BettingRoundClosed(uint256)"]);
+        contract.off(contract.filters["StartRevealPhase(uint256)"]);
         contract.off(contract.filters["GameEnded(uint256)"]);
         contract.off(
           contract.filters["PrizeAwarded(uint256,address,uint256,uint256)"]
         );
+        contract.off(
+          contract.filters["PlayerRefunded(uint256,address,uint256)"]
+        );
+        contract.off(contract.filters["FeeCollected(uint256,address,uint256)"]);
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [wallet]);
 
   const openModal = () => {
     dialog.current?.open();
@@ -247,7 +253,9 @@ const GamesPage = () => {
       </Modal>
       {averageGameInstances.length > 0 && (
         <div className={classes.container}>
-          <div className="swiper-button-prev"></div>
+          <div
+            className={`swiper-button-prev ${classes.swiperButtonPrev}`}
+          ></div>
           <Swiper
             className={classes.swiper}
             modules={[Grid, Pagination, Navigation]}
@@ -279,7 +287,9 @@ const GamesPage = () => {
               );
             })}
           </Swiper>
-          <div className="swiper-button-next"></div>
+          <div
+            className={`swiper-button-next ${classes.swiperButtonNext}`}
+          ></div>
         </div>
       )}
     </>

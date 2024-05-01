@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { AverageGameInstance } from "../shared/types";
+import { JsonRpcSigner } from "ethers";
 
 const useEventListening = (
   averageGameInstances: AverageGameInstance[],
-  fetchSingleGame: (id: number) => void
+  fetchSingleGame: (id: number) => void,
+  wallet: JsonRpcSigner | undefined
 ) => {
   const [gameId, setGameId] = useState<number | null>(null);
 
@@ -59,7 +61,14 @@ const useEventListening = (
         );
 
         averageGame.contract.on(
-          averageGame.contract.filters["BettingRoundClosed(uint256)"],
+          averageGame.contract.filters["StartRevealPhase(uint256)"],
+          (gameId) => fetchSingleGame(Number(gameId))
+        );
+
+        averageGame.contract.on(
+          averageGame.contract.filters[
+            "PlayerRefunded(uint256,address,uint256)"
+          ],
           (gameId) => fetchSingleGame(Number(gameId))
         );
 
@@ -75,7 +84,7 @@ const useEventListening = (
           (gameId) => fetchSingleGame(Number(gameId))
         );
       });
-  }, [gameId]);
+  }, [gameId, wallet]);
 
   return { setGameId };
 };
