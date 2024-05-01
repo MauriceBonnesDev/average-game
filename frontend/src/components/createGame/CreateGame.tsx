@@ -269,6 +269,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
                 ? formik.errors.icon
                 : undefined
             }
+            icon={formik.values.icon}
             setIcon={handleSetIcon}
           />
         </div>
