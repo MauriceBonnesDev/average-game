@@ -22,6 +22,14 @@ contract AverageGameFactory {
         uint256 _gameFee,
         uint256 _icon
     ) public returns (address) {
+        require(
+            _maxPlayers >= 3,
+            "Mindestens 3 Spieler m\xC3\xBCssen am Spiel teilnehmen k\xC3\xB6nnen!"
+        );
+        require(
+            _maxPlayers <= 10000,
+            "Maximal 10.000 Spieler d\xC3\xBCrfen am Spiel teilnehmen!"
+        );
         console.log("Creating Game!!!!!");
         address proxy = Clones.clone(_address);
         console.log("Cloned");

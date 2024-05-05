@@ -48,8 +48,8 @@ contract AverageGame is ReentrancyGuard {
         uint256 id;
         string name;
         uint256 entryPrice;
-        uint256 totalPlayers;
-        uint256 maxPlayers;
+        uint16 totalPlayers;
+        uint16 maxPlayers;
         address contractAddress;
         uint256 collateral;
         uint256 gameFee;
@@ -74,9 +74,9 @@ contract AverageGame is ReentrancyGuard {
     mapping(address => bool) private isPotentialWinner;
 
     enum GameState {
-        CommitPhase, // Participants are committing their guesses
-        RevealPhase, // Participants are revealing their guesses
-        Ended // The game has ended
+        CommitPhase,
+        RevealPhase,
+        Ended
     }
 
     enum GameIcon {
@@ -346,6 +346,12 @@ contract AverageGame is ReentrancyGuard {
         address[] memory newPlayersArr = new address[](totalPlayers);
         for (uint16 i = 0; i < totalPlayers; i++) {
             newPlayersArr[i] = players[i];
+            playerRevealPositionHashes[players[i]] = keccak256(
+                abi.encodePacked(
+                    blockhash(block.number),
+                    playerRevealPositionHashes[players[i]]
+                )
+            );
         }
 
         players = quickSort(newPlayersArr);
@@ -391,20 +397,6 @@ contract AverageGame is ReentrancyGuard {
         );
         console.log((playerRevealPositions[msg.sender] + 1) * timeToReveal);
         console.log("-----------");
-        // require(
-        //     block.number <=
-        //         startOfReveal +
-        //             (playerRevealPositions[msg.sender] + 1) *
-        //             timeToReveal,
-        //     "Deine Revealzeit ist vorbei!"
-        // );
-        // require(
-        //     block.number >
-        //         startOfReveal +
-        //             playerRevealPositions[msg.sender] *
-        //             timeToReveal,
-        //     "Deine Revealzeit hat noch nicht begonnen!"
-        // );
         revealedGuesses[msg.sender] = _guess;
         revealedSalts[msg.sender] = _salt;
         revealState = verifyCommit(msg.sender);
