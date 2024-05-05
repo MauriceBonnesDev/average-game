@@ -2,6 +2,10 @@
 
 Dies ist das 2/3-Durchschnittspiel als Blockchain 3 Beleg.
 
+## Voraussetzungen
+
+Es muss ein Node Package Manager installiert sein. (Läuft mit Node Version 18.19.0)
+
 ## Installation
 
 1. ##### Klonen Sie das Repository:
