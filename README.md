@@ -147,6 +147,6 @@ Um ein vereinfachtest Testen zu ermöglichen, gibt es die Möglichkeit, auf eine
 4. ##### Advanced öffnen
    ![alt text](images/Advanced.png)
 5. ##### Klicke auf Clear activity tab data
-   ![alt text](image.png)
+   ![alt text](images/ClearActivity.png)
 
 Diese Schritte für alle Wallets durchführen, die bisher eine Transaktion durchgeführt haben.
