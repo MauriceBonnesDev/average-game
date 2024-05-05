@@ -85,7 +85,7 @@ Um ein vereinfachtest Testen zu ermöglichen, gibt es die Möglichkeit, auf eine
 6. ##### Smart Contracts lokal deployen
 
    ```bash
-   ╰─ rm -rf ignition/deployments && npx hardhat ignition deploy ./ignition/modules/migration.ts --network localhost
+   rm -rf ignition/deployments && npx hardhat ignition deploy ./ignition/modules/migration.ts --network localhost
    ```
 
    Hiermit werden zu erst alte deployte Contract Abis gelöscht und dann werden die neuen deployt.
