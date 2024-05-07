@@ -1,6 +1,6 @@
 import classes from "./GamesPage.module.scss";
 import Card from "../../components/card/Card";
-import addresses from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json"; // Change to 11155111 for the Sepolia Testnet, now running on localhost
+import addresses from "../../../../backend/ignition/deployments/chain-11155111/deployed_addresses.json"; // Change to 11155111 for the Sepolia Testnet and 31337 for the Hardhat Network
 import { useEffect, useRef, useState } from "react";
 import { AverageGameModule_AverageGameFactory__factory as AverageGameFactory } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGameFactory__factory";
 import { AverageGameModule_AverageGame__factory as AverageGame } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGame__factory";
@@ -55,7 +55,7 @@ const GamesPage = () => {
   useEffect(() => {
     if (wallet) {
       const gameFactory = AverageGameFactory.connect(
-        addresses["AverageGameModule#AverageGameFactory"],
+        addresses["AverageGameFactoryModule#AverageGameFactory"],
         wallet
       );
 
@@ -254,47 +254,41 @@ const GamesPage = () => {
           closeModal={dialog.current?.close}
         />
       </Modal>
-      {averageGameInstances.length > 0 && (
-        <div className={classes.container}>
-          <div
-            className={`swiper-button-prev ${classes.swiperButtonPrev}`}
-          ></div>
-          <Swiper
-            className={classes.swiper}
-            modules={[Grid, Pagination, Navigation]}
-            slidesPerView={3}
-            navigation={{
-              nextEl: ".swiper-button-next",
-              prevEl: ".swiper-button-prev",
-            }}
-            spaceBetween={100}
-            grid={{ rows: 2, fill: "row" }}
-          >
-            <span className={classes.createGame}>
-              <Button style="grey" size="round" onClick={openModal}>
-                <i className={`fas fa-plus ${classes.icon}`}></i>
-              </Button>
-            </span>
-            {averageGameInstances.sort(sortGameInstances).map((game) => {
-              return (
-                <SwiperSlide key={game.id}>
-                  <Card
-                    gameInstance={game}
-                    connectedAccount={wallet!.address}
-                    isLoading={isLoading}
-                    currentFocusedGame={currentFocusedGame}
-                    setCurrentFocusedGame={setCurrentFocusedGame}
-                    setIsLoading={setIsLoading}
-                  />
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
-          <div
-            className={`swiper-button-next ${classes.swiperButtonNext}`}
-          ></div>
-        </div>
-      )}
+      <div className={classes.container}>
+        <div className={`swiper-button-prev ${classes.swiperButtonPrev}`}></div>
+        <Swiper
+          className={classes.swiper}
+          modules={[Grid, Pagination, Navigation]}
+          slidesPerView={3}
+          navigation={{
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+          }}
+          spaceBetween={100}
+          grid={{ rows: 2, fill: "row" }}
+        >
+          <span className={classes.createGame}>
+            <Button style="grey" size="round" onClick={openModal}>
+              <i className={`fas fa-plus ${classes.icon}`}></i>
+            </Button>
+          </span>
+          {averageGameInstances.sort(sortGameInstances).map((game) => {
+            return (
+              <SwiperSlide key={game.id}>
+                <Card
+                  gameInstance={game}
+                  connectedAccount={wallet!.address}
+                  isLoading={isLoading}
+                  currentFocusedGame={currentFocusedGame}
+                  setCurrentFocusedGame={setCurrentFocusedGame}
+                  setIsLoading={setIsLoading}
+                />
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
+        <div className={`swiper-button-next ${classes.swiperButtonNext}`}></div>
+      </div>
     </>
   ) : (
     <h2>Mit Wallet verbinden um Inhalte zusehen</h2>

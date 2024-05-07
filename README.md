@@ -56,9 +56,9 @@ Es muss ein Node Package Manager installiert sein. (Läuft mit Node Version 18.1
 
 Standardmäßig ist das Projekt so konfiguriert, dass über das Sepolia-Testnet die Contracts angesprochen werden können.
 
-#### AverageGameFactory Contract: 0x000
+#### AverageGameFactory Contract: 0x036018604447F4B7Be0E86b1433c79a987c6a2e9
 
-#### AverageGame Contract: 0x000
+#### AverageGame Contract: 0xA738778f65Ded964b2Eef47adEADC2C347B44888
 
 Um ein vereinfachtest Testen zu ermöglichen, gibt es die Möglichkeit, auf einer lokalen Blockchain von Hardhat umzuschalten. Hier ist die Blockzeit lediglich 2 Sekunden, was ein schnelleres Durchlaufen der Wartezeiten ermöglicht.
 
@@ -89,7 +89,7 @@ Um ein vereinfachtest Testen zu ermöglichen, gibt es die Möglichkeit, auf eine
 6. #### Smart Contracts lokal deployen
 
    ```bash
-   rm -rf ignition/deployments && npx hardhat ignition deploy ./ignition/modules/migration.ts --network localhost
+   rm -rf ignition/deployments/chain-31337 && npx hardhat ignition deploy ./ignition/modules/migrationHardhat.ts --network localhost
    ```
 
    Hiermit werden zu erst alte deployte Contract Abis gelöscht und dann werden die neuen deployt.

@@ -102,7 +102,7 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
       providerValue = new ethers.BrowserProvider(window.ethereum);
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x7a69" }], // 0xaa36a7 für Sepolia
+        params: [{ chainId: "0xaa36a7" }], // 0xaa36a7 für Sepolia und 0x7a69 für Hardhat
       });
       const signer = await providerValue.getSigner();
       if (isMounted || isWalletConnected(signer.address)) {
