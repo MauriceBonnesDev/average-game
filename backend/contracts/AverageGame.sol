@@ -304,6 +304,7 @@ contract AverageGame is ReentrancyGuard {
             !playerAlreadyJoined[msg.sender],
             "Du bist dem Spiel bereits beigetreten!"
         );
+        require(totalPlayers < maxPlayers, "Maximale Spieleranzahl erreicht!");
 
         totalBetAmount += betAmount;
         betAmountOfPlayer[msg.sender] = betAmount;
