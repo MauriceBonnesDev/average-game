@@ -386,6 +386,7 @@ const Card = ({
             ) : gameInstance.gameState === GameState.Ended &&
               playerRevealed &&
               isPotentialWinner &&
+              collateralShare > 0 &&
               !isWinner ? (
               <Button
                 color={color}
