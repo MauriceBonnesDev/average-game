@@ -10,12 +10,12 @@
   &Bottom {
     display: flex;
     justify-content: space-between;
-    height: 300px;
+    height: 18.75rem;
   }
 }
 
 .numberInputs {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.125rem;
 }

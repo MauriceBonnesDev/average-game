@@ -18,14 +18,15 @@
     width: 100%;
     padding-top: 10rem;
     padding-bottom: 5rem;
+    background-color: #f5f5f7;
 
     & > h1 {
-      font-size: 56px;
+      font-size: 3.5rem;
       font-weight: 600;
     }
 
     & > h3 {
-      font-size: 28px;
+      font-size: 1.75rem;
       font-weight: 400;
       margin-bottom: 2rem;
     }
@@ -40,13 +41,13 @@
     & .timelineContainer {
       width: 75vw;
       position: relative;
-      height: 1770px;
+      height: 110.625rem;
       display: flex;
       justify-content: center;
 
       & > img {
         position: absolute;
-        width: 90px;
+        width: 5.625rem;
         left: 50%;
         transform: translate(-50%);
       }
@@ -55,13 +56,13 @@
         list-style: none;
         & > li {
           position: absolute;
-          width: 450px;
+          width: 28.125rem;
           color: white;
-          padding: 30px;
-          border-radius: 15px;
+          padding: 1.875rem;
+          border-radius: 0.9375rem;
 
           & h3 {
-            font-size: 32px;
+            font-size: 2rem;
             font-weight: 800;
             line-height: normal;
           }
@@ -69,73 +70,73 @@
           & h5 {
             text-transform: uppercase;
             color: rgba(255, 255, 255, 0.6);
-            font-size: 18px;
+            font-size: 1.125rem;
             font-weight: 600;
           }
 
           & p {
-            font-size: 18px;
+            font-size: 1.125rem;
             line-height: 1.5;
             margin-top: 0.3rem;
           }
 
           &:nth-child(1) {
-            top: 95px;
+            top: 5.9375rem;
             background-color: rgb(105, 74, 213);
           }
 
           &:nth-child(2) {
-            top: 231px;
+            top: 14.4375rem;
             background-color: rgb(114, 72, 202);
           }
 
           &:nth-child(3) {
-            top: 367px;
+            top: 22.9375rem;
             background-color: rgb(123, 70, 191);
           }
 
           &:nth-child(4) {
-            top: 502px;
+            top: 31.375rem;
             background-color: rgb(130, 69, 180);
           }
 
           &:nth-child(5) {
-            top: 638px;
+            top: 39.875rem;
             background-color: rgb(139, 67, 170);
           }
 
           &:nth-child(6) {
-            top: 773px;
+            top: 48.3125rem;
             background-color: rgb(148, 65, 158);
           }
 
           &:nth-child(7) {
-            top: 908px;
+            top: 56.75rem;
             background-color: rgb(155, 63, 148);
           }
 
           &:nth-child(8) {
-            top: 1044px;
+            top: 65.25rem;
             background-color: rgb(163, 61, 136);
           }
 
           &:nth-child(9) {
-            top: 1179px;
+            top: 73.6875rem;
             background-color: rgb(172, 59, 125);
           }
 
           &:nth-child(10) {
-            top: 1313px;
+            top: 82.0625rem;
             background-color: rgb(180, 57, 115);
           }
 
           &:nth-child(11) {
-            top: 1450px;
+            top: 90.625rem;
             background-color: rgb(188, 54, 104);
           }
 
           &:nth-child(12) {
-            top: 1585px;
+            top: 99.0625rem;
             background-color: rgb(196, 53, 92);
           }
 
@@ -159,21 +160,22 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
+    background-color: #f5f5f7;
 
     & > h1 {
-      font-size: 56px;
+      font-size: 3.5rem;
       font-weight: 600;
     }
 
     & > h3 {
-      font-size: 28px;
+      font-size: 1.75rem;
       font-weight: 400;
       margin-bottom: 2rem;
     }
 
     & > p {
-      width: 75vw;
-      font-size: 18px;
+      width: 60vw;
+      font-size: 1.125rem;
       line-height: 1.5;
       margin-top: 0.3rem;
     }
@@ -186,7 +188,7 @@
     justify-content: center;
 
     & h3 {
-      font-size: 32px;
+      font-size: 2rem;
       font-weight: 800;
       line-height: normal;
     }
@@ -194,25 +196,25 @@
     & h5 {
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.6);
-      font-size: 18px;
+      font-size: 1.125rem;
       font-weight: 600;
     }
     & ol {
-      margin-left: 17px;
+      margin-left: 1.0625rem;
 
       & li {
-        font-size: 18px;
+        font-size: 1.125rem;
         line-height: 1.5;
         margin-top: 0.3rem;
       }
     }
 
     & > div {
-      width: 850px;
+      width: 53.125rem;
       background-color: rgb(196, 53, 92);
       color: white;
-      padding: 30px;
-      border-radius: 15px;
+      padding: 1.875rem;
+      border-radius: 0.9375rem;
     }
   }
 }

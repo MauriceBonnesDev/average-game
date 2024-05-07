@@ -1,19 +1,21 @@
 @use "../../colors";
 
 .container {
-  min-width: 2000px;
+  min-width: 125rem;
   width: 70vw;
-  height: 800px;
+  max-width: 70vw;
+  height: 50rem;
   display: flex;
-  margin: 10rem auto;
+  margin: 10rem auto 7.5rem auto;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 }
 
 .arrowBtn {
   color: colors.$light-grey;
   font-weight: 100;
-  font-size: 100px;
+  font-size: 6.25rem;
 }
 
 .material-symbols-outlined {
@@ -22,9 +24,9 @@
 
 .createGame {
   position: absolute;
-  top: 0px;
-  left: 0px;
-  padding: 10px;
+  top: 0rem;
+  left: 0rem;
+  padding: 0.625rem;
 }
 
 .buttonContent {
@@ -38,7 +40,9 @@
 }
 
 .swiper {
-  padding-top: 95px !important;
-  padding-left: 10px !important;
-  padding-right: 90px !important;
+  padding-top: 5.9375rem !important;
+  padding-left: 0.625rem !important;
+  padding-right: 5.625rem !important;
+
+  max-width: 70vw;
 }

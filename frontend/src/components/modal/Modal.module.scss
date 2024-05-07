@@ -2,7 +2,7 @@
 
 .modal {
   border: none;
-  border-radius: 15px;
+  border-radius: 0.9375rem;
   background-color: #ffffff;
   margin: 15rem auto;
 
@@ -33,7 +33,7 @@
 #modalBody {
   padding: 4rem;
   position: relative;
-  width: 560px;
+  width: 35rem;
 }
 
 @keyframes slide-in-from-top {
@@ -61,10 +61,10 @@
 
 .closeBtn {
   position: absolute;
-  top: 35px;
-  right: 35px;
+  top: 2.1875rem;
+  right: 2.1875rem;
   border: none;
-  font-size: 28px;
+  font-size: 1.75rem;
   background-color: transparent;
   cursor: pointer;
 }

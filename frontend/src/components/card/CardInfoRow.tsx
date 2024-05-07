@@ -9,7 +9,7 @@ const CardInfoRow = ({ amount, title }: CardInfoRowProps) => {
   return (
     <div className={classes.cardInfoRow}>
       <img src={ethLogo} />
-      <p className={classes.cardInfoPrice}>{amount.toFixed(2)}</p>
+      <p className={classes.cardInfoPrice}>{amount.toFixed(3)}</p>
       <p className={classes.cardInfoName}>{title}</p>
     </div>
   );

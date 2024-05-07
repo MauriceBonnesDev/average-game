@@ -26,11 +26,11 @@
   width: min-content !important;
 
   &::after {
-    font-size: 100px;
+    font-size: 6.25rem;
   }
 
   &:hover::after {
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem);
     color: darken($color: colors.$light-grey, $amount: 2);
   }
 }
@@ -42,11 +42,29 @@
 
 .swiper-button-prev {
   left: unset !important;
-  margin-right: calc(5rem + 69px);
+  margin-right: calc(5rem + 4.3125rem);
 }
 
 label {
   font-weight: 600;
-  font-size: 18px;
-  margin-bottom: 5px;
+  font-size: 1.125rem;
+  margin-bottom: 0.3125rem;
+}
+
+@media screen and (max-width: 125rem) {
+  :root {
+    font-size: 15px;
+  }
+}
+
+@media screen and (max-width: 118.75rem) {
+  :root {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 110rem) {
+  :root {
+    font-size: 12px;
+  }
 }

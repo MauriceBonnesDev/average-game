@@ -1,7 +1,7 @@
 @use "../../colors";
 
 .btn {
-  border-radius: 100px;
+  border-radius: 6.25rem;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -11,8 +11,9 @@
   position: relative;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba($color: colors.$purple-800, $alpha: 0.25);
+    transform: translateY(-0.125rem);
+    box-shadow: 0 0.3125rem 0.9375rem
+      rgba($color: colors.$purple-800, $alpha: 0.25);
   }
 
   &:disabled {
@@ -94,44 +95,45 @@
 
   &:active {
     transform: translateY(0);
-    box-shadow: 0 2px 5px rgba($color: colors.$purple-950, $alpha: 0.25);
+    box-shadow: 0 0.125rem 0.3125rem
+      rgba($color: colors.$purple-950, $alpha: 0.25);
   }
 
   &Small {
-    height: 38px;
+    height: 2.375rem;
     font-weight: 800;
-    font-size: 20px;
-    padding: 0 15px;
+    font-size: 1.25rem;
+    padding: 0 0.9375rem;
     min-width: 35;
   }
 
   &Medium {
-    height: 38px;
+    height: 2.375rem;
     font-weight: 400;
-    font-size: 22px;
-    padding: 0 20px;
+    font-size: 1.375rem;
+    padding: 0 1.25rem;
   }
 
   &Large {
-    height: 55px;
+    height: 3.4375rem;
     font-weight: 400;
-    font-size: 24px;
-    padding: 0 40px;
+    font-size: 1.5rem;
+    padding: 0 2.5rem;
   }
 
   &Round {
-    width: 60px;
-    height: 60px;
+    width: 3.75rem;
+    height: 3.75rem;
     font-weight: 600;
-    font-size: 26px;
-    padding: 0 20px;
+    font-size: 1.625rem;
+    padding: 0 1.25rem;
   }
 
   &RoundSmall {
-    height: 40px;
-    width: 40px;
+    height: 2.5rem;
+    width: 2.5rem;
     font-weight: 600;
-    font-size: 26px;
+    font-size: 1.625rem;
   }
 
   &LightPurple {

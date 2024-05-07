@@ -8,6 +8,8 @@ import classes from "./CreateGame.module.scss";
 import { GameSettings } from "../../shared/types";
 import IconPicker from "../iconPicker/IconPicker";
 import { FormikErrors, useFormik } from "formik";
+import toast from "react-hot-toast";
+import { transformError } from "../../shared/utils";
 
 type CreateGameProps = {
   contractAddress: string;
@@ -34,6 +36,8 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
 
       if (values.betAmount <= 0) {
         errors.betAmount = "Bitte wählen Sie einen Einsatz aus";
+      } else if (!isValidDecimal(values.betAmount)) {
+        errors.betAmount = "Maximal 3 Dezimalstellen erlaubt";
       }
 
       if (values.gameFee <= 0) {
@@ -99,6 +103,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
           console.log("Spiel erfolgreich erstellt", address);
         } catch (error) {
           console.error("Fehler beim Erstellen des Spiels:", error);
+          toast.error(transformError(error), { id: "error" });
         }
       }
     };
@@ -130,14 +135,17 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
       });
     };
 
+    function isValidDecimal(value: number): boolean {
+      const strValue = value.toString();
+      const decimalPart = strValue.split(".")[1];
+      return !decimalPart || decimalPart.length <= 3;
+    }
+
     const handleBetAmountChange = (name: string, step: number) => {
       formik.setTouched(
         {
+          ...formik.touched,
           betAmount: true,
-          gameFee: formik.touched.gameFee,
-          icon: formik.touched.icon,
-          maxPlayers: formik.touched.maxPlayers,
-          name: formik.touched.name,
         },
         true
       );
@@ -146,6 +154,10 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
         value += step;
         if (value < 0) {
           value = 0;
+        }
+
+        if (!isValidDecimal(value)) {
+          return prevState;
         }
 
         return {

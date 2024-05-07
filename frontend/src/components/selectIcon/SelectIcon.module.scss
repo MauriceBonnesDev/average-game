@@ -5,13 +5,13 @@
   color: transparent;
 
   & img {
-    height: 65px;
-    width: 65px;
+    height: 4.0625rem;
+    width: 4.0625rem;
     transition: all 0.3s ease-in-out;
 
     &:hover {
       cursor: pointer;
-      transform: translate3d(0, -5px, 10px);
+      transform: translate3d(0, -0.3125rem, 0.625rem);
     }
 
     &:active {
@@ -26,10 +26,10 @@
 
 .check {
   position: absolute;
-  top: -13px;
-  right: -13px;
+  top: -0.8125;
+  right: -0.8125;
   z-index: 1;
-  font-size: 25px;
+  font-size: 1.5625rem;
 }
 
 .active {
