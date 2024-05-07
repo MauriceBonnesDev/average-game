@@ -1,0 +1,139 @@
+footer {
+  background-color: #f5f5f7;
+  display: flex;
+  padding: 1rem 2rem 0 2rem;
+  flex-direction: column;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.56);
+
+  .footerContent {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+
+    section {
+      width: 15%;
+
+      h2 {
+        color: rgba(0, 0, 0, 0.88);
+        font-size: 2rem;
+      }
+    }
+    .followMe {
+      display: flex;
+      justify-content: space-between;
+
+      a {
+        border-radius: 6.25rem;
+        height: 1.25rem;
+        width: 1.25rem;
+        padding: 1rem;
+        font-size: 1.5625rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+          cursor: pointer;
+          transform: translateY(-0.125rem);
+          box-shadow: 0 0.3125rem 0.9375rem rgba($color: #000, $alpha: 0.25);
+        }
+      }
+    }
+  }
+
+  > .copyright {
+    color: rgba(0, 0, 0, 0.56);
+    font-size: 0.875rem;
+    line-height: unset;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.16);
+    width: 100%;
+  }
+
+  > .partnerships {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 50%;
+    margin: 0.5rem;
+
+    a {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        cursor: pointer;
+        transform: translateY(-0.125rem);
+      }
+    }
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#instagram {
+  background: #d6249f;
+  background: radial-gradient(
+    circle at 30% 107%,
+    #fdf497 0%,
+    #fdf497 5%,
+    #fd5949 45%,
+    #d6249f 60%,
+    #285aeb 90%
+  );
+
+  &:hover {
+    background: radial-gradient(
+      circle at 30% 107%,
+      darken(#fdf497, 5%) 0%,
+      darken(#fdf497, 5%) 5%,
+      darken(#fd5949, 5%) 45%,
+      darken(#d6249f, 5%) 60%,
+      darken(#285aeb, 5%) 90%
+    );
+  }
+}
+
+#linkedin {
+  background-color: rgb(39, 122, 177);
+
+  &:hover {
+    background: darken(rgb(39, 122, 177), 5%);
+  }
+}
+
+#github {
+  background-color: rgb(26, 30, 34);
+
+  &:hover {
+    background: lighten(rgb(26, 30, 34), 10%);
+  }
+}
+
+#twitter {
+  background-color: rgb(0, 0, 0);
+
+  &:hover {
+    background: lighten(rgb(0, 0, 0), 20%);
+  }
+}
+
+#bccmLogo {
+  width: 6.25rem;
+}
+
+#hsmwLogo {
+  width: 12.5rem;
+}
