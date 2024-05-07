@@ -66,7 +66,7 @@ Um ein vereinfachtest Testen zu ermöglichen, gibt es die Möglichkeit, auf eine
 
 1. #### Automatischer Netzwerkswechsel anpassen
 
-   Im `Web3Provider.tsx` in Zeile 105 die **chainId** ändern
+   Im `average-game/frontend/src/components/Web3Provider.tsx` in Zeile 105 die **chainId** ändern
    `params: [{ chainId: "0xaa36a7" }]`
 
    ###
@@ -76,7 +76,7 @@ Um ein vereinfachtest Testen zu ermöglichen, gibt es die Möglichkeit, auf eine
 
 2. #### Korrekte Deployment Adressen einbeziehen
 
-   Im `GamesPage.tsx` in Zeile 3 die **chain** anpassen
+   Im `average-game/frontend/src/pages/games/GamesPage.tsx` in Zeile 3 die **chain** anpassen
    `import addresses from "../../../../backend/ignition/deployments/chain-11155111/deployed_addresses.json";`
 
    ###
