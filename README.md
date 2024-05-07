@@ -62,6 +62,28 @@ Standardmäßig ist das Projekt so konfiguriert, dass über das Sepolia-Testnet 
 
 Um ein vereinfachtest Testen zu ermöglichen, gibt es die Möglichkeit, auf einer lokalen Blockchain von Hardhat umzuschalten. Hier ist die Blockzeit lediglich 2 Sekunden, was ein schnelleres Durchlaufen der Wartezeiten ermöglicht.
 
+## Applikation für das jeweilige Netzwerk einrichten
+
+1. #### Automatischer Netzwerkswechsel anpassen
+
+   Im `Web3Provider.tsx` in Zeile 105 die **chainId** ändern
+   `params: [{ chainId: "0xaa36a7" }]`
+
+   ###
+
+   Für **Sepolia**: `0xaa36a7`
+   Für **Hardhat**: `0x7a69`
+
+2. #### Korrekte Deployment Adressen einbeziehen
+
+   Im `GamesPage.tsx` in Zeile 3 die **chain** anpassen
+   `import addresses from "../../../../backend/ignition/deployments/chain-11155111/deployed_addresses.json";`
+
+   ###
+
+   Für **Sepolia**: `chain-11155111`
+   Für **Hardhat**: `chain-31337`
+
 ## Applikation in Hardhat starten
 
 1. #### Neues Terminalfenster im Projektverzeichnis starten
