@@ -3,6 +3,9 @@ import { parseEther } from "ethers";
 const AverageGameModule = buildModule("AverageGameModule", (m) => {
   const averageGame = m.contract("AverageGame", []);
   const averageGameFactory = m.contract("AverageGameFactory", []);
+  console.log(averageGame);
+  console.log(averageGameFactory);
+
   let name = "Average Game";
   let maxPlayers = 5;
   let amount = 1;

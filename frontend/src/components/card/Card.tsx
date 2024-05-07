@@ -156,6 +156,7 @@ const Card = ({
   const claimReward = async () => {
     try {
       setIsLoading(true);
+      setLoadingButton("action");
       setCurrentFocusedGame(gameInstance.id);
       await gameInstance.contract.withdrawPricepool(connectedAccount);
     } catch (error) {
@@ -338,6 +339,7 @@ const Card = ({
                 style="light"
                 onClick={openModal}
                 size="small"
+                info="Tritt dem Spiel bei!"
               >
                 Join
               </Button>

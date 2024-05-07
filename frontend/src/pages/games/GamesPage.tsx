@@ -191,18 +191,18 @@ const GamesPage = () => {
             "PlayerRevealedGuess(uint256,address,uint256,string,uint8)"
           ]
         );
+        contract.off(contract.filters["FeeCollected(uint256,address,uint256)"]);
         contract.off(contract.filters["StartRevealPhase(uint256)"]);
-        contract.off(contract.filters["GameEnded(uint256)"]);
         contract.off(
-          contract.filters["PrizeAwarded(uint256,address,uint256,uint256)"]
+          contract.filters["PlayerRefunded(uint256,address,uint256)"]
         );
+        contract.off(contract.filters["GameEnded(uint256)"]);
         contract.off(
           contract.filters["CollateralShareDeposited(uint256,address,uint256)"]
         );
         contract.off(
-          contract.filters["PlayerRefunded(uint256,address,uint256)"]
+          contract.filters["PrizeAwarded(uint256,address,uint256,uint256)"]
         );
-        contract.off(contract.filters["FeeCollected(uint256,address,uint256)"]);
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
