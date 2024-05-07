@@ -26,6 +26,7 @@ import Button from "../../components/button/Button";
 import { AverageGameInstance } from "../../shared/types";
 import { useWeb3Context } from "../../hooks/useWeb3Context";
 import useEventListening from "../../hooks/useEventListening";
+import { RotatingLines } from "react-loader-spinner";
 
 //TODO: Join Game screen, undeutlich, da geheimnis genau unter dem Text "Wähle eine Zahl zwischen 0 und 1000"
 //TODO: Collateral removed from payout, since that makes room for malicious behaviour by players -> Check if that fits now!
@@ -38,6 +39,7 @@ const GamesPage = () => {
   const [factoryContract, setFactoryContract] =
     useState<TAverageGameFactory | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [currentFocusedGame, setCurrentFocusedGame] = useState<number | null>(
     null
   );
@@ -66,6 +68,7 @@ const GamesPage = () => {
   const fetchGames = async () => {
     try {
       isMounted.current = false;
+      setIsFetching(true);
       const gameProxies = await factoryContract!.getGameProxies();
       const games = gameProxies.map((proxy) =>
         AverageGame.connect(proxy, wallet)
@@ -76,6 +79,7 @@ const GamesPage = () => {
       );
       setGameId(-1);
       setAverageGameInstances(gameInstances);
+      setIsFetching(false);
     } catch (error) {
       console.error("Error fetching games data:", error);
     }
@@ -254,41 +258,55 @@ const GamesPage = () => {
           closeModal={dialog.current?.close}
         />
       </Modal>
-      <div className={classes.container}>
-        <div className={`swiper-button-prev ${classes.swiperButtonPrev}`}></div>
-        <Swiper
-          className={classes.swiper}
-          modules={[Grid, Pagination, Navigation]}
-          slidesPerView={3}
-          navigation={{
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-          }}
-          spaceBetween={100}
-          grid={{ rows: 2, fill: "row" }}
-        >
-          <span className={classes.createGame}>
-            <Button style="grey" size="round" onClick={openModal}>
-              <i className={`fas fa-plus ${classes.icon}`}></i>
-            </Button>
-          </span>
-          {averageGameInstances.sort(sortGameInstances).map((game) => {
-            return (
-              <SwiperSlide key={game.id}>
-                <Card
-                  gameInstance={game}
-                  connectedAccount={wallet!.address}
-                  isLoading={isLoading}
-                  currentFocusedGame={currentFocusedGame}
-                  setCurrentFocusedGame={setCurrentFocusedGame}
-                  setIsLoading={setIsLoading}
-                />
-              </SwiperSlide>
-            );
-          })}
-        </Swiper>
-        <div className={`swiper-button-next ${classes.swiperButtonNext}`}></div>
-      </div>
+
+      {isFetching ? (
+        <RotatingLines
+          strokeWidth="3"
+          width="125"
+          animationDuration="1.25"
+          strokeColor={"black"}
+        />
+      ) : (
+        <div className={classes.container}>
+          <div
+            className={`swiper-button-prev ${classes.swiperButtonPrev}`}
+          ></div>
+          <Swiper
+            className={classes.swiper}
+            modules={[Grid, Pagination, Navigation]}
+            slidesPerView={3}
+            navigation={{
+              nextEl: ".swiper-button-next",
+              prevEl: ".swiper-button-prev",
+            }}
+            spaceBetween={100}
+            grid={{ rows: 2, fill: "row" }}
+          >
+            <span className={classes.createGame}>
+              <Button style="grey" size="round" onClick={openModal}>
+                <i className={`fas fa-plus ${classes.icon}`}></i>
+              </Button>
+            </span>
+            {averageGameInstances.sort(sortGameInstances).map((game) => {
+              return (
+                <SwiperSlide key={game.id}>
+                  <Card
+                    gameInstance={game}
+                    connectedAccount={wallet!.address}
+                    isLoading={isLoading}
+                    currentFocusedGame={currentFocusedGame}
+                    setCurrentFocusedGame={setCurrentFocusedGame}
+                    setIsLoading={setIsLoading}
+                  />
+                </SwiperSlide>
+              );
+            })}
+          </Swiper>
+          <div
+            className={`swiper-button-next ${classes.swiperButtonNext}`}
+          ></div>
+        </div>
+      )}
     </>
   ) : (
     <h2>Mit Wallet verbinden um Inhalte zusehen</h2>
