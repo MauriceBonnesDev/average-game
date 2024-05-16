@@ -61,6 +61,7 @@ const Card = ({
   const joinGameRef = useRef<JoinGameRef>(null);
   const gameMasterConnected = connectedAccount === gameInstance.gameMaster;
   const playerJoined = gameInstance.players.includes(connectedAccount);
+  const playerIndex = gameInstance.players.indexOf(connectedAccount) + 1;
   const [playerRevealed, setPlayerRevealed] = useState(false);
   const [isPotentialWinner, setIsPotentialWinner] = useState(false);
   const [collateralShare, setCollateralShare] = useState(0);
@@ -284,6 +285,12 @@ const Card = ({
               : ""
           }`}
         ></div>
+
+        <p className={classes.revealOrder}>
+          {gameInstance.gameState === GameState.RevealPhase && playerJoined
+            ? `Du musst als ${playerIndex}. veröffentlichen`
+            : ""}
+        </p>
         <div className={classes.cardBodyContent}>
           <h5>Get Started</h5>
           <Tooltip title={`${name} #${id}`}>
