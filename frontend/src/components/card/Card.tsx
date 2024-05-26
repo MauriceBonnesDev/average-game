@@ -218,6 +218,12 @@ const Card = ({
     dialog.current?.open();
   };
 
+  const closeModal = () => {
+    if (dialog.current) {
+      dialog.current.close();
+    }
+  };
+
   const modalTitle =
     gameInstance.gameState === GameState.CommitPhase
       ? "Join Game"
@@ -273,7 +279,7 @@ const Card = ({
           ref={joinGameRef}
           setIsLoading={setIsLoading}
           gameInstance={gameInstance}
-          closeModal={dialog.current?.close}
+          closeModal={closeModal}
         />
       </Modal>
       <div className={`${classes.card} ${cardColor}`}>
