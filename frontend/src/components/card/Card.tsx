@@ -24,6 +24,7 @@ import {
 import { transformError } from "../../shared/utils";
 import CardInfoRow from "./CardInfoRow";
 import { Box, Tooltip } from "@mui/material";
+import { ethers } from "ethers";
 
 type CardProps = {
   gameInstance: AverageGameInstance;
@@ -66,6 +67,7 @@ const Card = ({
   const [isPotentialWinner, setIsPotentialWinner] = useState(false);
   const [collateralShare, setCollateralShare] = useState(0);
   const isWinner = gameInstance.winner === connectedAccount;
+  const noWinnerFound = gameInstance.winner === ethers.ZeroAddress;
   const rewardClaimed = gameInstance.rewardClaimed;
   const feeClaimed = gameInstance.feeClaimed;
   const [loadingButton, setLoadingButton] = useState<
@@ -302,25 +304,26 @@ const Card = ({
           </Tooltip>
           <p>Trete bei und vervielfache dein Cash!</p>
         </div>
-        {gameInstance.gameState === GameState.CommitPhase && playerJoined && (
-          <div className={classes.refundButton}>
-            <Button
-              color={color}
-              style="light"
-              size="round-small"
-              disabled={isLoading && currentFocusedGame === gameInstance.id}
-              isLoading={
-                isLoading &&
-                loadingButton === "refund" &&
-                currentFocusedGame === gameInstance.id
-              }
-              onClick={requestRefund}
-              info="Refund beantragen: Du bekommst dein Einsatz und deine Kaution zurück!"
-            >
-              <img src={closeIcon} />
-            </Button>
-          </div>
-        )}
+        {(gameInstance.gameState === GameState.CommitPhase && playerJoined) ||
+          (gameInstance.gameState === GameState.Ended && noWinnerFound && (
+            <div className={classes.refundButton}>
+              <Button
+                color={color}
+                style="light"
+                size="round-small"
+                disabled={isLoading && currentFocusedGame === gameInstance.id}
+                isLoading={
+                  isLoading &&
+                  loadingButton === "refund" &&
+                  currentFocusedGame === gameInstance.id
+                }
+                onClick={requestRefund}
+                info="Refund beantragen: Du bekommst dein Einsatz und deine Kaution zurück!"
+              >
+                <img src={closeIcon} />
+              </Button>
+            </div>
+          ))}
         <div className={`${classes.cardFooter} ${footerColor}`}>
           <div className={`${classes.logo} ${logoColor}`}>
             <img src={icons[gameInstance.icon]} />

@@ -689,8 +689,9 @@ contract AverageGame is ReentrancyGuard {
         nonReentrant
     {
         require(
-            state == GameState.CommitPhase,
-            "Spiel muss in der Commit Phase sein!"
+            state == GameState.CommitPhase ||
+                (state == GameState.Ended && winner == address(0)),
+            "Refund darf noch nicht beantragt werden!"
         );
         require(
             betAmountOfPlayer[msg.sender] > 0,
