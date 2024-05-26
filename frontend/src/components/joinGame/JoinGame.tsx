@@ -146,6 +146,11 @@ const JoinGame = forwardRef<JoinGameRef, JoinGameProps>(
         if (value < 1000 && value > 0) {
           value += step;
         }
+
+        if ((value === 0 && step === 1) || (value === 1000 && step === -1)) {
+          value += step;
+        }
+
         return {
           ...prevState,
           [name]: value,
