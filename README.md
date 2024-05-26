@@ -174,6 +174,8 @@ Um ein vereinfachtest Testen zu ermöglichen, gibt es die Möglichkeit, auf eine
    Sollte ein Problem auftreten, wobei in dem Terminalfenster der Blockchain eine ähnliche Meldung wie diese auftritt:
    `Received invalid block tag xx. Latest block number is zz`
    Dann sollten alle connecteten Wallets die Activity Data löschen, dann disconnecten und im Anschluss den Browser neu starten. Das kann passieren, da Metamask einen anderen Stand der Blockchain cached, welcher somit zurückgesetzt wird.
+   In den Chrome Developer Tools taucht dann der folgende Fehler auf:
+   ![Errormessage](images/Error.png)
 
 2. #### Transaktionsnonce nicht synchron
    Wenn die lokale Blockchain genutzt wird, kann es sein, dass Metamask ein Problem damit hat, dass die Transaktionsnoncen nicht synchron mit der lokalen Blockchain sind. Dafür ist es notwendig, die Activity Data zu löschen, bevor eine Transaktion durchgeführt wird.
