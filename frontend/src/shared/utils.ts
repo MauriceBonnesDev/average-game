@@ -1,6 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function transformError(error: any) {
-  console.log(error);
+export function transformError(error: any): string {
   if (JSON.stringify(error).includes("user rejected action")) {
     return "Transaktion abgebrochen";
   }
@@ -17,7 +16,10 @@ export function transformError(error: any) {
     return (
       "Die Aktion darf noch nicht durchgeführt werden, warte noch " +
       (requiredBlocks - (currentBlock - startBlock)) +
-      " Blöcke ab. Es müssen mindestens " +
+      (requiredBlocks - (currentBlock - startBlock) > 1
+        ? " Blöcke"
+        : " Block") +
+      " ab. Es müssen mindestens " +
       requiredBlocks +
       " Blöcke vergehen."
     );
@@ -31,15 +33,12 @@ export function transformError(error: any) {
 
     const startBlock = Number(arr![1]);
     const currentBlock = Number(arr![2]);
-    const requiredBlocks = Number(arr![3]);
 
-    console.log(startBlock);
-    console.log(currentBlock);
-    console.log(requiredBlocks);
     return (
       "Deine Revealzeit ist seit " +
       (currentBlock - startBlock) +
-      " Blöcken vorbei!"
+      (currentBlock - startBlock > 1 ? " Blöcken" : "Block") +
+      " vorbei!"
     );
   }
 
@@ -65,9 +64,12 @@ export function transformError(error: any) {
     );
   }
 
+  if (JSON.stringify(error).includes("Es wurde kein Gewinner gefunden")) {
+    return "Es wurde kein Gewinner gefunden!";
+  }
+
   if (error.reason) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (error as any).reason;
+    return error.reason;
   }
 
   return "Unbekannter Fehler";
