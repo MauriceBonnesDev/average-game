@@ -1,5 +1,6 @@
 import { ethers, JsonRpcSigner, Eip1193Provider } from "ethers";
 import { createContext, useState, ReactNode, useEffect } from "react";
+import { useNetworkContext } from "../hooks/useNetworkContext";
 
 interface Web3ContextType {
   wallet: JsonRpcSigner | undefined;
@@ -74,6 +75,8 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
   >();
   const [isMounted, setIsMounted] = useState(false);
   const { isWalletConnected, addWallet, removeWallet } = useConnectedWallets();
+  const { network } = useNetworkContext();
+
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", async () => {
@@ -91,7 +94,7 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
       initWallet();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [network]);
 
   async function initWallet() {
     let providerValue;
@@ -100,10 +103,59 @@ export default function Web3Provider({ children }: { children: ReactNode }) {
       providerValue = ethers.getDefaultProvider();
     } else {
       providerValue = new ethers.BrowserProvider(window.ethereum);
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0xaa36a7" }], // 0xaa36a7 für Sepolia und 0x7a69 für Hardhat
-      });
+      try {
+        if (network === "sepolia") {
+          console.log("Changed");
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: "0xaa36a7" }], // 0xaa36a7 für Sepolia und 0x7a69 für Hardhat
+          });
+        } else if (network === "hardhat") {
+          console.log("Changed");
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: "0x7a69" }], // 0xaa36a7 für Sepolia und 0x7a69 für Hardhat
+          });
+        }
+      } catch (error) {
+        if (network === "sepolia") {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                blockExplorerUrls: ["https://sepolia.etherscan.io"],
+                iconUrls: [],
+                nativeCurrency: {
+                  name: "SepoliaETH",
+                  symbol: "SepoliaETH",
+                  decimals: 18,
+                },
+                rpcUrls: ["https://sepolia.infura.io/v3/"],
+                chainId: "0xaa36a7",
+                chainName: "Sepolia",
+              },
+            ],
+          });
+        } else {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                blockExplorerUrls: [],
+                iconUrls: [],
+                nativeCurrency: {
+                  name: "ETH",
+                  symbol: "ETH",
+                  decimals: 18,
+                },
+                rpcUrls: ["http://127.0.0.1:8545/"],
+                chainId: "31337",
+                chainName: "Hardhat",
+              },
+            ],
+          });
+        }
+      }
       const signer = await providerValue.getSigner();
       if (isMounted || isWalletConnected(signer.address)) {
         setWalletInstance(signer);

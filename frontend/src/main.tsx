@@ -6,9 +6,12 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+import NetworkProvider from "./components/NetworkProvider.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <Web3Provider>
-    <App />
-  </Web3Provider>
+  <NetworkProvider>
+    <Web3Provider>
+      <App />
+    </Web3Provider>
+  </NetworkProvider>
 );

@@ -1,0 +1,51 @@
+@use "../../colors";
+
+.toggleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 6.25rem;
+  background-color: rgba($color: colors.$purple-300, $alpha: 0.25);
+  color: colors.$white;
+
+  .networkName {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    height: 3.4375rem;
+    font-weight: 400;
+    font-size: 1.5rem;
+    padding: 0 2.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      background-color: rgba($color: colors.$purple-400, $alpha: 0.25);
+      box-shadow: 0 0.3125rem 0.9375rem
+        rgba($color: colors.$purple-800, $alpha: 0.25);
+    }
+
+    &:disabled:hover {
+      background-color: transparent;
+    }
+
+    &.active {
+      background-color: rgba($color: colors.$purple-400, $alpha: 0.25);
+    }
+  }
+
+  #hardhat {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 6.25rem;
+    border-bottom-left-radius: 6.25rem;
+  }
+
+  #sepolia {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 6.25rem;
+    border-bottom-right-radius: 6.25rem;
+  }
+}

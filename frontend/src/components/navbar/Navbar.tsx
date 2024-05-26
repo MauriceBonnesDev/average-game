@@ -2,6 +2,7 @@ import classes from "./Navbar.module.scss";
 import Button from "../button/Button";
 import { NavLink } from "react-router-dom";
 import { useWeb3Context } from "../../hooks/useWeb3Context";
+import NetworkToggle from "../networkToggle/NetworkToggle";
 
 const Navbar = () => {
   const { address, init, disconnect } = useWeb3Context();
@@ -36,14 +37,17 @@ const Navbar = () => {
           </li>
         </ul>
       </nav>
-      <Button
-        onClick={address ? disconnect : init}
-        size="large"
-        style="light"
-        color="purple"
-      >
-        {address ? formatAddress(address) : "Connect"}
-      </Button>
+      <div className={classes.web3Section}>
+        <NetworkToggle />
+        <Button
+          onClick={address ? disconnect : init}
+          size="large"
+          style="light"
+          color="purple"
+        >
+          {address ? formatAddress(address) : "Connect"}
+        </Button>
+      </div>
     </div>
   );
 };

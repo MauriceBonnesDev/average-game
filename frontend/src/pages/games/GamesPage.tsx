@@ -1,6 +1,7 @@
 import classes from "./GamesPage.module.scss";
 import Card from "../../components/card/Card";
-import addresses from "../../../../backend/ignition/deployments/chain-11155111/deployed_addresses.json"; // Change to 11155111 for the Sepolia Testnet and 31337 for the Hardhat Network
+import addressesHardhat from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json";
+import addressesSepolia from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json"; // Change to 11155111
 import { useEffect, useRef, useState } from "react";
 import { AverageGameModule_AverageGameFactory__factory as AverageGameFactory } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGameFactory__factory";
 import { AverageGameModule_AverageGame__factory as AverageGame } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGame__factory";
@@ -27,13 +28,16 @@ import { AverageGameInstance } from "../../shared/types";
 import { useWeb3Context } from "../../hooks/useWeb3Context";
 import useEventListening from "../../hooks/useEventListening";
 import { RotatingLines } from "react-loader-spinner";
+import { useNetworkContext } from "../../hooks/useNetworkContext";
+
+type AddressesType = {
+  [key: string]: string;
+};
 
 //TODO: Join Game screen, undeutlich, da geheimnis genau unter dem Text "Wähle eine Zahl zwischen 0 und 1000"
-//TODO: Collateral removed from payout, since that makes room for malicious behaviour by players -> Check if that fits now!
-//TODO: Next Phase Button oben rechts neben Ausrufezeichen
-//TODO: Claim Feed Button unten von Ended oder auch oben rechts
 const GamesPage = () => {
   const { wallet } = useWeb3Context();
+  const { network } = useNetworkContext();
   const dialog = useRef<DialogRef>(null);
   const createGameRef = useRef<CreateGameRef>(null);
   const [factoryContract, setFactoryContract] =
@@ -43,6 +47,7 @@ const GamesPage = () => {
   const [currentFocusedGame, setCurrentFocusedGame] = useState<number | null>(
     null
   );
+  const [addresses, setAddresses] = useState<AddressesType>(addressesHardhat);
 
   const [averageGameInstances, setAverageGameInstances] = useState<
     AverageGameInstance[]
@@ -56,14 +61,19 @@ const GamesPage = () => {
 
   useEffect(() => {
     if (wallet) {
+      if (network === "hardhat") {
+        setAddresses(addressesHardhat);
+      } else if (network === "sepolia") {
+        setAddresses(addressesSepolia);
+      }
       const gameFactory = AverageGameFactory.connect(
-        addresses["AverageGameFactoryModule#AverageGameFactory"],
+        addresses["AverageGameModule#AverageGameFactory"],
         wallet
       );
 
       setFactoryContract(gameFactory);
     }
-  }, [wallet]);
+  }, [wallet, network]);
 
   const fetchGames = async () => {
     try {
