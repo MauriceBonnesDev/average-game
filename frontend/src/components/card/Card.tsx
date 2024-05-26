@@ -25,6 +25,7 @@ import { transformError } from "../../shared/utils";
 import CardInfoRow from "./CardInfoRow";
 import { Box, Tooltip } from "@mui/material";
 import { ethers } from "ethers";
+import { useWeb3Context } from "../../hooks/useWeb3Context";
 
 type CardProps = {
   gameInstance: AverageGameInstance;
@@ -55,6 +56,7 @@ const Card = ({
   setCurrentFocusedGame,
   setIsLoading,
 }: CardProps) => {
+  const { wallet } = useWeb3Context();
   const { id, name, entryPrice, totalPlayers, maxPlayers } = gameInstance;
   const betAmount = parseFloat(entryPrice);
   const pricePool = totalPlayers * betAmount;
@@ -63,6 +65,7 @@ const Card = ({
   const gameMasterConnected = connectedAccount === gameInstance.gameMaster;
   const playerJoined = gameInstance.players.includes(connectedAccount);
   const playerIndex = gameInstance.players.indexOf(connectedAccount) + 1;
+  const timeToReveal = gameInstance.timeToReveal;
   const [playerRevealed, setPlayerRevealed] = useState(false);
   const [isPotentialWinner, setIsPotentialWinner] = useState(false);
   const [collateralShare, setCollateralShare] = useState(0);
@@ -73,6 +76,8 @@ const Card = ({
   const [loadingButton, setLoadingButton] = useState<
     "refund" | "action" | "nextPhase" | "collateralShare" | "gameFee"
   >("action");
+  const isRevealTimeOver = useRef(false);
+  const [revealPositionMessage, setRevealPositionMessage] = useState("");
 
   useEffect(() => {
     const getPlayerRevealedState = async () => {
@@ -93,6 +98,35 @@ const Card = ({
       setIsPotentialWinner(isPotWinner);
     };
 
+    const getIsRevealTimeOver = async () => {
+      const revealTime = Number(
+        await gameInstance.contract.getRevealTime(connectedAccount)
+      );
+
+      if (wallet) {
+        const currentBlock = await wallet.provider.getBlockNumber();
+        isRevealTimeOver.current =
+          currentBlock > Number(revealTime) ? true : false;
+
+        let position = "Du musst";
+        if (
+          currentBlock <= revealTime &&
+          currentBlock >= revealTime - timeToReveal
+        ) {
+          position += " jetzt";
+        } else if (
+          currentBlock + timeToReveal < revealTime &&
+          revealTime < currentBlock + 2 * timeToReveal
+        ) {
+          position += " als nächstes";
+        } else {
+          position += " als " + playerIndex + ".";
+        }
+
+        setRevealPositionMessage(position + " veröffentlichen");
+      }
+    };
+
     const getCollateralShare = async () => {
       const share = Number(await gameInstance.contract.collateralShare());
       setCollateralShare(share);
@@ -101,6 +135,7 @@ const Card = ({
     getPlayerRevealedState();
     getCollateralShare();
     getIsPotentialWinner();
+    getIsRevealTimeOver();
   }, [connectedAccount, gameInstance.contract]);
 
   let cardColor = classes.cardPurple;
@@ -239,6 +274,7 @@ const Card = ({
       ? joinGame()
       : revealGuess();
   };
+  console.log(gameInstance.id, playerJoined);
 
   const showDisableCard = () => {
     if (gameInstance.gameState !== GameState.Ended) {
@@ -246,23 +282,20 @@ const Card = ({
     }
 
     const canClaimShare = isPotentialWinner && !isWinner && collateralShare > 0;
-    if (
+
+    const conditions = [
+      gameMasterConnected && feeClaimed && !playerJoined,
+      !playerJoined && noWinnerFound && !gameMasterConnected && feeClaimed,
       !isWinner &&
-      ((!gameMasterConnected && !canClaimShare) ||
-        (gameMasterConnected && feeClaimed && !canClaimShare))
-    ) {
-      return true;
-    }
-
-    if (
+        !noWinnerFound &&
+        ((!gameMasterConnected && !canClaimShare) ||
+          (gameMasterConnected && feeClaimed && !canClaimShare)),
       isWinner &&
-      ((!gameMasterConnected && rewardClaimed) ||
-        (gameMasterConnected && feeClaimed && rewardClaimed))
-    ) {
-      return true;
-    }
+        ((!gameMasterConnected && rewardClaimed) ||
+          (gameMasterConnected && feeClaimed && rewardClaimed)),
+    ];
 
-    return false;
+    return conditions.some((condition) => condition);
   };
 
   return (
@@ -285,18 +318,22 @@ const Card = ({
       <div className={`${classes.card} ${cardColor}`}>
         {showDisableCard() && <div className={classes.disableCard}></div>}
         {isWinner && <img className={classes.crown} src={crown} />}
-
-        <div
-          className={`${classes.refundButton} ${
-            gameInstance.gameState !== GameState.CommitPhase || !playerJoined
-              ? classes.hide
-              : ""
-          }`}
-        ></div>
-
         <p className={classes.revealOrder}>
           {gameInstance.gameState === GameState.RevealPhase && playerJoined
-            ? `Du musst als ${playerIndex}. veröffentlichen`
+            ? !playerRevealed && !isRevealTimeOver.current
+              ? revealPositionMessage
+              : gameInstance.gameState === GameState.RevealPhase &&
+                playerJoined &&
+                !playerRevealed &&
+                isRevealTimeOver.current
+              ? "Deine Revealzeit ist vorbei"
+              : gameInstance.gameState === GameState.RevealPhase &&
+                playerJoined &&
+                playerRevealed
+              ? "Erfolgreich veröffentlicht"
+              : ""
+            : gameInstance.gameState === GameState.RevealPhase
+            ? "Das Spiel läuft bereits"
             : ""}
         </p>
         <div className={classes.cardBodyContent}>
@@ -310,26 +347,28 @@ const Card = ({
           </Tooltip>
           <p>Trete bei und vervielfache dein Cash!</p>
         </div>
-        {(gameInstance.gameState === GameState.CommitPhase && playerJoined) ||
-          (gameInstance.gameState === GameState.Ended && noWinnerFound && (
-            <div className={classes.refundButton}>
-              <Button
-                color={color}
-                style="light"
-                size="round-small"
-                disabled={isLoading && currentFocusedGame === gameInstance.id}
-                isLoading={
-                  isLoading &&
-                  loadingButton === "refund" &&
-                  currentFocusedGame === gameInstance.id
-                }
-                onClick={requestRefund}
-                info="Refund beantragen: Du bekommst dein Einsatz und deine Kaution zurück!"
-              >
-                <img src={closeIcon} />
-              </Button>
-            </div>
-          ))}
+        {((gameInstance.gameState === GameState.CommitPhase && playerJoined) ||
+          (gameInstance.gameState === GameState.Ended &&
+            noWinnerFound &&
+            playerJoined)) && (
+          <div className={classes.refundButton}>
+            <Button
+              color={color}
+              style="light"
+              size="round-small"
+              disabled={isLoading && currentFocusedGame === gameInstance.id}
+              isLoading={
+                isLoading &&
+                loadingButton === "refund" &&
+                currentFocusedGame === gameInstance.id
+              }
+              onClick={requestRefund}
+              info="Refund beantragen: Du bekommst dein Einsatz und deine Kaution zurück!"
+            >
+              <img src={closeIcon} />
+            </Button>
+          </div>
+        )}
         <div className={`${classes.cardFooter} ${footerColor}`}>
           <div className={`${classes.logo} ${logoColor}`}>
             <img src={icons[gameInstance.icon]} />
@@ -360,7 +399,9 @@ const Card = ({
                 Join
               </Button>
             ) : gameInstance.gameState === GameState.RevealPhase &&
-              !playerRevealed ? (
+              !playerRevealed &&
+              !isRevealTimeOver.current &&
+              playerJoined ? (
               <Button
                 color={color}
                 disabled={
@@ -466,11 +507,7 @@ const Card = ({
                 onClick={claimReward}
                 size="small"
               >
-                {playerJoined && !isWinner
-                  ? "Lost"
-                  : isWinner
-                  ? "Rewards claimed"
-                  : "Ended"}
+                {playerJoined && !isWinner && !noWinnerFound ? "Lost" : "Ended"}
               </Button>
             )}
             <p className={classes.playerCount}>

@@ -94,6 +94,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "getPlayerRevealedState"
       | "getPlayers"
       | "getPotentialWinners"
+      | "getRevealTimeIsOver"
       | "icon"
       | "id"
       | "initGame"
@@ -182,6 +183,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getPotentialWinners",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRevealTimeIsOver",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "icon", values?: undefined): string;
   encodeFunctionData(functionFragment: "id", values?: undefined): string;
@@ -303,6 +308,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   decodeFunctionResult(functionFragment: "getPlayers", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getPotentialWinners",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getRevealTimeIsOver",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "icon", data: BytesLike): Result;
@@ -655,6 +664,12 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   getPotentialWinners: TypedContractMethod<[], [string[]], "view">;
 
+  getRevealTimeIsOver: TypedContractMethod<
+    [_player: AddressLike],
+    [boolean],
+    "view"
+  >;
+
   icon: TypedContractMethod<[], [bigint], "view">;
 
   id: TypedContractMethod<[], [bigint], "view">;
@@ -781,6 +796,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   getFunction(
     nameOrSignature: "getPotentialWinners"
   ): TypedContractMethod<[], [string[]], "view">;
+  getFunction(
+    nameOrSignature: "getRevealTimeIsOver"
+  ): TypedContractMethod<[_player: AddressLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "icon"
   ): TypedContractMethod<[], [bigint], "view">;

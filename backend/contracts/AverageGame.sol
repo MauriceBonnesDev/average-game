@@ -26,7 +26,7 @@ contract AverageGame is ReentrancyGuard {
     uint256 private totalGameFees;
     int256 private totalPotentialWinners;
     uint256 public blockNumber;
-    uint8 public timeToReveal = 25;
+    uint8 private timeToReveal = 25;
     uint256 public startOfReveal;
     UD60x18 public collateralShare;
 
@@ -60,6 +60,7 @@ contract AverageGame is ReentrancyGuard {
         bool rewardClaimed;
         bool feeClaimed;
         GameIcon icon;
+        uint8 timeToReveal;
     }
 
     mapping(address => bytes32) private playerRevealPositionHashes;
@@ -72,6 +73,7 @@ contract AverageGame is ReentrancyGuard {
     mapping(address => uint256) private collateralOfPlayer;
     mapping(address => uint256) private betAmountOfPlayer;
     mapping(address => bool) private isPotentialWinner;
+    mapping(address => uint256) private revealTimes;
 
     enum GameState {
         CommitPhase,
@@ -239,6 +241,7 @@ contract AverageGame is ReentrancyGuard {
         address indexed winner,
         uint256 indexed amount
     );
+    event NoWinnerFound(uint256 indexed gameId);
     event PrizeAwarded(
         uint256 indexed gameId,
         address indexed player,
@@ -359,6 +362,7 @@ contract AverageGame is ReentrancyGuard {
         console.log("Test2");
         for (uint i = 0; i < totalPlayers; i++) {
             playerRevealPositions[players[i]] = i;
+            revealTimes[players[i]] = startOfReveal + (i + 1) * timeToReveal;
         }
         console.log("Commit Phase ended, Reveal Phase started");
         emit StartRevealPhase(id);
@@ -430,10 +434,12 @@ contract AverageGame is ReentrancyGuard {
         console.log(totalCollateralAmount);
         console.log(uint256(totalPotentialWinners));
         console.log("##############");
-        collateralShare = div(
-            convert(totalCollateralAmount),
-            convert(uint256(totalPotentialWinners))
-        );
+        if (totalPotentialWinners > 0) {
+            collateralShare = div(
+                convert(totalCollateralAmount),
+                convert(uint256(totalPotentialWinners))
+            );
+        }
 
         emit GameEnded(id);
     }
@@ -448,8 +454,7 @@ contract AverageGame is ReentrancyGuard {
         UD60x18 twoThirdAverage = calculateTwoThirdAverage();
 
         if (twoThirdAverage == convert(1000)) {
-            emit GameEnded(id);
-            revert("Es wurde kein Gewinner gefunden!");
+            return;
         }
 
         potentialWinners = new address[](totalPlayers);
@@ -559,6 +564,7 @@ contract AverageGame is ReentrancyGuard {
             winner = payable(potentialWinners[0]);
         } else {
             console.log("No winner found");
+            emit NoWinnerFound(id);
         }
 
         emit WinnerSelected(id, winner, pricePool);
@@ -712,9 +718,14 @@ contract AverageGame is ReentrancyGuard {
         playerAlreadyJoined[msg.sender] = false;
         for (uint i = 0; i < totalPlayers; i++) {
             if (players[i] == msg.sender) {
-                players[i] = address(0);
+                for (uint j = i; j < totalPlayers - 1; j++) {
+                    players[j] = players[j + 1];
+                }
+                players[totalPlayers - 1] = address(0);
+                break;
             }
         }
+
         totalPlayers -= 1;
 
         (bool sent, ) = msg.sender.call{value: refund}("");
@@ -726,7 +737,6 @@ contract AverageGame is ReentrancyGuard {
      * @notice Withdraws the game fees to the game master
      */
     function withdrawGameFees() external onlyGameMaster gameOver nonReentrant {
-        require(winner != address(0), "Es wurde noch kein Gewinner gefunden!");
         require(
             getBalance() >= totalGameFees,
             "Nicht gen\xC3\xBCgend Ether in dem Vertrag um die Spielgeb\xC3\xBChr auszuzahlen!"
@@ -768,6 +778,10 @@ contract AverageGame is ReentrancyGuard {
         return isPotentialWinner[_player];
     }
 
+    function getRevealTime(address _player) public view returns (uint256) {
+        return revealTimes[_player];
+    }
+
     function getPlayers() public view returns (address[] memory) {
         return players;
     }
@@ -793,7 +807,8 @@ contract AverageGame is ReentrancyGuard {
                 winner,
                 rewardClaimed,
                 feeClaimed,
-                icon
+                icon,
+                timeToReveal
             );
     }
 

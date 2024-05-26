@@ -40,6 +40,7 @@ export declare namespace AverageGame {
     rewardClaimed: boolean;
     feeClaimed: boolean;
     icon: BigNumberish;
+    timeToReveal: BigNumberish;
   };
 
   export type AverageGameInstanceStructOutput = [
@@ -57,7 +58,8 @@ export declare namespace AverageGame {
     winner: string,
     rewardClaimed: boolean,
     feeClaimed: boolean,
-    icon: bigint
+    icon: bigint,
+    timeToReveal: bigint
   ] & {
     id: bigint;
     name: string;
@@ -74,6 +76,7 @@ export declare namespace AverageGame {
     rewardClaimed: boolean;
     feeClaimed: boolean;
     icon: bigint;
+    timeToReveal: bigint;
   };
 }
 
@@ -94,6 +97,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "getPlayerRevealedState"
       | "getPlayers"
       | "getPotentialWinners"
+      | "getRevealTime"
       | "icon"
       | "id"
       | "initGame"
@@ -111,7 +115,6 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "startOfReveal"
       | "startRevealPhase"
       | "state"
-      | "timeToReveal"
       | "totalBetAmount"
       | "totalCollateralAmount"
       | "totalPlayers"
@@ -128,6 +131,7 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
       | "FeeCollected"
       | "GameCreated"
       | "GameEnded"
+      | "NoWinnerFound"
       | "PlayerJoined"
       | "PlayerRefunded"
       | "PlayerRevealedGuess"
@@ -182,6 +186,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getPotentialWinners",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRevealTime",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "icon", values?: undefined): string;
   encodeFunctionData(functionFragment: "id", values?: undefined): string;
@@ -240,10 +248,6 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "state", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "timeToReveal",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "totalBetAmount",
     values?: undefined
@@ -305,6 +309,10 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     functionFragment: "getPotentialWinners",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getRevealTime",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "icon", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "id", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initGame", data: BytesLike): Result;
@@ -340,10 +348,6 @@ export interface AverageGameModule_AverageGameInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "timeToReveal",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "totalBetAmount",
     data: BytesLike
@@ -438,6 +442,18 @@ export namespace GameCreatedEvent {
 }
 
 export namespace GameEndedEvent {
+  export type InputTuple = [gameId: BigNumberish];
+  export type OutputTuple = [gameId: bigint];
+  export interface OutputObject {
+    gameId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace NoWinnerFoundEvent {
   export type InputTuple = [gameId: BigNumberish];
   export type OutputTuple = [gameId: bigint];
   export interface OutputObject {
@@ -655,6 +671,8 @@ export interface AverageGameModule_AverageGame extends BaseContract {
 
   getPotentialWinners: TypedContractMethod<[], [string[]], "view">;
 
+  getRevealTime: TypedContractMethod<[_player: AddressLike], [bigint], "view">;
+
   icon: TypedContractMethod<[], [bigint], "view">;
 
   id: TypedContractMethod<[], [bigint], "view">;
@@ -710,8 +728,6 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   startRevealPhase: TypedContractMethod<[], [void], "nonpayable">;
 
   state: TypedContractMethod<[], [bigint], "view">;
-
-  timeToReveal: TypedContractMethod<[], [bigint], "view">;
 
   totalBetAmount: TypedContractMethod<[], [bigint], "view">;
 
@@ -781,6 +797,9 @@ export interface AverageGameModule_AverageGame extends BaseContract {
   getFunction(
     nameOrSignature: "getPotentialWinners"
   ): TypedContractMethod<[], [string[]], "view">;
+  getFunction(
+    nameOrSignature: "getRevealTime"
+  ): TypedContractMethod<[_player: AddressLike], [bigint], "view">;
   getFunction(
     nameOrSignature: "icon"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -853,9 +872,6 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     nameOrSignature: "state"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "timeToReveal"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "totalBetAmount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -911,6 +927,13 @@ export interface AverageGameModule_AverageGame extends BaseContract {
     GameEndedEvent.InputTuple,
     GameEndedEvent.OutputTuple,
     GameEndedEvent.OutputObject
+  >;
+  getEvent(
+    key: "NoWinnerFound"
+  ): TypedContractEvent<
+    NoWinnerFoundEvent.InputTuple,
+    NoWinnerFoundEvent.OutputTuple,
+    NoWinnerFoundEvent.OutputObject
   >;
   getEvent(
     key: "PlayerJoined"
@@ -1009,6 +1032,17 @@ export interface AverageGameModule_AverageGame extends BaseContract {
       GameEndedEvent.InputTuple,
       GameEndedEvent.OutputTuple,
       GameEndedEvent.OutputObject
+    >;
+
+    "NoWinnerFound(uint256)": TypedContractEvent<
+      NoWinnerFoundEvent.InputTuple,
+      NoWinnerFoundEvent.OutputTuple,
+      NoWinnerFoundEvent.OutputObject
+    >;
+    NoWinnerFound: TypedContractEvent<
+      NoWinnerFoundEvent.InputTuple,
+      NoWinnerFoundEvent.OutputTuple,
+      NoWinnerFoundEvent.OutputObject
     >;
 
     "PlayerJoined(uint256,address,uint256)": TypedContractEvent<

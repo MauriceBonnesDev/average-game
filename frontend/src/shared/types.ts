@@ -60,4 +60,5 @@ export type AverageGameInstance = {
   rewardClaimed: boolean;
   feeClaimed: boolean;
   icon: GameIcon;
+  timeToReveal: number;
 };

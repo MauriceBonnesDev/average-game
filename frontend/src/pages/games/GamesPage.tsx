@@ -140,6 +140,7 @@ const GamesPage = () => {
       rewardClaimed,
       feeClaimed,
       icon,
+      timeToReveal,
     ] = gameInstance;
 
     return {
@@ -159,6 +160,7 @@ const GamesPage = () => {
       rewardClaimed,
       feeClaimed,
       icon: Number(icon),
+      timeToReveal: Number(timeToReveal),
     };
   };
 
