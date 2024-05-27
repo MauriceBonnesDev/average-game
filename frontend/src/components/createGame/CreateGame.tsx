@@ -82,7 +82,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
     });
 
     const createGame = async () => {
-      if (factoryContract && formik.values.icon) {
+      if (factoryContract && formik.values.icon !== null) {
         try {
           const transactionResponse = await factoryContract.createAverageGame(
             formik.values.contractAddress,

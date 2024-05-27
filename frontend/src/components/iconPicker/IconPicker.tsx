@@ -22,7 +22,8 @@ const IconPicker = ({ icon, setIcon, error }: IconPickerProps) => {
   const [selected, setSelected] = useState<GameIcon | null>(null);
 
   useEffect(() => {
-    if (!icon) {
+    console.log(icon);
+    if (icon === null) {
       setSelected(null);
     }
   }, [icon]);
