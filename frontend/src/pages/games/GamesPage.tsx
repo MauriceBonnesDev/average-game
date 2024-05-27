@@ -73,7 +73,7 @@ const GamesPage = () => {
 
       setFactoryContract(gameFactory);
     }
-  }, [wallet, network]);
+  }, [wallet, network, addresses]);
 
   const fetchGames = async () => {
     try {
@@ -83,7 +83,6 @@ const GamesPage = () => {
       const games = gameProxies.map((proxy) =>
         AverageGame.connect(proxy, wallet)
       );
-
       const gameInstances: AverageGameInstance[] = await createGameInstances(
         games
       );
@@ -92,6 +91,7 @@ const GamesPage = () => {
       setIsFetching(false);
     } catch (error) {
       console.error("Error fetching games data:", error);
+      setIsFetching(false);
     }
   };
 
@@ -118,6 +118,7 @@ const GamesPage = () => {
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching single game data:", error);
+      setIsLoading(false);
     }
   }
   const averageGameInstanceMapper = (
@@ -142,7 +143,6 @@ const GamesPage = () => {
       icon,
       timeToReveal,
     ] = gameInstance;
-
     return {
       id: Number(id),
       name,
