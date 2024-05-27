@@ -1,7 +1,7 @@
 import classes from "./GamesPage.module.scss";
 import Card from "../../components/card/Card";
 import addressesHardhat from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json";
-import addressesSepolia from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json"; // Change to 11155111
+import addressesSepolia from "../../../../backend/ignition/deployments/chain-11155111/deployed_addresses.json"; // Change to 11155111
 import { useEffect, useRef, useState } from "react";
 import { AverageGameModule_AverageGameFactory__factory as AverageGameFactory } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGameFactory__factory";
 import { AverageGameModule_AverageGame__factory as AverageGame } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGame__factory";
@@ -228,6 +228,12 @@ const GamesPage = () => {
     dialog.current?.open();
   };
 
+  const closeModal = () => {
+    if (dialog.current) {
+      dialog.current.close();
+    }
+  };
+
   const createGame = () => {
     if (createGameRef.current) {
       createGameRef.current.createGame();
@@ -267,7 +273,7 @@ const GamesPage = () => {
           ref={createGameRef}
           factoryContract={factoryContract}
           contractAddress={addresses["AverageGameModule#AverageGame"]}
-          closeModal={dialog.current?.close}
+          closeModal={closeModal}
         />
       </Modal>
 
@@ -321,7 +327,9 @@ const GamesPage = () => {
       )}
     </>
   ) : (
-    <h2>Mit Wallet verbinden um Inhalte zusehen</h2>
+    <h2 className={classes.connectWalletMessage}>
+      Mit Wallet verbinden um Inhalte zusehen
+    </h2>
   );
 };
 
