@@ -118,22 +118,25 @@ contract AverageGame is ReentrancyGuard {
     );
 
     modifier onlyDuringValidRevealTime() {
-        if (
+        if (state == GameState.CommitPhase) {
+            console.log("Commit Phase ended, Starting Reveal Phase");
+            startRevealPhase();
+        } else if (
             block.number >
-            startOfReveal +
-                (playerRevealPositions[msg.sender] + 1) *
-                timeToReveal
+            startOfReveal + (playerRevealPositions[msg.sender]) * timeToReveal
         ) {
             revert RevealTimeOver(
                 startOfReveal +
-                    (playerRevealPositions[msg.sender] + 1) *
+                    playerRevealPositions[msg.sender] *
                     timeToReveal,
                 block.number,
                 timeToReveal
             );
         } else if (
             block.number <=
-            startOfReveal + playerRevealPositions[msg.sender] * timeToReveal
+            startOfReveal +
+                (playerRevealPositions[msg.sender] - 1) *
+                timeToReveal
         ) {
             revert RevealTimeNotStarted(
                 startOfReveal +
@@ -193,7 +196,10 @@ contract AverageGame is ReentrancyGuard {
         console.log(timeToPass);
         console.log(startTime);
         console.log(block.number);
-        if (block.number < startTime + timeToPass) {
+        if (
+            playerRevealPositions[msg.sender] != totalPlayers - 1 &&
+            block.number < startTime + timeToPass
+        ) {
             revert MinimumTimePassed(startTime, block.number, timeToPass);
         }
         _;
@@ -333,7 +339,7 @@ contract AverageGame is ReentrancyGuard {
      * @notice Closes the betting round and starts the reveal phase.
      * @dev Only allowed once 3 players have joined the game
      */
-    function startRevealPhase() external minimumTimePassed(blockNumber, 25) {
+    function startRevealPhase() private minimumTimePassed(blockNumber, 25) {
         require(
             state == GameState.CommitPhase,
             "Reveal Phase kann nur gestartet werden, wenn aktuell die Commit Phase ist!"
@@ -346,7 +352,6 @@ contract AverageGame is ReentrancyGuard {
         state = GameState.RevealPhase;
         startOfReveal = block.number;
         blockNumber = block.number;
-        console.log("Test");
         address[] memory newPlayersArr = new address[](totalPlayers);
         for (uint16 i = 0; i < totalPlayers; i++) {
             newPlayersArr[i] = players[i];
@@ -358,13 +363,41 @@ contract AverageGame is ReentrancyGuard {
             );
         }
 
-        players = quickSort(newPlayersArr);
-        console.log("Test2");
+        newPlayersArr = quickSort(newPlayersArr);
+
+        address[] memory orderedPlayers = new address[](totalPlayers);
+        orderedPlayers[0] = msg.sender;
+
+        uint index = 1;
+        for (uint i = 0; i < totalPlayers; i++) {
+            if (newPlayersArr[i] != msg.sender) {
+                orderedPlayers[index] = newPlayersArr[i];
+                index++;
+            }
+        }
+        players = orderedPlayers;
+
         for (uint i = 0; i < totalPlayers; i++) {
             playerRevealPositions[players[i]] = i;
-            revealTimes[players[i]] = startOfReveal + (i + 1) * timeToReveal;
+            revealTimes[players[i]] = startOfReveal + (i) * timeToReveal;
         }
+
         console.log("Commit Phase ended, Reveal Phase started");
+        console.log(
+            "First reveal has to be done by ",
+            players[0],
+            playerRevealPositions[players[0]]
+        );
+        console.log(
+            "Second reveal has to be done by ",
+            players[1],
+            playerRevealPositions[players[1]]
+        );
+        console.log(
+            "Third reveal has to be done by ",
+            players[2],
+            playerRevealPositions[players[2]]
+        );
         emit StartRevealPhase(id);
     }
 
@@ -379,8 +412,8 @@ contract AverageGame is ReentrancyGuard {
     )
         external
         onlyValidPlayers(msg.sender)
-        onlyRevealPhase
         onlyDuringValidRevealTime
+        onlyRevealPhase
     {
         RevealState revealState = playerRevealed[msg.sender];
         require(
@@ -391,6 +424,7 @@ contract AverageGame is ReentrancyGuard {
             _guess >= minGuess && _guess <= maxGuess,
             "Tipp muss zwischen 0 und 1000 liegen!"
         );
+
         console.log("-----------");
         console.log(playerRevealPositions[msg.sender]);
         console.log(startOfReveal);
@@ -415,6 +449,9 @@ contract AverageGame is ReentrancyGuard {
         }
 
         emit PlayerRevealedGuess(id, msg.sender, _guess, _salt, revealState);
+        if (playerRevealPositions[msg.sender] == totalPlayers - 1) {
+            endGame();
+        }
     }
 
     /**
@@ -422,7 +459,7 @@ contract AverageGame is ReentrancyGuard {
      * @dev This function will be automatically called from within the factory, after the random number has been generated
      */
     function endGame()
-        external
+        public
         minimumTimePassed(startOfReveal, totalPlayers * timeToReveal)
         onlyRevealPhase
     {

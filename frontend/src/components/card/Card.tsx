@@ -178,9 +178,7 @@ const Card = ({
       setIsLoading(true);
       setLoadingButton("nextPhase");
       setCurrentFocusedGame(gameInstance.id);
-      if (phase === GameState.CommitPhase) {
-        await gameInstance.contract.startRevealPhase();
-      } else if (phase === GameState.RevealPhase) {
+      if (phase === GameState.RevealPhase) {
         await gameInstance.contract.endGame();
       } else if (phase === GameState.Ended && !feeClaimed) {
         await gameInstance.contract.withdrawGameFees();
@@ -260,17 +258,19 @@ const Card = ({
   };
 
   const modalTitle =
-    gameInstance.gameState === GameState.CommitPhase
+    gameInstance.gameState === GameState.CommitPhase && !playerJoined
       ? "Join Game"
       : "Veröffentliche deinen Tipp!";
   const disclaimer =
-    gameInstance.gameState === GameState.CommitPhase
+    gameInstance.gameState === GameState.CommitPhase && !playerJoined
       ? "Wähle eine Zahl zwischen 0 und 1000"
       : "Wähle genau die Zahl und das Geheimnis was du vorher gewählt hast.";
   const submitText =
-    gameInstance.gameState === GameState.CommitPhase ? "Join" : "Reveal";
+    gameInstance.gameState === GameState.CommitPhase && !playerJoined
+      ? "Join"
+      : "Reveal";
   const onModalClick = () => {
-    gameInstance.gameState === GameState.CommitPhase
+    gameInstance.gameState === GameState.CommitPhase && !playerJoined
       ? joinGame()
       : revealGuess();
   };
@@ -398,9 +398,10 @@ const Card = ({
               >
                 Join
               </Button>
-            ) : gameInstance.gameState === GameState.RevealPhase &&
+            ) : ((gameInstance.gameState === GameState.RevealPhase &&
+                !isRevealTimeOver.current) ||
+                gameInstance.gameState === GameState.CommitPhase) &&
               !playerRevealed &&
-              !isRevealTimeOver.current &&
               playerJoined ? (
               <Button
                 color={color}
@@ -483,7 +484,7 @@ const Card = ({
               >
                 Claim Fee
               </Button>
-            ) : gameInstance.gameState !== GameState.Ended ? (
+            ) : gameInstance.gameState === GameState.RevealPhase ? (
               <Button
                 color={color}
                 style="light"
@@ -495,7 +496,7 @@ const Card = ({
                   currentFocusedGame === gameInstance.id
                 }
                 onClick={nextPhase}
-                info="Leitet die nächste Phase ein!"
+                info="Beendet das Spiel!"
               >
                 <img src={arrowRight} />
               </Button>

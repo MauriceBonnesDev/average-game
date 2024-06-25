@@ -1,7 +1,7 @@
 import classes from "./GamesPage.module.scss";
 import Card from "../../components/card/Card";
 import addressesHardhat from "../../../../backend/ignition/deployments/chain-31337/deployed_addresses.json";
-import addressesSepolia from "../../../../backend/ignition/deployments/chain-11155111/deployed_addresses.json"; // Change to 11155111
+import addressesSepolia from "../../../../backend/ignition/deployments/chain-11155111/deployed_addresses.json";
 import { useEffect, useRef, useState } from "react";
 import { AverageGameModule_AverageGameFactory__factory as AverageGameFactory } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGameFactory__factory";
 import { AverageGameModule_AverageGame__factory as AverageGame } from "../../../types/ethers-contracts/factories/AverageGameModule_AverageGame__factory";
@@ -47,7 +47,6 @@ const GamesPage = () => {
   const [currentFocusedGame, setCurrentFocusedGame] = useState<number | null>(
     null
   );
-  const [addresses, setAddresses] = useState<AddressesType>(addressesHardhat);
 
   const [averageGameInstances, setAverageGameInstances] = useState<
     AverageGameInstance[]
@@ -58,14 +57,10 @@ const GamesPage = () => {
     fetchSingleGame,
     wallet
   );
-
+  const addresses: AddressesType =
+    network === "hardhat" ? addressesHardhat : addressesSepolia;
   useEffect(() => {
     if (wallet) {
-      if (network === "hardhat") {
-        setAddresses(addressesHardhat);
-      } else if (network === "sepolia") {
-        setAddresses(addressesSepolia);
-      }
       const gameFactory = AverageGameFactory.connect(
         addresses["AverageGameModule#AverageGameFactory"],
         wallet
@@ -169,10 +164,15 @@ const GamesPage = () => {
   ): Promise<AverageGameInstance[]> => {
     return await Promise.all(
       games.map(async (game) => {
-        const gameInstance = await game.getAverageGameInstance();
-        return averageGameInstanceMapper(game, gameInstance);
+        try {
+          const gameInstance = await game.getAverageGameInstance();
+          return averageGameInstanceMapper(game, gameInstance);
+        } catch (error) {
+          console.log("Failed to create game instance of game", game, error);
+          return null;
+        }
       })
-    );
+    ).then((instances) => instances.filter((instance) => instance !== null));
   };
 
   useEffect(() => {

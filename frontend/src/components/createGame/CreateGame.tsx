@@ -2,7 +2,6 @@ import { forwardRef, useImperativeHandle } from "react";
 import NumberPicker from "../numberPicker/NumberPicker";
 import type { AverageGameModule_AverageGameFactory as TAverageGameFactory } from "../../../types/ethers-contracts/AverageGameModule_AverageGameFactory";
 import { parseEther } from "ethers";
-import { EventLog } from "ethers";
 import TextInput from "../textInput/TextInput";
 import classes from "./CreateGame.module.scss";
 import { GameSettings } from "../../shared/types";
@@ -50,7 +49,7 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
 
       return errors;
     };
-
+    console.log("Create Game: ContractAddress:", contractAddress);
     const formik = useFormik<GameSettings>({
       initialValues: {
         contractAddress,
@@ -97,10 +96,8 @@ const CreateGame = forwardRef<CreateGameRef, CreateGameProps>(
             ),
             formik.values.icon
           );
-          const test = await transactionResponse.wait();
-          const eventLog = test?.logs[1] as EventLog;
-          const address = eventLog.args[1];
-          console.log("Spiel erfolgreich erstellt", address);
+          await transactionResponse.wait();
+          console.log("Spiel erfolgreich erstellt");
         } catch (error) {
           console.error("Fehler beim Erstellen des Spiels:", error);
           toast.error(transformError(error), { id: "error" });
