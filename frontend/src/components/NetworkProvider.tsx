@@ -8,10 +8,28 @@ interface NetworkContextType {
 export const NetworkContext = createContext<NetworkContextType | null>(null);
 
 export default function NetworkProvider({ children }: { children: ReactNode }) {
-  const [network, setNetwork] = useState("hardhat");
+  const getNetworkFromLocalStorage = (): string => {
+    const selectedNetwork = localStorage.getItem("network");
+
+    return selectedNetwork ?? "hardhat";
+  };
+
+  const setNetworkToLocalStorage = (network: string) => {
+    localStorage.setItem("network", network);
+  };
+
+  const [network, setNetwork] = useState(getNetworkFromLocalStorage);
 
   const toggleNetwork = (network: string) => {
-    setNetwork((prev) => (network !== prev ? network : prev));
+    setNetwork((prev) => {
+      if (network !== prev) {
+        setNetworkToLocalStorage(network);
+        return network;
+      }
+
+      setNetworkToLocalStorage(prev);
+      return prev;
+    });
   };
 
   return (
